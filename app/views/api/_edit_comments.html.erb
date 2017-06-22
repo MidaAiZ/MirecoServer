@@ -1,0 +1,305 @@
+<section class='api' data-type='edit_comments'>
+  <div class="api-header">协作评论</div>
+  <div class="api-body">
+    <table class="table" width="100%" cellspacing="0">
+      <thead>
+        <tr>
+          <td width="10%">操作</td>
+          <td width="15%">接口</td>
+          <td width="10%">方法</td>
+          <td width="20%">参数</td>
+          <td width="25%">响应</td>
+          <td width="20%">说明</td>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>新建协作评论</td>
+          <td>
+            <span>workspace/articles/:article_id/edit_comments</span>
+          </td>
+          <td>POST</td>
+          <td>
+            <textarea cols="30" rows="10">
+{
+    "edit_comment": {
+        "hash_key": "IUHIADSSIQASK",
+        "content": "这是协作评论"
+    }
+}
+            </textarea>
+          </td>
+          <td>
+            <textarea cols="30" rows="10">
+//新建成功
+{
+    "code": "Success",
+    "edit_comment": {
+        "id": 1,
+        "user_id": 1,
+        "hash_key": "IUHIADSSIQASK",
+        "content": "这是协作评论",
+        "created_at": "2017-06-13T05:41:02.348Z",
+        "replies": {}
+    }
+}
+//新建失败
+{
+    "code": "Fail",
+    "errors": {
+        ...
+    }
+}
+            </textarea>
+          </td>
+          <td>
+            <ul>
+              <li>
+                <span>code: 状态码</span><br>
+                <span>Success：协作评论成功， Fail：协作评论失败, ResourceNotEist: 找不到文件或评论, NoPermission: 没有权限, NotLoggedIn: 用户未登录</span>
+              </li>
+              <li>
+                <span>参数说明:</span>
+                <ol>
+                  <li>hash_key: 标识文章评论的唯一哈希值,用于前端渲染时确定评论位置,评论时应在文章被评论的句子上包裹一个span,赋值一个具有相同hash值的属性</li>
+                  <li>content: 评论内容</li>
+                  <li>replies: 该协作评论的回复</li>
+                </ol>
+              </li>
+              <li>
+                <span class="notice">
+                  <span>注意：</span>
+                  <ul>
+                    <li>协作评论不可以修改更新</li>
+                    <li>允许协作评论的对象包括: 1.文章</li>
+                  </ul>
+                </span>
+              </li>
+              <li>
+                <span>允许协作评论的角色有: 文件所有者(own), 管理员(admin), 普通作者(editor)</span>
+              </li>
+            </ul>
+          </td>
+        </tr>
+        <!-- 获取多条协作评论记录 -->
+        <tr>
+          <td>获取多条协作评论记录</td>
+          <td>
+            <span>workspace/articles/:article_id/edit_comments</span>
+          </td>
+          <td>GET</td>
+          <td>
+          </td>
+          <td>
+            <textarea cols="30" rows="10">
+{
+    "comments": [
+        {
+            "id": 1,
+            "user_id": 1,
+            "hash_key": "IUHIADSSIQASK",
+            "content": "这是协作评论",
+            "created_at": "2017-06-13T05:41:02.348Z",
+            "replies": {}
+        },
+        {
+            ...
+        },
+        ...
+    ]
+}
+            </textarea>
+          </td>
+          <td>
+            <ul>
+              <li>通过文件的唯一ID获取文件的所有协作评论</li>
+            </ul>
+          </td>
+        </tr>
+        <!-- 获取一条协作评论记录 -->
+        <tr>
+          <td>获取一条协作评论记录</td>
+          <td>
+            <span>workspace/articles/:article_id/edit_comments/:id</span>
+          </td>
+          <td>GET</td>
+          <td>
+            <textarea cols="30" rows="10">
+无
+            </textarea>
+          </td>
+          <td>
+            <textarea cols="30" rows="10">
+{
+    "edit_comment": {
+        "id": 1,
+        "user_id": 1,
+        "hash_key": "IUHIADSSIQASK",
+        "content": "这是协作评论",
+        "created_at": "2017-06-13T05:41:02.348Z",
+        "replies": {}
+    }
+}
+              </textarea>
+          </td>
+          <td>
+            <ul>
+              <li>
+                <span>code: 状态码</span><br>
+                <span>Success：协作评论成功， Fail：协作评论失败, ResourceNotEist: 找不到文件或评论, NoPermission: 没有权限, NotLoggedIn: 用户未登录</span>
+              </li>
+              <li>通过源文章的唯一id和协作评论的唯一id获取协作评论</li>
+            </ul>
+          </td>
+        </tr>
+        <!-- 删除协作评论 -->
+        <tr>
+          <td>删除协作评论</td>
+          <td>
+            <span>workspace/articles/:article_id/edit_comments/:id</span>
+          </td>
+          <td>DELETE</td>
+          <td>无</td>
+          <td>
+            <textarea cols="30" rows="10">
+{
+    "code": "Success"
+}
+
+              </textarea>
+          </td>
+          <td>
+            <ul>
+              <li>
+                <span>code: 状态码</span><br>
+                <span>Success：删除成功， Fail：删除失败, Nopermission: 没有权限, NotLoggedIn: 用户未登录, ResouceNotExist: 源文章不存在或协作评论不存在</span>
+              </li>
+              <li>
+                <span>用户只有在<span class="notice">已登录</span>情况下才能删除属于<span class="notice">具有删除权限</span>的协作评论</span>
+              </li>
+              <li>
+                <sapn>允许删除协作评论的角色:</sapn> <br>
+                <span>文件拥有者/文件管理员/协作评论的用户</span>
+              </li>
+              <li>
+                <span class="notice">协作评论被删除后将永久删除,无法恢复</span>
+              </li>
+            </ul>
+          </td>
+        </tr>
+        <!-- 回复协作评论 -->
+        <tr>
+          <td>回复协作评论</td>
+          <td>
+            <span>workspace/articles/:article_id/edit_comments/:id/replies</span>
+          </td>
+          <td>POST</td>
+          <td>
+            <textarea cols="30" rows="10">
+{
+        "content": "回复协作评论"
+}
+            </textarea>
+          </td>
+          <td>
+            <textarea cols="30" rows="10">
+//回复成功
+{
+    "code": "Success",
+    "edit_comment": {
+        "id": 1,
+        "user_id": 1,
+        "hash_key": "IUHIADSSIQASK",
+        "content": "这是协作评论",
+        "created_at": "2017-06-13T05:41:02.348Z",
+        "replies": {
+            "2017-06-13 14:06:33": {
+              "user_id": 1,
+              "content": "回复协作评论"
+          }
+        }
+    }
+}
+//回复失败
+{
+    "code": "Fail",
+    "errors": {
+        ...
+    }
+}
+            </textarea>
+          </td>
+          <td>
+            <ul>
+              <li>
+                <span>code: 状态码</span><br>
+                <span>Success：回复成功， Fail：回复失败, ResourceNotEist: 找不到文件或评论, NoPermission: 没有权限, NotLoggedIn: 用户未登录</span>
+              </li>
+              <li>
+                <span>参数说明:</span>
+                <ol>
+                  <li>content: 回复内容</li>
+                  <li>replies: 回复集</li>
+                  <li>
+                    <span class="notice">评论回复存放在一个hash对象中,回复时间作为键,值包含回复用户的唯一id和回复的内容</span>
+                  </li>
+                </ol>
+              </li>
+              <li>
+                <span>允许回复协作评论的角色有: 文件所有者(own), 管理员(admin), 普通作者(editor)</span>
+              </li>
+            </ul>
+          </td>
+        </tr>
+        <!-- 删除回复 -->
+        <tr>
+          <td>删除回复</td>
+          <td>
+            <span>workspace/articles/:article_id/edit_comments/:id/replies</span>
+          </td>
+          <td>DELETE</td>
+          <td>
+            <textarea cols="30" rows="10">
+{
+        "hash_key": "2017-06-13 14:06:33"
+}
+            </textarea>
+          </td>
+          <td>
+            <textarea cols="30" rows="10">
+//删除成功
+{
+    "code": "Success"
+}
+//删除失败
+{
+    "code": "Fail",
+    "errors": {
+        ...
+    }
+}
+            </textarea>
+          </td>
+          <td>
+            <ul>
+              <li>
+                <span>code: 状态码</span><br>
+                <span>Success：删除成功， Fail：删除失败, Nopermission: 没有权限, NotLoggedIn: 用户未登录, ResouceNotExist: 源文章不存在或评论不存在或回复不存在</span>
+              </li>
+              <li>
+                <span>用户只有在<span class="notice">已登录</span>情况下才能删除属于<span class="notice">具有删除权限</span>的回复</span>
+              </li>
+              <li>
+                <sapn>允许删除回复的角色:</sapn> <br>
+                <span>文件拥有者/管理员/协作评论的用户/回复的用户</span>
+              </li>
+              <li>
+                <span class="notice">回复被删除后将永久删除,无法恢复</span>
+              </li>
+            </ul>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</section>

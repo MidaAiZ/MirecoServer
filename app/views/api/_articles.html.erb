@@ -1,0 +1,478 @@
+<section class='api' data-type='articles'>
+  <div class="api-header">文章</div>
+  <div class="api-body">
+    <div class="notice">
+      <h4>本目录下的API要求用户在已登录情况下才可以访问,否则返回code='NotLoggedIn',表示用户未登录</h4>
+    </div>
+    <table class="table" width="100%" cellspacing="0">
+      <thead>
+        <tr>
+          <td width="10%">操作</td>
+          <td width="15%">接口</td>
+          <td width="10%">方法</td>
+          <td width="20%">参数</td>
+          <td width="25%">响应</td>
+          <td width="20%">说明</td>
+        </tr>
+      </thead>
+      <tbody>
+        <!-- 新建文章 -->
+        <tr>
+          <td>新建文章</td>
+          <td>workspace/articles</td>
+          <td>POST</td>
+          <td>
+            <textarea cols="30" rows="10">
+{
+    "article": {
+        "name": "新建文章", //必须字段
+        "content": "test_content",
+        "tag": "test_tag",  //标签
+        “is_shown”: true,
+        "is_marked": false
+        "corpus_id": 10 //当新建文章作为文集的子文章时传入文集id
+        "folder_id": null //当新建文章作为文件夹的文件时传入文件夹id
+    }
+}
+            </textarea>
+          </td>
+          <td>
+            <textarea cols="30" rows="10">
+//新建成功
+{
+    "code": "Success",
+    "article": {
+        "id": 1,
+        "name": "新建文章",
+        "content": "test_content",
+        "tag": "test_tag",
+        "is_shown": true,
+        "is_marked": false,
+        "corpus_id": 10,
+        "folder_id": null,
+        "created_at": "2017-05-05T16:38:33.056Z",
+        "updated_at": "2017-05-05T16:38:33.056Z"
+    }
+}
+
+//新建失败
+{
+    "code": "Fail",
+    "errors": {
+        "name": [
+            "文件名不能为空"
+        ]
+    }
+}
+            </textarea>
+          </td>
+          <td>
+            <ul>
+              <li><span>code: 状态码</span><br>
+                <span>Success：修改成功， Fail：修改失败, Nopermisson: 对目标文集(文件夹)没有权限</span>
+              </li>
+              <br>
+              <li>id: 唯一id</li>
+              <li>name： 文章名字，必须字段</li>
+              <li>content： 文章内容</li>
+              <li>tag： 文章的分类标签,以空格键分割，最多允许传入5个</li>
+              <li>is_shown: 判断文章是否发表，默认false, 接受值为：true和false</li>
+              <li>is_marked: 判断文章是否标星，默认false, 接受值为：true和false</li>
+              <li>folder_id: 所属文件夹的id</li>
+              <li>corpus_id: 所属文集的id</li>
+            </ul>
+            <span class="notice">
+               <span>注意：</span>
+
+
+
+              <ul>
+                <li>文章不可以同时属于某个文集或某个文件夹</li>
+                <li>从属关系为：文章&lt;&lt;文集&lt;&lt;文件夹，或：文章&lt;&lt;文件夹，或者既不属于文集也不属于文件夹</li>
+                <li>可以通过文章&lt;&lt;文集&lt;&lt;文件夹的关系判断文章是否属于某个文件夹</li>
+              </ul>
+            </span>
+          </td>
+        </tr>
+        <!-- 获取多条文章记录 -->
+        <tr>
+          <td>获取多条文章记录</td>
+          <td>workspace/articles</td>
+          <td>GET</td>
+          <td>
+            <textarea cols="30" rows="10">
+page:页码
+count:数量
+
+示例：
+    http://localhost:3000/artilces?page=3&count=10
+    请求说明：获取按每页10条记录划分的文章集合的第三页
+    单次请求最多允许获取30条记录
+             </textarea>
+          </td>
+          <td>
+            <textarea cols="30" rows="10">
+{
+    "articles": [
+        {
+            "id": 1,
+            "name": "新建文章",
+            "tag": "test_tag",
+            "is_shown": true,
+            "is_marked": false,
+            "corpus_id": 10,
+            "folder_id": null,
+            "created_at": "2017-05-05T16:38:33.056Z",
+            "updated_at": "2017-05-05T16:38:33.056Z"
+        },
+        {
+            "id": 2,
+            ...
+        },
+        ...
+    ]
+}
+              </textarea>
+          </td>
+          <td>
+            <ul>
+              <li>服务器返回json格式的数组</li>
+              <li>此接口返回用户的文章,需要用户已登录才可以访问</li>
+            </ul>
+          </td>
+        </tr>
+        <!-- 获取一条文章记录 -->
+        <tr>
+          <td>获取一条文章记录</td>
+          <td>workspace/articles/:id</td>
+          <td>GET</td>
+          <td>
+            <textarea cols="30" rows="10">
+无
+            </textarea>
+          </td>
+          <td>
+            <textarea cols="30" rows="10">
+{
+    "article": {
+        "id": 1,
+        "name": "新建文章",
+        "tag": "test_tag",
+        "is_shown": true,
+        "is_marked": false,
+        "corpus_id": 10,
+        "folder_id": null,
+        "created_at": "2017-05-05T16:38:33.056Z",
+        "updated_at": "2017-05-05T16:38:33.056Z"
+        "content": "test_content"
+    }
+}
+              </textarea>
+          </td>
+          <td>
+            <ul>
+              <li>
+                <span>code: 状态码</span><br>
+                <span>ResourceNotExist: 文章不存在</span>
+              </li>
+              <li>通过文章的唯一id获取该文章</li>
+              <li>此接口返回用户的文章,需要用户已登录才可以访问</li>
+            </ul>
+          </td>
+        </tr>
+        <!-- 更新文章信息 -->
+        <tr>
+          <td>更新文章信息</td>
+          <td>workspace/articles/:id</td>
+          <td>PUT</td>
+          <td>
+            <textarea cols="30" rows="10">
+{
+    "article": {
+        "name": "new_name",
+        "content": "new_content",
+        "tag": "new_tag",
+        "is_shown": true,
+        "is_marked": true
+    }
+}
+              </textarea>
+          </td>
+          <td>
+            <textarea cols="30" rows="10">
+//更新成功
+{
+    "code": "Success",
+    "article": {
+        "id": 1,
+        "name": "new_name",
+        "content": "new_content",
+        "tag": "new_tag",
+        "is_marked": true
+        ...
+    }
+}
+
+//更新失败
+{
+    "code": "Fail",
+    errors: {
+        ...
+    }
+}
+              </textarea>
+          </td>
+          <td>
+            <ul>
+              <li><span>code: 状态码</span><br>
+                <span>Success：修改成功， Fail：修改失败, Nopermisson: 没有权限， ResourceNotExist: 文章不存在</span>
+              </li>
+              <li>
+                <span>用户只有在<span class="notice">已登录</span>情况下才能修改<span class="notice">自己的</span>文章</span>
+              </li>
+              <li>
+                <span>通过update接口允许修改的属性有：</span>
+                <ol>
+                  <li>name</li>
+                  <li>content</li>
+                  <li>tag</li>
+                  <li>is_marked</li>
+                </ol>
+                <span>更新时传入需要修改的字段的键值对即可</span>
+              </li>
+            </ul>
+          </td>
+        </tr>
+        <!-- 发表文章 -->
+        <tr>
+          <td>发表文章</td>
+          <td>workspace/articles/:id/publish</td>
+          <td>PUT</td>
+          <td>
+            <textarea cols="30" rows="10">
+{
+    "is_shown": true
+}
+              </textarea>
+          </td>
+          <td>
+            <textarea cols="30" rows="10">
+//发表成功
+{
+    "code": "Success",
+    "article": {
+        "id": 1,
+        "is_shown": true
+        ...
+    }
+}
+
+//发表失败
+{
+    "code": "Fail",
+    errors: {
+        ...
+    }
+}
+              </textarea>
+          </td>
+          <td>
+            <ul>
+              <li><span>code: 状态码</span><br>
+                <span>Success：修改成功， Fail：修改失败, Nopermisson: 没有权限， ResourceNotExist: 文章不存在</span>
+              </li>
+              <li>
+                <span class="notice">仅拥有者才有权限发表文章</span>
+              </li>
+              <li>
+                <span class="notice">文章发表后将不支持修改</span>
+              </li>
+              <li>
+                <span>通过publish接口允许修改的属性有：</span>
+                <ol>
+                  <li>is_shown</li>
+                </ol>
+              </li>
+            </ul>
+          </td>
+        </tr>
+        <!-- 更新文章的文件夹路径 -->
+        <tr>
+          <td>更新文章的路径</td>
+          <td>workspace/articles/:id/move_dir</td>
+          <td>PUT</td>
+          <td>
+            <textarea cols="30" rows="10">
+// 移入文件夹
+{
+    "folder_id": 1
+    //传入的参数为目标文件夹的id
+}
+
+// 移入文集
+{
+    "corpus_id": 1
+}
+
+// 移到根目录
+{
+    "dir": 0
+}
+              </textarea>
+          </td>
+          <td>
+            <textarea cols="30" rows="10">
+//移动成功
+{
+    "code": "Success",
+    "article": {
+        "folder_id": 1,
+        //或 "corpus_id": 1,
+        ...
+    }
+}
+
+//移动失败
+{
+    "code": "Fail",
+    "errors": {
+        "folder_id": [
+            "找不到目标文件夹(文集)"
+        ]
+    }
+}
+              </textarea>
+          </td>
+          <td>
+            <ul>
+              <li>
+                <sapn>code: 状态码</sapn><br>
+                <span>Success：修改成功， Fail：修改失败, NoPermission: 没有权限， ResourceNotExist: 文章不存在</span>
+              </li>
+              <li>
+                <span>用户只有在<span class="notice">已登录</span>情况下才能修改<span class="notice">自己的</span>文章</span>
+              </li>
+              <li>
+                <span>通过<span class="notice">move_dir</span>接口允许修改的属性有：</span>
+                <ol>
+                  <li>folder_id</li>
+                  <li>corpus_id</li>
+                </ol>
+              </li>
+              <li>
+                <span class="notice">如果找不到移入的目标文件夹(文集)将移动失败</span>
+              </li>
+            </ul>
+          </td>
+        </tr>
+        <!-- 删除文章 -->
+        <tr>
+          <td>删除文章</td>
+          <td>workspace/articles/:id</td>
+          <td>DELETE</td>
+          <td>无</td>
+          <td>
+            <textarea cols="30" rows="10">
+{
+    "code": "Success"
+}
+
+              </textarea>
+          </td>
+          <td>
+            <ul>
+              <li>
+                <span>code: 状态码</span><br>
+                <span>Success：删除成功， Fail：删除失败, Nopermission: 没有权限， ResourceNotExist: 文章不存在</span>
+              </li>
+              <li>
+                <span>用户只有在<span class="notice">已登录</span>情况下才能删除<span class="notice">具有删除权限</span>文章</span>
+                <span>否则会报错, 返回Noperission, 表示用户对目标文件没有操作权限</span>
+              </li>
+              <li>具有删除权限的角色有: 拥有者(own), 管理员(admin)</li>
+              <li>
+                <span class="notice">文章被删除后将被移入回收站, 拥有者和管理员具有恢复文章的权限</span>
+              </li>
+            </ul>
+          </td>
+        </tr>
+        <!-- 添加协同作者 -->
+        <tr>
+          <td>添加协同作者</td>
+          <td>workspace/articles/:id/add_editor</td>
+          <td>POST</td>
+          <td>
+            <textarea cols="30" rows="10">
+
+{
+    "role": "admin", // 权限角色,允许的值包含: admin, editor, readonly
+    "user_id": 2 // 被添加的用户的唯一ID
+}
+            </textarea>
+          </td>
+          <td>
+            <textarea cols="30" rows="10">
+{
+    "code": "Success"
+}
+
+              </textarea>
+          </td>
+          <td>
+            <ul>
+              <li><span>code: 状态码</span><br>
+                <span>Success：添加成功， Fail：添加失败, Nopermission: 对目标文章没有权限， ResourceNotExist: 文章不存在</span>
+              </li>
+              <li>
+                <span class="notice">权限等级暂分为四等: </span>
+                <ol>
+                  <li><span class="notice">所有者(own): 文件主人, 具有至高无上的一切权限</span></li>
+                  <li><span class="notice">管理员(admin): 仅次于所有者的第二大角色,具有除永久删除文章/发表文章之外的所有权限</span></li>
+                  <li><span class="notice">普通作者(editor): 允许编辑文章/评论/添加历史版本等权限</span></li>
+                  <li><span class="notice">仅读(readonly): 仅具有查看文章的权限</span></li>
+                </ol>
+              </li>
+              <li>
+                <span>用户只有在<span class="notice">已登录</span>情况下才能添加<span class="notice">具有编辑作者权限的</span>文章的协同作者</span>
+                <span>允许添加协同作者的角色有: 文件所有者(own), 管理员(admin)</span>
+              </li>
+            </ul>
+          </td>
+        </tr>
+        <!-- 移除协同作者 -->
+        <tr>
+          <td>移除协同作者</td>
+          <td>workspace/articles/:id/remove_editor</td>
+          <td>POST</td>
+          <td>
+            <textarea cols="30" rows="10">
+
+{
+    "user_id": 2 // 被移除的用户的唯一ID
+}
+            </textarea>
+          </td>
+          <td>
+            <textarea cols="30" rows="10">
+{
+    "code": "Success"
+}
+
+              </textarea>
+          </td>
+          <td>
+            <ul>
+              <li><span>code: 状态码</span><br>
+                <span>Success：移除成功， Fail：移除失败, Nopermission: 对目标文章没有权限， ResourceNotExist: 文章不存在</span>
+              </li>
+              <li>
+                <span>用户只有在<span class="notice">已登录</span>情况下才能移除<span class="notice">具有编辑作者权限的</span>文章的协同作者</span>
+                <span>允许删除协同作者的角色有: 文件所有者(own), 管理员(admin)</span>
+              </li>
+            </ul>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</section>

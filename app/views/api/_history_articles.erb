@@ -1,0 +1,167 @@
+<section class='api' data-type='history_articles'>
+  <div class="api-header">历史文章</div>
+  <div class="api-body">
+    <div class="notice">
+      <h4>本目录下的API要求用户在已登录情况下才可以访问,否则返回code='NotLoggedIn',表示用户未登录</h4>
+    </div>
+    <table class="table" width="100%" cellspacing="0">
+      <thead>
+        <tr>
+          <td width="10%">操作</td>
+          <td width="15%">接口</td>
+          <td width="10%">方法</td>
+          <td width="20%">参数</td>
+          <td width="25%">响应</td>
+          <td width="20%">说明</td>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>新建历史文章</td>
+          <td>workspace/articles/:article_id/history_articles</td>
+          <td>POST</td>
+          <td>
+            <textarea cols="30" rows="10">
+无
+            </textarea>
+          </td>
+          <td>
+            <textarea cols="30" rows="10">
+//新建成功
+{
+    "code": "Success",
+    history_article: {
+        "id": 1,
+        "name": "新建文章",
+        "content": "test_content",
+        "tag": "test_tag"
+        "created_at": "2017-05-06T16:05:22.787Z"
+    }
+}
+
+//新建失败
+{
+    "code": "Fail",
+    "errors": {
+        "name": [
+            "文件名不能为空"
+        ]
+    }
+}
+            </textarea>
+          </td>
+          <td>
+            <ul>
+              <li>code: 状态码 Success：删除成功， Fail：删除失败, Nopermission: 没有权限</li>
+              <li>article_id: 需要新建历史记录的源文章的唯一id</li>
+            </ul>
+            <span class="notice">
+               <span>注意：</span>
+
+              <ul>
+                <li>历史文章不可以修改更新</li>
+                <li>历史文章属于源文章，当源文章更新时历史文章不变</li>
+                <li>历史文章允许删除</li>
+              </ul>
+            </span>
+          </td>
+        </tr>
+        <!-- 获取多条历史文章记录 -->
+        <tr>
+          <td>获取文章的多条历史文章记录</td>
+          <td>workspace/articles/:article_id/history_articles</td>
+          <td>GET</td>
+          <td>
+          </td>
+          <td>
+            <textarea cols="30" rows="10">
+{
+    history_articles: [
+        {
+            "id": 1,
+            "name": "新建文章",
+            "content": "test_content",
+            "tag": "test_tag"
+            "created_at": "2017-05-06T16:05:22.787Z"
+        },
+        {
+            "id": 2,
+            ...
+        },
+        ...
+    ]
+}
+              </textarea>
+          </td>
+          <td>
+            <ul>
+              <li>服务器返回json格式的数组</li>
+            </ul>
+          </td>
+        </tr>
+        <!-- 获取一条历史文章记录 -->
+        <tr>
+          <td>获取一条历史文章记录</td>
+          <td>workspace/articles/:article_id/history_articles/:id</td>
+          <td>GET</td>
+          <td>
+            <textarea cols="30" rows="10">
+无
+            </textarea>
+          </td>
+          <td>
+            <textarea cols="30" rows="10">
+{
+    history_article: {
+        "id": 1,
+        "name": "新建文章",
+        "content": "test_content",
+        "tag": "test_tag"
+        "created_at": "2017-05-06T16:05:22.787Z"
+    }
+}
+              </textarea>
+          </td>
+          <td>
+            <ul>
+              <li>
+                <span>code: 状态码</span><br>
+                <span>ResourceNotExist: 源文章或历史文章不存在</span>
+              </li>
+              <li>通过源文章的唯一id和历史文章的唯一id获取历史文章</li>
+            </ul>
+          </td>
+        </tr>
+        <!-- 删除历史文章 -->
+        <tr>
+          <td>删除历史文章</td>
+          <td>workspace/articles/:article_id/history_articles/:id</td>
+          <td>DELETE</td>
+          <td>无</td>
+          <td>
+            <textarea cols="30" rows="10">
+{
+    "code": "Success"
+}
+
+              </textarea>
+          </td>
+          <td>
+            <ul>
+              <li>
+                <span>code: 状态码</span><br>
+                <span>Success：删除成功， Fail：删除失败, Nopermission: 没有权限, ResouceNotExist: 源文章不存在或历史文章不存在</span>
+              </li>
+              <li>
+                <span>用户只有在<span class="notice">已登录</span>情况下才能删除属于<span class="notice">具有删除权限</span>历史文章</span>
+              </li>
+              <li>
+                <span class="notice">历史文章被删除后将永久删除,无法恢复</span>
+              </li>
+            </ul>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</section>

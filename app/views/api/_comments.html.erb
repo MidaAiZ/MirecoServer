@@ -1,0 +1,383 @@
+<section class='api' data-type='comments'>
+  <div class="api-header">读者评论</div>
+  <div class="api-body">
+    <table class="table" width="100%" cellspacing="0">
+      <thead>
+        <tr>
+          <td width="10%">操作</td>
+          <td width="15%">接口</td>
+          <td width="10%">方法</td>
+          <td width="20%">参数</td>
+          <td width="25%">响应</td>
+          <td width="20%">说明</td>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>新建评论</td>
+          <td>
+            <ul>
+              <li>
+                <span>评论文章:</span><br>
+                <span>articles/:article_id/comments</span>
+              </li>
+              <li>
+                <span>评论文集:</span><br>
+                <span>corpuses/:corpus_id/comments</span>
+              </li>
+            </ul>
+          </td>
+          <td>POST</td>
+          <td>
+            <textarea cols="30" rows="10">
+{
+    "comment": {
+        "content": "这是评论"
+    }
+}
+            </textarea>
+          </td>
+          <td>
+            <textarea cols="30" rows="10">
+//新建成功
+{
+    "code": "Success",
+    "comment": {
+        "id": 1,
+        "user_id": 1,
+        "content": "这是评论",
+        "created_at": "2017-06-13T05:13:04.135Z",
+        "updated_at": "2017-06-13T05:13:04.135Z"
+    }
+}
+
+//新建失败
+{
+    "code": "Fail",
+    "errors": {
+        ...
+    }
+}
+            </textarea>
+          </td>
+          <td>
+            <ul>
+              <li>
+                <span>code: 状态码</span><br>
+                <span>Success：评论成功， Fail：评论失败, ResourceNotEist: 找不到文件, NotLoggedIn: 用户未登录</span>
+              </li>
+              <li>仅当文件被发表后才允许评论</li>
+            </ul>
+            <span class="notice">
+              <span>注意：</span>
+              <ul>
+                <li>评论不可以修改更新</li>
+                <li>允许评论的对象包括: 1.文章, 2.文集</li>
+              </ul>
+            </span>
+          </td>
+        </tr>
+        <!-- 获取多条评论记录 -->
+        <tr>
+          <td>获取多条评论记录</td>
+          <td>
+            <ul>
+              <li>
+                <span>获取文章评论:</span>
+                <span>articles/:article_id/comments?page=1&count=15</span>
+              </li>
+              <li>
+                <span>获取文集评论:</span>
+                <span>corpuses/:corpus_id/comments?page=1&count=15</span>
+              </li>
+            </ul>
+          </td>
+          <td>GET</td>
+          <td>
+          </td>
+          <td>
+            <textarea cols="30" rows="10">
+{
+    "comments": [
+        {
+            "id": 1,
+            "user_id": 1,
+            "content": "这是评论",
+            "created_at": "2017-06-13T05:13:04.135Z"
+        },
+        {
+            ...
+        },
+        ...
+    ]
+}
+              </textarea>
+          </td>
+          <td>
+            <ul>
+              <li>通过文件的唯一ID获取文件的所有评论</li>
+              <li>page: 评论的页数,默认为1</li>
+              <li>count: 每页的评论数, 默认为15, 单次请求最大允许100条</li>
+            </ul>
+          </td>
+        </tr>
+        <!-- 获取一条评论记录 -->
+        <tr>
+          <td>获取一条评论记录</td>
+          <td>
+            <ul>
+              <li>
+                <span>获取文章评论:</span>
+                <span>articles/:article_id/comments/:id</span>
+              </li>
+              <li>
+                <span>获取文集评论:</span>
+                <span>corpuses/:corpus_id/comments/:id</span>
+              </li>
+            </ul>
+          </td>
+          <td>GET</td>
+          <td>
+            <textarea cols="30" rows="10">
+无
+            </textarea>
+          </td>
+          <td>
+            <textarea cols="30" rows="10">
+{
+    comment: {
+        "id": 1,
+        "user_id": 1,
+        "content": "这是评论",
+        "created_at": "2017-06-13T05:13:04.135Z"
+    }
+}
+              </textarea>
+          </td>
+          <td>
+            <ul>
+              <li>
+                <span>code: 状态码</span><br>
+                <span>ResourceNotExist: 源文章或评论不存在</span>
+              </li>
+              <li>通过源文章的唯一id和评论的唯一id获取评论</li>
+            </ul>
+          </td>
+        </tr>
+        <!-- 删除评论 -->
+        <tr>
+          <td>删除评论</td>
+          <td>
+            <ul>
+              <li>
+                <span>删除文章评论:</span>
+                <span>articles/:article_id/comments/:id</span>
+              </li>
+              <li>
+                <span>删除文集评论:</span>
+                <span>corpuses/:corpus_id/comments/:id</span>
+              </li>
+            </ul>
+          </td>
+          <td>DELETE</td>
+          <td>无</td>
+          <td>
+            <textarea cols="30" rows="10">
+{
+    "code": "Success"
+}
+
+              </textarea>
+          </td>
+          <td>
+            <ul>
+              <li>
+                <span>code: 状态码</span><br>
+                <span>Success：删除成功， Fail：删除失败, Nopermission: 没有权限, NotLoggedIn: 用户未登录, ResouceNotExist: 源文章不存在或评论不存在</span>
+              </li>
+              <li>
+                <span>用户只有在<span class="notice">已登录</span>情况下才能删除属于<span class="notice">具有删除权限</span>的评论</span>
+              </li>
+              <li>
+                <sapn>允许删除评论的角色:</sapn> <br>
+                <span>文件拥有者/文件管理员/评论用户</span>
+              </li>
+              <li>
+                <span class="notice">评论被删除后将永久删除,无法恢复</span>
+              </li>
+            </ul>
+          </td>
+        </tr>
+        <!-- 回复评论 -->
+        <tr>
+          <td>回复评论</td>
+          <td>
+            comments/:comment_id/replies
+          </td>
+          <td>POST</td>
+          <td>
+            <textarea cols="30" rows="10">
+{
+    "reply": {
+        "content": "回复评论"
+    }
+}
+            </textarea>
+          </td>
+          <td>
+            <textarea cols="30" rows="10">
+//回复成功
+{
+    "code": "Success",
+    "reply": {
+        "id": 1,
+        "user_id": 1,
+        "content": "回复评论",
+        "created_at": "2017-06-13T08:04:36.174Z"
+    }
+}
+//回复失败
+{
+    "code": "Fail",
+    "errors": {
+        ...
+    }
+}
+            </textarea>
+          </td>
+          <td>
+            <ul>
+              <li>
+                <span>code: 状态码</span><br>
+                <span>Success：回复成功， Fail：回复失败, ResourceNotEist: 找不到评论, NotLoggedIn: 用户未登录</span>
+              </li>
+              <li>
+                <span>参数说明:</span>
+                <ol>
+                  <li>content: 回复内容</li>
+                </ol>
+              </li>
+              <li>
+                <span>用户需要在已登录情况下才可以对评论进行回复</span>
+              </li>
+            </ul>
+          </td>
+        </tr>
+        <!-- 获取多条评论记录 -->
+        <tr>
+          <td>获取多条回复记录</td>
+          <td>
+            <span>comments/:id/?page=1&count=15</span>
+          </td>
+          <td>GET</td>
+          <td>
+          </td>
+          <td>
+            <textarea cols="30" rows="10">
+{
+    "replies": [
+        {
+            "id": 1,
+            "user_id": 1,
+            "content": "回复评论",
+            "created_at": "2017-06-13T08:04:36.174Z"
+        },
+        {
+            ...
+        },
+        ...
+    ]
+            </textarea>
+          </td>
+          <td>
+            <ul>
+              <li>通过文件的唯一ID获取评论的所有回复</li>
+              <li>page: 回复的页数,默认为1</li>
+              <li>count: 每页的回复数, 默认为15, 单次请求最大允许100条</li>
+            </ul>
+          </td>
+        </tr>
+        <!-- 获取一条回复记录 -->
+        <tr>
+          <td>获取一条回复记录</td>
+          <td>
+            <span>comments/:comment_id/replies/:reply_id</span>
+          </td>
+          <td>GET</td>
+          <td>
+            <textarea cols="30" rows="10">
+无
+            </textarea>
+          </td>
+          <td>
+            <textarea cols="30" rows="10">
+{
+    reply: {
+        "id": 1,
+        "user_id": 1,
+        "content": "回复评论",
+        "created_at": "2017-06-13T08:04:36.174Z"
+    }
+}
+              </textarea>
+          </td>
+          <td>
+            <ul>
+              <li>
+                <span>code: 状态码</span><br>
+                <span>ResourceNotExist: 评论或回复不存在</span>
+              </li>
+              <li>通过评论的唯一id获取回复</li>
+            </ul>
+          </td>
+        </tr>
+        <!-- 删除回复 -->
+        <tr>
+          <td>删除回复</td>
+          <td>
+            <span>comments/:comment_id/replies/:reply_id</span>
+          </td>
+          <td>DELETE</td>
+          <td>
+            <textarea cols="30" rows="10">
+无
+            </textarea>
+          </td>
+          <td>
+            <textarea cols="30" rows="10">
+//删除成功
+{
+    "code": "Success"
+}
+//删除失败
+{
+    "code": "Fail",
+    "errors": {
+        ...
+    }
+}
+            </textarea>
+          </td>
+          <td>
+            <ul>
+              <li>
+                <span>code: 状态码</span><br>
+                <span>Success：删除成功， Fail：删除失败, Nopermission: 没有权限, ResouceNotExist: 评论不存在或回复不存在</span>
+              </li>
+              <li>
+                <span>用户只有在<span class="notice">已登录</span>情况下才能删除属于<span class="notice">具有删除权限</span>的回复</span>
+              </li>
+              <li>
+                <sapn>允许删除回复的角色:</sapn> <br>
+                <span>文件拥有者/管理员/评论的用户/回复的用户</span>
+              </li>
+              <li>
+                <span class="notice">回复被删除后将永久删除,无法恢复</span>
+              </li>
+            </ul>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</section>

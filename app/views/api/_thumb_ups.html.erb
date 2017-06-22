@@ -1,0 +1,125 @@
+<section class='api' data-type='thumb_ups'>
+  <div class="api-header">点赞</div>
+  <div class="api-body">
+    <table class="table" width="100%" cellspacing="0">
+      <thead>
+        <tr>
+          <td width="10%">操作</td>
+          <td width="15%">接口</td>
+          <td width="10%">方法</td>
+          <td width="20%">参数</td>
+          <td width="25%">响应</td>
+          <td width="20%">说明</td>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>点赞</td>
+          <td>
+            <ul>
+              <li>
+                <span>点赞文章:</span><br>
+                <span>articles/:article_id/thumb_ups</span>
+              </li>
+              <li>
+                <span>点赞文集:</span><br>
+                <span>corpuses/:corpus_id/thumb_ups</span>
+              </li>
+              <li>
+                <span>点赞评论:</span><br>
+                <span>comments/:comment_id/thumb_ups</span>
+              </li>
+              <li>
+                <span>点赞评论回复:</span><br>
+                <span>replies/:reply_id/thumb_ups</span>
+              </li>
+            </ul>
+          </td>
+          <td>POST</td>
+          <td>
+            <textarea cols="30" rows="10">
+无
+            </textarea>
+          </td>
+          <td>
+            <textarea cols="30" rows="10">
+//点赞成功
+{
+    "code": "Success"
+}
+
+//点赞失败
+{
+    "code": "Fail",
+    "errors": {
+        ...
+    }
+}
+            </textarea>
+          </td>
+          <td>
+            <ul>
+              <li>
+                <span>code: 状态码</span><br>
+                <span>Success：点赞成功， Fail：点赞失败, ResourceNotEist: 找不到目标, NotLoggedIn: 用户未登录</span>
+              </li>
+              <li>进当文件被发表后才允许点赞</li>
+            </ul>
+            <span class="notice">
+              <span>注意：</span>
+              <ul>
+                <li>点赞不可以修改更新</li>
+                <li>允许点赞的对象包括: 1.文章, 2.文集, 3.评论</li>
+              </ul>
+            </span>
+          </td>
+        </tr>
+        <!-- 取消点赞 -->
+        <tr>
+          <td>取消点赞</td>
+          <td>
+            <ul>
+              <li>
+                <span>取消文章点赞:</span>
+                <span>articles/:article_id/thumb_ups</span>
+              </li>
+              <li>
+                <span>取消文集点赞:</span>
+                <span>corpuses/:corpus_id/thumb_ups</span>
+              </li>
+              <li>
+                <span>取消评论点赞:</span>
+                <span>comments/:comment_id/thumb_ups</span>
+              </li>
+              <li>
+                <span>取消评论回复点赞:</span>
+                <span>replies/:reply_id/thumb_ups</span>
+              </li>
+            </ul>
+          </td>
+          <td>DELETE</td>
+          <td>无</td>
+          <td>
+            <textarea cols="30" rows="10">
+{
+    "code": "Success"
+}
+
+              </textarea>
+          </td>
+          <td>
+            <ul>
+              <li>
+                <span>code: 状态码</span><br>
+                <span>Success：取消成功， Fail：取消失败, ResouceNotExist: 找不到目标, NotLoggedIn: 用户未登录</span>
+              </li>
+              <li>
+                <span>用户只有在<span class="notice">已登录</span>情况下才能取消自己曾点过的赞</span>
+              </li>
+            </ul>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</section>

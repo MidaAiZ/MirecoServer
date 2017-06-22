@@ -1,0 +1,444 @@
+<section class='api' data-type='folder'>
+  <div class="api-header">文件夹</div>
+  <div class="api-body">
+    <div class="notice">
+      <h4>本目录下的API要求用户在已登录情况下才可以访问,否则返回code='NotLoggedIn',表示用户未登录, 文件夹仅对拥有者可见</h4>
+    </div>
+    <table class="table" width="100%" cellspacing="0">
+      <thead>
+        <tr>
+          <td width="10%">操作</td>
+          <td width="15%">接口</td>
+          <td width="10%">方法</td>
+          <td width="20%">参数</td>
+          <td width="25%">响应</td>
+          <td width="20%">说明</td>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>新建文件夹</td>
+          <td>workspace/folders</td>
+          <td>POST</td>
+          <td>
+            <textarea cols="30" rows="10">
+{
+    "folder": {
+        "name": "新建文件夹", //必须字段
+        "tag": "test_tag",  //标签
+        "is_marked": false
+        "folder_id": null //当新建文件夹作为文件夹的文件时传入文件夹id
+    }
+}
+            </textarea>
+          </td>
+          <td>
+            <textarea cols="30" rows="10">
+//新建成功
+{
+    "code": "Success",
+    "folder": {
+        "id": 1,
+        "name": "新建文件夹",
+        "tag": "test_tag",
+        "is_marked": false,
+        "folder_id": null,
+        "created_at": "2017-05-05T16:38:33.056Z",
+        "updated_at": "2017-05-05T16:38:33.056Z"
+    }
+}
+
+//新建失败
+{
+    "code": "Fail",
+    "errors": {
+        "name": [
+            "文件名不能为空"
+        ]
+    }
+}
+            </textarea>
+          </td>
+          <td>
+            <ul>
+              <li>id: 唯一id</li>
+              <li>name： 文件夹名字，必须字段</li>
+              <li>content： 文件夹内容</li>
+              <li>tag： 文件夹的分类标签,以空格键分割，最多允许传入5个</li>
+              <li>is_marked: 判断文件夹是否标星，默认false, 接受值为：true和false</li>
+              <li>index_folder_id: 所属文件夹的id</li>
+            </ul>
+          </td>
+        </tr>
+        <!-- 获取多条文件夹记录 -->
+        <tr>
+          <td>获取多条文件夹记录</td>
+          <td>workspace/folders</td>
+          <td>GET</td>
+          <td>
+            <textarea cols="30" rows="10">
+page:页码
+count:数量
+
+示例：
+    http://localhost:3000/folders?page=3&count=10
+    请求说明：获取按每页10条记录划分的文件夹集合的第三页
+    单次请求最多允许获取30条记录
+             </textarea>
+          </td>
+          <td>
+            <textarea cols="30" rows="10">
+[
+    {
+        "folder": {
+            "id": 1,
+            "name": "新建文件夹",
+            "tag": "test_tag",
+            "is_marked": false,
+            "folder_id": null,
+            "created_at": "2017-05-05T16:38:33.056Z",
+            "updated_at": "2017-05-05T16:38:33.056Z"
+        }
+    },
+    {
+        "folder": {
+            "id": 2,
+            ...
+        }
+    },
+    ...
+]
+              </textarea>
+          </td>
+          <td>
+            <ul>
+              <li>服务器返回json格式的数组</li>
+            </ul>
+          </td>
+        </tr>
+        <!-- 获取一条文件夹记录 -->
+        <tr>
+          <td>获取一条文件夹记录</td>
+          <td>workspace/folders:id</td>
+          <td>GET</td>
+          <td>
+            <textarea cols="30" rows="10">
+无
+            </textarea>
+          </td>
+          <td>
+            <textarea cols="30" rows="10">
+{
+    "folder": {
+        "id": 1,
+        "name": "新建文件夹",
+        "is_marked": false,
+        "folder_id": null,
+        "created_at": "2017-05-05T16:38:33.056Z",
+        "updated_at": "2017-05-05T16:38:33.056Z"
+    }
+}
+              </textarea>
+          </td>
+          <td>
+            <ul>
+              <li><span>code: 状态码</span><br>
+                <span>ResourceNotExist: 文件夹不存在</span>
+              </li>
+              <li>通过文件夹的唯一id获取该文件夹</li>
+            </ul>
+          </td>
+        </tr>
+        <!-- 获取文件夹包含子文件 -->
+        <tr>
+          <td>获取文件夹包含的子文件</td>
+          <td>workspace/folders:id/profile</td>
+          <td>GET</td>
+          <td>
+            <textarea cols="30" rows="10">
+无
+            </textarea>
+          </td>
+          <td>
+            <textarea cols="30" rows="10">
+{
+    "code": "Success",
+    //文件夹所包含的子文件夹
+    "son_folders": [
+        {
+            "folder": {
+                "id": 6,
+                "name": "test_name",
+                ...
+                //文件夹信息,为使文档清晰,此处略去
+            }
+        },
+        {
+            "folder": {
+                ...
+            }
+        },
+        ...
+    ],
+    //文件夹所包含的文集
+    "son_corpus": [
+        {
+            "corpus": {
+                "id": 3,
+                ...
+                //文集信息,为使文档清晰,此处略去
+            }
+        },
+        ...
+    ],
+    //文件夹所包含的文章
+    "son_articles": [
+        {
+            "article": {
+                "id": 4,
+                ...
+                //文章信息,为使文档清晰,此处略去
+            }
+        },
+        ...
+    ]
+}
+              </textarea>
+          </td>
+          <td>
+            <ul>
+              <li><span>code: 状态码</span><br>
+                <span>ResourceNotExist: 文件夹不存在</span>
+              </li>
+              <li>通过文集的唯一id获取该文件夹包含的文件</li>
+              <li><span class="notice">只有在用户登录的情况下才能获取文件夹包含的文件</span></li>
+              <li>获取的内容中,文件夹包含的子文件夹/文集/文章分别为一个数组</li>
+            </ul>
+          </td>
+        </tr>
+        <!-- 更新文件夹信息 -->
+        <tr>
+          <td>更新文件夹信息</td>
+          <td>workspace/folders:id</td>
+          <td>PUT</td>
+          <td>
+            <textarea cols="30" rows="10">
+{
+    "folder": {
+        "name": "new_name",
+        "tag": "new_tag",
+        "is_marked": true
+    }
+}
+              </textarea>
+          </td>
+          <td>
+            <textarea cols="30" rows="10">
+//更新成功
+{
+    "code": "Success",
+    "folder": {
+        "id": 1,
+        "name": "new_name",
+        "tag": "new_tag",
+        "is_marked": true
+        ...
+    }
+}
+
+//更新失败
+{
+    "code": "Fail",
+    errors: {
+        ...
+    }
+}
+              </textarea>
+          </td>
+          <td>
+            <ul>
+              <li><span>code: 状态码</span><br>
+                <span>Success：修改成功， Fail：修改失败, Nopermisson: 没有权限， ResourceNotExist: 文件夹不存在</span>
+              </li>
+              <li>
+                <span>用户只有在<span class="notice">已登录</span>情况下才能修改<span class="notice">具有编辑权限的</span>文件夹</span>
+              </li>
+              <li>
+                <span>通过update接口允许修改的属性有：</span>
+                <ol>
+                  <li>name</li>
+                  <li>tag</li>
+                  <li>is_marked</li>
+                </ol>
+                <span>更新时传入需要修改的字段的键值对即可</span>
+              </li>
+            </ul>
+          </td>
+        </tr>
+        <!-- 更新文件夹的路径 -->
+        <tr>
+          <td>更新文件夹的路径</td>
+          <td>workspace/folders:id/move_dir</td>
+          <td>POST</td>
+          <td>
+            <textarea cols="30" rows="10">
+{
+
+    "new_folder": 1
+    //传入的参数为目标文件夹的id
+    //如果要将文件夹移出父级文件夹， 传入0即可
+}
+              </textarea>
+          </td>
+          <td>
+            <textarea cols="30" rows="10">
+//移动成功
+{
+    "code": "Success",
+    "folder": {
+        "folder_id": 1,
+        ...
+    }
+}
+
+//移动失败
+{
+    "code": "Fail",
+    "errors": {
+        "folder_id": [
+            "找不到目标文件夹"
+        ]
+    }
+}
+              </textarea>
+          </td>
+          <td>
+            <ul>
+              <li><span>code: 状态码</span><br>
+                <span>Success：修改成功， Fail：修改失败, Nopermisson: 没有权限， ResourceNotExist: 文件夹不存在</span>
+              </li>
+              <li>
+                <span>用户只有在<span class="notice">已登录</span>情况下才能修改具有<span class="notice">移动权限的</span>文件夹</span>
+              </li>
+              <li>
+                <span>通过<span class="notice">update_dir</span>接口允许修改的属性有：</span>
+                <ol>
+                  <li>folder_id</li>
+                </ol>
+              </li>
+              <li>
+                <span class="notice">如果找不到移入的目标文件夹将移动失败</span>
+              </li>
+            </ul>
+          </td>
+        </tr>
+        <!-- 删除文件夹 -->
+        <tr>
+          <td>删除文件夹</td>
+          <td>workspace/folders:id</td>
+          <td>DELETE</td>
+          <td>无</td>
+          <td>
+            <textarea cols="30" rows="10">
+{
+    "code": "Success"
+}
+              </textarea>
+          </td>
+          <td>
+            <ul>
+              <li><span>code: 状态码</span><br>
+                <span>Success：修改成功， Fail：修改失败, Nopermisson: 没有权限， ResourceNotExist: 文章不存在</span>
+              </li>
+              <li>
+                <span>用户只有在<span class="notice">已登录</span>情况下才能删除<span class="notice">具有删除权限的</span>文件夹</span>
+              </li>
+              <li>具有删除权限的角色有: 拥有者(own), 管理员(admin)</li>
+              <li>
+                <span class="notice">文件夹被删除后将被移入回收站, 拥有者和管理员具有恢复文件夹的权限</span>
+              </li>
+            </ul>
+          </td>
+        </tr>
+        <!-- 添加协同作者 -->
+        <tr>
+          <td>添加协同作者</td>
+          <td>workspace/folders/:id/add_editor</td>
+          <td>POST</td>
+          <td>
+            <textarea cols="30" rows="10">
+
+{
+    "role": "admin", // 权限角色,允许的值包含: admin, editor, readonly
+    "user_id": 2 // 被添加的用户的唯一ID
+}
+            </textarea>
+          </td>
+          <td>
+            <textarea cols="30" rows="10">
+{
+    "code": "Success"
+}
+
+              </textarea>
+          </td>
+          <td>
+            <ul>
+              <li>
+                <span>code: 状态码</span>
+                <span>Success：添加成功， Fail：添加失败, Nopermission: 对目标文集没有权限， ResourceNotExist: 文件夹不存在</span>
+              </li>
+              <li>
+                <span class="notice">权限等级暂分为四等: </span>
+                <ol>
+                  <li><span class="notice">所有者(own): 文件主人, 具有至高无上的一切权限</span></li>
+                  <li><span class="notice">管理员(admin): 仅次于所有者的第二大角色,具有除永久删除文件夹/发表文件夹内文章(文集)之外的所有权限</span></li>
+                  <li><span class="notice">普通作者(editor): 允许编辑文件夹内文集(文章)/评论/添加历史版本等权限</span></li>
+                  <li><span class="notice">仅读(readonly): 仅具有查看文件夹的权限</span></li>
+                </ol>
+              </li>
+              <li>
+                <span>用户只有在<span class="notice">已登录</span>情况下才能添加<span class="notice">具有编辑作者权限的</span>文件夹的协同作者</span>
+                <span>允许添加协同作者的角色有: 文件所有者(own), 管理员(admin)</span>
+              </li>
+            </ul>
+          </td>
+        </tr>
+        <!-- 移除协同作者 -->
+        <tr>
+          <td>移除协同作者</td>
+          <td>workspace/folders/:id/remove_editor</td>
+          <td>POST</td>
+          <td>
+            <textarea cols="30" rows="10">
+
+{
+    "user_id": 2 // 被移除的用户的唯一ID
+}
+            </textarea>
+          </td>
+          <td>
+            <textarea cols="30" rows="10">
+{
+    "code": "Success"
+}
+
+              </textarea>
+          </td>
+          <td>
+            <ul>
+              <li>
+                <span>code: 状态码</span><br>
+                <span>Success：移除成功， Fail：移除失败, Nopermission: 对目标文件夹没有权限， ResourceNotExist: 文件夹不存在</span>
+              </li>
+              <li>
+                <span>用户只有在<span class="notice">已登录</span>情况下才能移除<span class="notice">具有编辑作者权限的</span>文件夹的协同作者</span>
+                <span>允许删除协同作者的角色有: 文件所有者(own), 管理员(admin)</span>
+              </li>
+            </ul>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</section>

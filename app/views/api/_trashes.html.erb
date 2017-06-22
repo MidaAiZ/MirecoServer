@@ -1,0 +1,208 @@
+<section class='api' data-type='trashes'>
+  <div class="api-header">回收站</div>
+  <div class="api-body">
+    <div class="notice">
+      <h4>本目录下的API要求用户在已登录情况下才可以访问,否则返回code='NotLoggedIn',表示用户未登录</h4>
+    </div>
+    <table class="table" width="100%" cellspacing="0">
+      <thead>
+        <tr>
+          <td width="10%">操作</td>
+          <td width="15%">接口</td>
+          <td width="10%">方法</td>
+          <td width="20%">参数</td>
+          <td width="25%">响应</td>
+          <td width="20%">说明</td>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>新建回收站</td>
+          <td>workspace/trashes</td>
+          <td>POST</td>
+          <td>
+            <textarea cols="30" rows="10">
+{
+    "file_type": "folders",
+    "file_id": 1
+}
+            </textarea>
+          </td>
+          <td>
+            <textarea cols="30" rows="10">
+//新建成功
+{
+    "code": "Success",
+    "trash": {
+        "id": 1,
+        "files_count": 1,
+        "created_at": "2017-06-08T17:34:51.302Z",
+        "file_name": "test",
+        "file_type": "folders"
+    }
+}
+
+//新建失败
+{
+    "code": "Fail"
+}
+            </textarea>
+          </td>
+          <td>
+            <ul>
+              <li>code: 状态码 Success：删除成功， Fail：删除失败, Nopermission: 没有权限, NotLoggedIn: 用户未登录</li>
+              <li>files_count: 被移入回收站的文件数目</li>
+              <li>files_name: 文件名</li>
+              <li>
+                  <span>file_type: 被移入回收站的文件类型, 支持以下文件:</span>
+                  <ol>
+                      <li>folders: 文件夹</li>
+                      <li>corpuses: 文集</li>
+                      <li>articles: 文章</li>
+                  </ol>
+              </li>
+              <li>file_id: 文件的唯一id</li>
+            </ul>
+            <span class="notice">
+               <span>注意：</span>
+
+              <ul>
+                <li>该接口和文章/文集/文件夹等删除文件的接口是等效的,都是将文件移入回收站</li>
+                <li>移入回收站后将不可以再查看或编辑该文件,文件将从用户的文件列表中被移除</li>
+                <li>用户可以到回收站里选择恢复文件或者永久删除文件</li>
+                <li>允许将文件移入回收站的角色有: own(拥有者), admin(管理员)</li>
+              </ul>
+            </span>
+          </td>
+        </tr>
+        <!-- 获取多条回收站记录 -->
+        <tr>
+          <td>获取多条回收站记录</td>
+          <td>workspace/trashes</td>
+          <td>GET</td>
+          <td>
+          </td>
+          <td>
+            <textarea cols="30" rows="10">
+{
+    trashes: [
+        {
+              "id": 1,
+              "files_count": 1,
+              "created_at": "2017-05-29T16:41:36.180Z",
+              "file_name": "test",
+              "file_type": "folders"
+        },
+        {
+            "id": 2,
+            ...
+        },
+        ...
+    ]
+}
+              </textarea>
+          </td>
+          <td>
+            <ul>
+              <li>服务器返回json格式的数组</li>
+            </ul>
+          </td>
+        </tr>
+        <!-- 获取一条回收站记录 -->
+        <tr>
+          <td>获取一条回收站记录</td>
+          <td>workspace/trashes/:id</td>
+          <td>GET</td>
+          <td>
+            <textarea cols="30" rows="10">
+无
+            </textarea>
+          </td>
+          <td>
+            <textarea cols="30" rows="10">
+{
+    trash {
+        "id": 1,
+        "files_count": 1,
+        "created_at": "2017-05-29T16:41:36.180Z",
+        "file_name": "test",
+        "file_type": "folders"
+    }
+}
+            </textarea>
+          </td>
+          <td>
+            <ul>
+              <li>
+                <span>code: 状态码</span><br>
+                <span>ResourceNotExist: 记录不存在</span>
+              </li>
+              <li>通过回收站的唯一id获取记录</li>
+            </ul>
+          </td>
+        </tr>
+        <!-- 恢复文件 -->
+        <tr>
+          <td>恢复文件</td>
+          <td>workspace/trashes/:id/recover</td>
+          <td>POST</td>
+          <td>
+            <textarea cols="30" rows="10">
+无
+            </textarea>
+          </td>
+          <td>
+            <textarea cols="30" rows="10">
+{
+    "code": "Success"
+}
+            </textarea>
+          </td>
+          <td>
+            <ul>
+              <li>
+                <span>code: 状态码</span><br>
+                <span>Success：恢复成功， Fail：恢复失败, Nopermission: 没有权限, ResouceNotExist: 记录不存在, NotLoggedIn: 用户未登录</span>
+              </li>
+              <li>通过回收站的唯一id恢复文件</li>
+              <li>
+                <span>仅拥有者(own)和管理员(admin)具有恢复文件的权限</span>
+              </li>
+            </ul>
+          </td>
+        </tr>
+        <!-- 彻底删除 -->
+        <tr>
+          <td>彻底删除</td>
+          <td>workspace/trashes/:id</td>
+          <td>DELETE</td>
+          <td>无</td>
+          <td>
+            <textarea cols="30" rows="10">
+{
+    "code": "Success"
+}
+              </textarea>
+          </td>
+          <td>
+            <ul>
+              <li>
+                <span>code: 状态码</span><br>
+                <span>Success：删除成功， Fail：删除失败, Nopermission: 没有权限, ResouceNotExist: 记录不存在, NotLoggedIn: 用户未登录</span>
+              </li>
+              <li>
+                <span>用户只有在<span class="notice">已登录</span>情况下才能删除属于<span class="notice">具有彻底删除权限</span>的回收站</span>
+              </li>
+              <li>
+                <span class="notice">回收站被删除后文件将永久删除,无法恢复</span>
+              </li>
+              <li>
+                <span class="notice">仅文件拥有者(own)角色才可以删除回收站从而彻底删除文件</span>
+              </li>
+            </ul>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</section>

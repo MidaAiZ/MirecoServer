@@ -1,0 +1,432 @@
+<section class='api' data-type='users'>
+  <div class="api-header">用户</div>
+  <div class="api-body">
+    <table class="table" width="100%" cellspacing="0">
+      <thead>
+        <tr>
+          <td width="10%">操作</td>
+          <td width="15%">接口</td>
+          <td width="10%">方法</td>
+          <td width="20%">参数</td>
+          <td width="25%">响应</td>
+          <td width="20%">说明</td>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>注册</td>
+          <td>users</td>
+          <td>POST</td>
+          <td>
+            <textarea name="" id="" cols="30" rows="10">
+// 注意,注册帐号时需要先请求系统发送注册验证码,详见短信验证一节
+{
+    "user": {
+        "number": "123456", //最少两位，允许数字/字母/下划线/汉字
+        "password": "123456", //最少两位，允许数字/字母/下划线/特殊符合
+        "phone": "15850680000"
+    },
+    "msg_code": "1234" //注册手机号接收到的验证码
+}
+            </textarea>
+          </td>
+          <td>
+            <textarea name="" id="" cols="30" rows="10">
+//注册成功
+{
+    "code": "Success",
+    "user": {
+        "id": 1,
+        "number": "123456",
+        "phone": "158****0024",
+        "email": null,
+        "gender": null,
+        "birthday": null,
+        "address": null,
+        "created_at": "2017-05-06T07:31:58.055Z",
+        "avatar": null
+    }
+}
+
+//注册失败
+{
+    "code": "Fail",
+    "errors": {
+        "number": [
+            "该帐号已被注册"
+        ],
+        "phone": [
+            "该手机号已被注册"
+        ]
+    }
+}
+            </textarea>
+          </td>
+          <td>
+            <span>注册时允许传入的字段：</span>
+            <ul>
+              <li>
+                <span class="notice">*必填字段</span>
+                <ol>
+                  <li>number: 帐号名，2-16位，唯一，注册后不可更改</li>
+                  <li>password: 密码，6-20位</li>
+                  <li>phone： 11位数手机号码</li>
+                  <br>
+                </ol>
+                <li>
+                  <span class="notice">选填字段（注册时非必须）</span>
+                  <ul>
+                    <li>email： 邮箱号</li>
+                    <li>gender： 性别</li>
+                    <li>birthday： 生日，格式：2017-01-01</li>
+                    <li>address： 住址</li>
+                    <li>intro： 自我介绍</li>
+                    <li>avatar： 头像，接受一个url地址或者Blob对象</li>
+                  </ul>
+                </li>
+              </ul>
+              <span>响应参数:</span>
+              <ul>
+                <li>
+                  <span>code: 状态码</span><br>
+                  <span>Success：注册成功， Fail：注册失败，'WrongMsgCode': 短信验证码错误</span>
+                </li>
+                <li>
+                  <span>errors: 错误信息</span><br>
+                  <span>值为一个对象，内含多条错误信息，每一条错误信息为一个数组，数组内包含多个该字段的报错信息</span>
+                </li>
+              </ul>
+            </td>
+          </tr>
+          <!-- 获取用户信息 -->
+          <tr>
+            <td>获取用户信息</td>
+            <td>users/profile</td>
+            <td>GET</td>
+            <td>
+              <textarea name="" id="" cols="30" rows="10">
+无
+            </textarea>
+            </td>
+            <td>
+              <textarea name="name" rows="10" cols="30">
+//获取成功
+{
+    "code": "Success",
+    {
+        "user": {
+            "id": 1,
+            "number": "123456",
+            "phone": "158****0024",
+            "email": null,
+            "gender": null,
+            "birthday": null,
+            "address": null,
+            "intro": null,
+            "created_at": "2017-05-06T07:31:58.055Z",
+            "avatar": null
+        }
+    }
+}
+
+//获取失败
+{
+    "code": 'NotLoggedIn' //用户未登录
+}
+            </textarea>
+            </td>
+            <td>
+              <span class="notice">只有在用户已登录的情况下才可以获取到用户信息</span>
+            </td>
+          </tr>
+          <!-- 修改用户信息 -->
+          <tr>
+            <td>修改用户信息</td>
+            <td>users/update</td>
+            <td>PUT</td>
+            <td>
+              <textarea name="" id="" cols="30" rows="10">
+{
+    "user": {
+        "gender": "男",
+        "address": "北京",
+        "birthday": "2015-01-01"
+    }
+}
+            </textarea>
+            </td>
+            <td>
+              <textarea name="name" rows="10" cols="30">
+//修改成功
+{
+    "code": "Success",
+    "user": {
+        "id": 1,
+        "number": "123456",
+        "gender": "男",
+        "birthday": "2015-01-01",
+        "address": "北京"
+        ...
+    }
+}
+
+//修改失败
+{
+    "code": "Fail",
+    "errors": {
+        ...
+    }
+}
+            </textarea>
+            </td>
+            <td>
+              <span>更新时允许修改的字段：</span>
+              <ul>
+                <li>gender： 性别</li>
+                <li>birthday： 生日，格式：2017-01-01</li>
+                <li>address： 住址</li>
+                <li>intro： 自我介绍</li>
+                <li>avatar： 头像，接受一个url地址或者Blob对象</li>
+              </ul>
+              <span>响应参数:</span>
+              <ul>
+                <li>
+                  <span>code: 状态码</span><br>
+                  <span>Success：修改成功， Fail：修改失败</span>
+                </li>
+                <li>
+                  <span>errors: 错误信息</span><br>
+                  <span>值为一个对象，内含多条错误信息，每一条错误信息为一个数组，数组内包含多个该字段的报错信息</span>
+                </li>
+              </ul>
+            </td>
+          </tr>
+          <!-- 修改手机号 -->
+          <tr>
+            <td>修改手机号</td>
+            <td>users/update_phone</td>
+            <td>PUT</td>
+            <td>
+              <textarea name="" id="" cols="30" rows="10">
+{
+    "new_phone": "131.....", //新手机号
+    "new_msg_code": "1234", //新手机号的短信验证码
+    "old_msg_code": "4321" //旧手机号的短信验证码
+}
+            </textarea>
+            </td>
+            <td>
+              <textarea name="name" rows="10" cols="30">
+//修改成功
+{
+    "code": "Success",
+    "user": {
+        "id": 1,
+        ...
+    }
+}
+
+//修改失败
+{
+    "code": "Fail",
+    "errors": {
+        ...
+    }
+}
+            </textarea>
+            </td>
+            <td>
+              <span>code: 状态码:</span><br>
+              <span>Success：修改成功， Fail：修改失败</span>
+              <p><span class="notice">修改手机号时需要提交的参数:</span></p>
+              <ul>
+                <li>
+                  <span>"new_phone": 新手机号</span>
+                </li>
+                <li>
+                  <span>"new_msg_code": 新手机号接收到的验证码</span>
+                </li>
+                <li>
+                  <span>"new_msg_code": 旧手机号接收到的验证码</span>
+                </li>
+              </ul>
+              <p><span class="notice">修改手机号步骤:</span></p>
+              <ul>
+                <li>
+                  <span>请求发送验证码到旧手机</span>
+                </li>
+                <li>
+                  <span>验证短信验证码是否正确, 验证方式详见短信验证一节</span>
+                </li>
+                <li>
+                  <span>如果旧手机号验证码正确, 则用户输入新手机号并请求发送验证码到新手机</span>
+                </li>
+                <li>
+                  <span>用户输入新手机验证码, 验证新手机号短信验证码是否正确</span>
+                </li>
+                <li>
+                  <span>最后将新手机号/新手机号验证码/旧手机号验证码一起提交给服务器</span>
+                </li>
+                <li>
+                  <span class="notice">发送短信的请求操作详见短信验证一节, 其中请求handle=update_phone</span>
+                </li>
+              </ul>
+            </td>
+          </tr>
+          <!-- 修改密码 -->
+          <tr>
+            <td>修改密码</td>
+            <td>users/update_password</td>
+            <td>PUT</td>
+            <td>
+              <textarea name="" id="" cols="30" rows="10">
+//通过原密码+新密码方式修改, 默认方式
+{
+    "old_password": "111111", // 旧密码
+    "new_password": "222222" // 新密码
+}
+
+//通过短信验证码修改
+{
+    "msg_code": "1234", // 短信验证码
+    "new_password": "222222", //新密码
+    "update_type": "msg_code" //指定修改方式为短信验证码
+}
+            </textarea>
+            </td>
+            <td>
+              <textarea name="name" rows="10" cols="30">
+//修改成功
+{
+    "code": "Success",
+    "user": {
+        "id": 1,
+        ...
+    }
+}
+
+//修改失败
+{
+    "code": "Fail",
+    "errors": {
+        ...
+    }
+}
+            </textarea>
+            </td>
+            <td>
+              <span>code: 状态码:</span><br>
+              <span>Success：修改成功， Fail：修改失败</span>
+              <p><span class="notice">通过短信验证码修改密码步骤:</span></p>
+              <ul>
+                <li>
+                  <span>请求发送验证码到用户手机</span>
+                </li>
+                <span>将新密码/短信验证码一起提交给服务器,并指定<span class="notice">update_type=msg_code</span></span>
+              </li>
+            </ul>
+            <span class="notice">发送短信的请求操作详见短信验证一节, 其中请求handle=update_password</span>
+          </td>
+        </tr>
+        <!-- 检测唯一性 -->
+        <tr>
+          <td>检测唯一性</td>
+          <td>users/check_uniq</td>
+          <td>POST</td>
+          <td>
+            <textarea name="" id="" cols="30" rows="10">
+//检测帐号唯一性
+{
+    "name": "number", // 指定检测的字段为帐号
+    "value": "1111111" // 需要检测的值
+}
+
+//检测手机号唯一性
+{
+    "name": "phone", // 指定检测的字段为手机号
+    "value": "158..." // 需要检测的值
+}
+//检测邮箱唯一性
+{
+    "name": "email", // 指定检测的字段为邮箱
+    "value": "123...@xxx.com" // 需要检测的值
+}
+            </textarea>
+          </td>
+          <td>
+            <textarea name="name" rows="10" cols="30">
+//取值唯一
+{
+    uniq: true
+}
+
+//取值不唯一
+{
+    uniq: false
+}
+            </textarea>
+          </td>
+          <td>
+            <span>uniq: 取值是否唯一:</span><br>
+            <span>true: 唯一, false: 不唯一</span>
+            <p class="notice">通过该接口可以检测的值包含:</p>
+            <ul>
+              <li>
+                <span>number: 帐号</span>
+              </li>
+              <li>
+                <span>phone: 手机号</span>
+              </li>
+              <li>
+                <span>email: 邮箱</span>
+              </li>
+            </ul>
+            <span class="notice">该接口可以用于新建帐号或者修改帐号信息时判断帐号/手机号/邮箱是否已经被占用,如果被占用注册(修改)将失败</span>
+          </td>
+        </tr>
+        <!-- 搜索用户 -->
+        <tr>
+          <td>搜索用户</td>
+          <td>users/search</td>
+          <td>GET</td>
+          <td>
+            <textarea name="" id="" cols="30" rows="10">
+//通过帐号搜索
+{
+    "number": "number"
+}
+
+//通过手机号搜索
+{
+    "phone": "158...."
+}
+
+//通过邮箱搜索
+{
+    "email": "xxx@xxx.com"
+}
+            </textarea>
+          </td>
+          <td>
+            <textarea name="name" rows="10" cols="30">
+// 搜索结果, 每次搜索最多返回十条结果
+{
+    users: [
+        {
+            "id": 1,
+            ...
+        },
+        ....
+    ]
+}
+            </textarea>
+          </td>
+          <td>
+            <span class="notice">允许通过email, number, phone进行搜索符合条件的用户,每次搜索最多返回十条结果</span>
+            <span>此接口可以用于添加协同作者时搜索用户, 也可用于主页搜索作者(建议只允许通过帐号进行搜索)</span>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</section>

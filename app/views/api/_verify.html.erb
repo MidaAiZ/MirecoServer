@@ -1,0 +1,113 @@
+<section class='api' data-type='verify'>
+  <div class="api-header">短信验证</div>
+  <div class="api-body">
+    <table class="table" width="100%" cellspacing="0">
+      <thead>
+        <tr>
+          <td width="10%">操作</td>
+          <td width="15%">接口</td>
+          <td width="10%">方法</td>
+          <td width="20%">参数</td>
+          <td width="25%">响应</td>
+          <td width="20%">说明</td>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>请求发送短信</td>
+          <td>send_msg</td>
+          <td>POST</td>
+          <td>
+            <textarea name="" id="" cols="30" rows="10">
+//注册新帐号
+{
+    "phone": "158...." //需要发送短信的号码
+    "handle": "register" //操作类型,注册
+}
+
+//修改密码
+{
+    "phone": "user_phone" //发送给已登录用户,此处值为:user_phone
+    "handle": "update_password" //操作类型,修改密码
+}
+            </textarea>
+          </td>
+          <td>
+            <textarea name="" id="" cols="30" rows="10">
+//发送结果
+{
+    "code": "Success"
+}
+//更详细的发送结果报告将会在后续开放
+
+            </textarea>
+          </td>
+          <td>
+            <ul>
+              <li>
+                <span>code: 状态码</span><br>
+                <span>Success：发送成功， Fail：发送失败, InvalidPhone: 手机号错误， InvalidHandle: 无效的handle</span>
+              </li>
+              <span>目前支持的操作类型有:</span>
+              <ol>
+                <li>register: 用户注册</li>
+                <li>login: 用户登录(手机号+短信验证码方式)</li>
+                <li>update_phone: 修改手机号, phone="user_phone"</li>
+                <li>update_password: 通过短信验证码修改密码, phone="user_phone"</li>
+              </ol>
+            </ul>
+            <span class="notice">所有需要短信验证码的操作都需要通过该接口单独向服务器请求发送验证码</span><br>
+            <span class="notice">如果没有请求发送验证码,服务器不会自动发送,相关操作请求将无法通过验证</span><br>
+            <span class="notice">所有在用户已登录情况下进行的短信请求, 参数phone的值为"user_phone"</span>
+          </td>
+        </tr>
+        <!-- 验证短信验证码 -->
+        <tr>
+          <td>验证短信验证码</td>
+          <td>verify_msg</td>
+          <td>POST</td>
+          <td>
+            <textarea name="" id="" cols="30" rows="10">
+// 验证注册的短信验证码
+{
+    "phone": "158...." //需要发送短信的号码
+    "handle": "register" //操作类型,注册
+    "msg_code": "12234" //用户手机接收到的验证码
+}
+
+// 验证修改密码的短信验证码
+{
+    "phone": "user_phone" ////发送给已登录用户,此处值为:user_phone
+    "handle": "update_password" //操作类型,修改密码
+    "msg_code": "12234" //用户手机接收到的验证码
+}
+            </textarea>
+          </td>
+          <td>
+            <textarea name="" id="" cols="30" rows="10">
+//验证码正确
+{
+    "code": "Success"
+}
+
+//验证码错误
+{
+    "code": "Fail"
+}
+            </textarea>
+          </td>
+          <td>
+            <span>code: 返回参数</span><br>
+            <span>Success: 验证码正确, Fail: 验证码错误, MsgCodeNotExist: 未查询到该手机号的验证码记录</span><br>
+            <span>如果出现code=MsgCodeNotExist, 则说明系统查询不到该手机号handle操作的验证码,原因可能是手机号错误或还没有发送验证码或者验证码失效,请尝试重新请求发送</span>
+            <br>
+            <p class="notice"><b>注意: 该接口需谨慎使用!</b></p>
+            <span class="notice">为了防止暴力破解,通过该接口验证短信最多允许10次验证失败</span>
+            <span class="notice">当第10次验证失败时,对应的短信验证码会被系统删除导致失效,需要重新发送</span>
+            <span class="notice">所有在用户已登录情况下进行的短信验证, 参数phone的值为"user_phone"</span>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</section>

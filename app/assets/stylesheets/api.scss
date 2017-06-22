@@ -1,0 +1,68 @@
+body {
+  /*box-sizing: padding-box;*/
+  margin: 0px;
+}
+
+.header {
+  text-align: center;
+  padding: 15px 0;
+  color: white;
+  background-color: #a7e5a7;
+}
+
+.apis {
+  padding: 10px;
+}
+
+section {
+  border: 1px dotted #ddd;
+}
+
+.api-header {
+  display: block;
+  padding: 10px;
+  text-align: center;
+  border-bottom: 1px dotted #ddd;
+  &:hover {
+      cursor: pointer;
+      background-color: #eee;
+  }
+}
+
+.api-body {
+  display: none;
+  padding: 10px;
+}
+
+.table {
+  thead {
+    text-align: center;
+    background-color: #ddd;
+  }
+
+  td {
+    padding: 3px;
+    border-bottom: 1px solid #ddd;
+    border-right: 1px solid #ddd;
+
+    &:first-child {
+      border-left: 1px solid #ddd;
+    }
+  }
+}
+
+textarea {
+  width: 100%;
+
+  /*自动适应父布局宽度*/
+  height: 100%;
+  overflow: auto;
+  white-space: nowrap;
+  word-break: break-all;
+  border: none;
+  outline: none;
+}
+
+.notice {
+  color: crimson;
+}

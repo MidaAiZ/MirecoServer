@@ -1,0 +1,20 @@
+<div class="login-form">
+  <center>
+    <p><%= notice %></p>
+    <%= form_tag login_path do %>
+      <%= label_tag "user[number]", "帐号" %>
+      <%= text_field_tag "user[number]" %><br>
+      <%= label_tag "user[password]", "密码" %>
+      <%= password_field_tag "user[password]", "密码" %><br>
+      <% if @show_code %>
+        <div class="code">
+          <%= label_tag "_rucaptcha", "验证码" %>
+          <%= text_field_tag :_rucaptcha %>
+          <br>
+          <img src="rucaptcha">
+        </div>
+      <% end %>
+      <%= submit_tag "登录" %>
+    <% end %>
+  </center>
+</div>

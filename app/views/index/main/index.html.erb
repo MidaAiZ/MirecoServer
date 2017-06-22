@@ -1,0 +1,17 @@
+<div>
+  <center>
+    <h2 style="font-weight: 200;">Mireco协同编辑器 V1.0</h2>
+    <p>By Mida</p>
+    <div>
+      <span><%= "已登录:" + @user.number if @user %></span>
+      <span><%= link_to "登录", login_path unless @user %></span>
+      <% if @user %>
+        <%= form_tag logout_path, method: "delete" do %>
+          <%= submit_tag "退出" %>
+        <% end %>
+      <% else %>
+        <%= link_to "注册", new_user_path %>
+      <% end %>
+    </div>
+  </center>
+</div>

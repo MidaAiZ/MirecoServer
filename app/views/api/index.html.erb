@@ -1,0 +1,43 @@
+<%= stylesheet_link_tag params[:controller], media: 'all' %>
+<div class="header">
+  <h2>Mireco API 接口规范1.0</h2>
+</div>
+<div class="apis">
+  <!-- main -->
+  <%= render 'main' %>
+  <br>
+  <!-- session -->
+  <%= render 'session' %>
+  <br>
+  <!-- users -->
+  <%= render 'users' %>
+  <br>
+  <!-- articles -->
+  <%= render 'articles' %>
+  <br>
+  <!-- history_articles -->
+  <%= render 'history_articles' %>
+  <br>
+  <!-- corpus -->
+  <%= render 'corpus' %>
+  <br>
+  <!-- folders -->
+  <%= render 'folders' %>
+  <br>
+  <!-- edit_comments -->
+  <%= render 'edit_comments' %>
+  <br>
+  <!-- comments -->
+  <%= render 'comments' %>
+  <br>
+  <!-- thumb_ups -->
+  <%= render 'thumb_ups' %>
+  <br>
+  <!-- trashes -->
+  <%= render 'trashes' %>
+  <br>
+  <!-- verify -->
+  <%= render 'verify' %>
+  <br>
+</div>
+<%= javascript_include_tag params[:controller] %>
