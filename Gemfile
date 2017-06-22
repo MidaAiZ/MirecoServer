@@ -63,7 +63,7 @@ gem 'redis-rack-cache'
 gem 'sinatra' # 用于使用自带的监控页面
 
 # Use Unicorn as the app server
-# gem 'unicorn'
+gem 'unicorn'
 
 # Use Capistrano for deployment
 # gem 'capistrano-rails', group: :development
