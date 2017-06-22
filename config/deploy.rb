@@ -51,6 +51,8 @@ set :linked_dirs, fetch(:linked_dirs, []).push('log', 'tmp/pids', 'tmp/cache', '
 # Skip migration if files in db/migrate were not modified
 set :conditionally_migrate, true
 
+set :unicorn_config_path, -> { File.join(current_path, "config", "unicorn.rb") }
+
 # in case you want to set ruby version from the file:
 # set :rbenv_ruby, File.read('.ruby-version').strip
 
@@ -59,3 +61,21 @@ set :conditionally_migrate, true
 
 # 可以看到bundle install的输出
 set :bundle_flags, ''
+
+after 'deploy:publishing', 'deploy:restart'
+namespace :deploy do
+
+  after :restart, :clear_cache do
+    on roles(:web), in: :groups, limit: 3, wait: 10 do
+      # Here we can do anything such as:
+      # within release_path do
+      #   execute :rake, 'cache:clear'
+      # end
+    end
+  end
+
+  task :restart do
+    invoke 'unicorn:legacy_restart'
+  end
+
+end

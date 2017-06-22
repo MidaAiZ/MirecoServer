@@ -65,12 +65,13 @@ gem 'redis-namespace'
 gem 'sinatra' # 用于使用自带的监控页面
 
 # Use Unicorn as the app server
-# gem 'unicorn'
+gem 'unicorn'
 
 # Use Capistrano for deployment
 group :development do
   gem 'capistrano-rails'
   gem 'capistrano-bundler'
+  gem 'capistrano3-unicorn'
   gem 'capistrano-sidekiq'
   gem 'capistrano-faster-assets'
 end
