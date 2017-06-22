@@ -11,10 +11,16 @@ class Index::Comment < ActiveRecord::Base
            class_name: 'Index::CommentReply',
            dependent: :destroy
 
-  # # -------------------------赞--------------------------- #
-  # has_one :thumb_up, as: :resource,
-  #                    class_name: 'Index::ThumbUp',
-  #                    dependent: :destroy
+  # -------------------------赞--------------------------- #
+  has_one :thumb_up, as: :resource,
+                     class_name: 'Index::ThumbUp',
+                     dependent: :destroy
+
+  has_one :thumb_ct, -> { t_counts },
+          as: :resource,
+          class_name: 'Index::ThumbUp'
+
+  # -------------------------验证------------------------- #
 
   validates :user_id, presence: true
   validates :resource_id, presence: true
@@ -27,7 +33,7 @@ class Index::Comment < ActiveRecord::Base
   end
 
   # --------------------------赞--------------------------- #
-  def thumb_up
+  def thumb_ups
     Index::ThumbUp.get(self)
   end
 
@@ -42,6 +48,6 @@ class Index::Comment < ActiveRecord::Base
   end
 
   def delete_thumb_up
-    Index::ThumbUp.destroy self
+    # Index::ThumbUp.destroy self
   end
 end

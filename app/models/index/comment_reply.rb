@@ -14,6 +14,12 @@ class Index::CommentReply < ActiveRecord::Base
                      class_name: 'Index::ThumbUp',
                      dependent: :destroy
 
+  has_one :thumb_ct, -> { t_counts },
+          as: :resource,
+          class_name: 'Index::ThumbUp'
+
+  # -------------------------验证------------------------- #
+
   validates :user_id, presence: true
   validates :comment_id, presence: true
   validates :content, presence: true, length: { minimum: 1, maximum: 255 }
@@ -24,7 +30,7 @@ class Index::CommentReply < ActiveRecord::Base
   end
 
   # --------------------------赞--------------------------- #
-  def thumb_up
+  def thumb_ups
     Index::ThumbUp.get(self)
   end
 
@@ -39,6 +45,6 @@ class Index::CommentReply < ActiveRecord::Base
   end
 
   def delete_thumb_up
-    Index::ThumbUp.destroy self
+    # Index::ThumbUp.destroy self
   end
 end

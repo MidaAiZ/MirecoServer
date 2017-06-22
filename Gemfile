@@ -55,25 +55,18 @@ gem 'bcrypt', '~> 3.1.7'
 gem 'sidekiq'
 gem 'sidetiq'
 
-# 使用redis作为缓存层
+# 缓存以及定时器依赖
 gem "redis"
-gem 'redis-rails'
-gem 'redis-rack-cache'
-
-# 定时器
+gem "redis-rails"
 gem 'redis-namespace'
+gem 'redis-rack-cache'
 gem 'sinatra' # 用于使用自带的监控页面
 
 # Use Unicorn as the app server
 # gem 'unicorn'
 
 # Use Capistrano for deployment
-group :development do
-  gem 'capistrano-rails'
-  gem 'capistrano-bundler'
-  gem 'capistrano-sidekiq'
-  gem 'capistrano-faster-assets'
-end
+# gem 'capistrano-rails', group: :development
 
 group :development, :test do
   # Call 'byebug' anywhere in the code to stop execution and get a debugger console

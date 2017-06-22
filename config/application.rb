@@ -15,6 +15,8 @@ module Server
     # Set Time.zone default to the specified zone and make Active Record auto-convert to this zone.
     # Run "rake -D time" for a list of tasks for finding time zone names. Default is UTC.
     # config.time_zone = 'Central Time (US & Canada)'
+    config.active_record.default_timezone = :local
+    config.time_zone = 'Beijing'  
 
     # The default locale is :en and all translations from config/locales/*.rb,yml are auto loaded.
     # config.i18n.load_path += Dir[Rails.root.join('my', 'locales', '*.{rb,yml}').to_s]
@@ -23,8 +25,8 @@ module Server
     # Do not swallow errors in after_commit/after_rollback callbacks.
     config.active_record.raise_in_transactional_callbacks = true
 
-    config.cache_store = :redis_store,  "redis://localhost:6379/0/cache"
-    #, {
+    config.cache_store = :redis_store,  'redis://localhost:6379/0/cache'
+    # , {
     #   host: "localhost",
     #   port: 6379,
     #   db: 0,
@@ -33,8 +35,8 @@ module Server
     # }
 
     config.action_dispatch.rack_cache = {
-      metastore: "redis://localhost:6379/1/metastore",
-      entitystore: "redis://localhost:6379/1/entitystore"
+      metastore: 'redis://localhost:6379/1/metastore',
+      entitystore: 'redis://localhost:6379/1/entitystore'
     }
 
     # 定时任务
@@ -43,10 +45,10 @@ module Server
     # Avoid CORS issues when API is called from the frontend app.
     # Handle Cross-Origin Resource Sharing (CORS) in order to accept cross-origin AJAX requests.
     # Read more: https://github.com/cyu/rack-cors
-    config.middleware.insert_before 0, "Rack::Cors" do
+    config.middleware.insert_before 0, 'Rack::Cors' do
       allow do
         origins '*'
-        resource '*', :headers => :any, :methods => [:get, :post, :put, :patch, :delete, :head, :options]
+        resource '*', headers: :any, methods: [:get, :post, :put, :patch, :delete, :head, :options]
       end
     end
   end

@@ -21,7 +21,8 @@ class Index::ThumbUpsController < IndexController
   private
 
   def set_resource
-    return nil unless @user
+    # return nil unless @user
+    @user = Index::User.first
     resource_type = params[:resource_type]
     resource_id = params[:resource_id]
     @resource = case resource_type

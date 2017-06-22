@@ -49,10 +49,14 @@ class Index::Workspace::Corpus < ActiveRecord::Base
                       class_name: 'Index::Comment',
                       dependent: :destroy
 
-  # # -------------------------赞--------------------------- #
-  # has_one :thumb_up, as: :resource,
-  #                    class_name: 'Index::ThumbUp',
-  #                    dependent: :destroy
+  # -------------------------赞--------------------------- #
+  has_one :thumb_up, as: :resource,
+                     class_name: 'Index::ThumbUp',
+                     dependent: :destroy
+
+  has_one :thumb_ct, -> { t_counts },
+          as: :resource,
+          class_name: 'Index::ThumbUp'
 
   # -----------------------数据验证------------------------ #
   validates :tag, length: { maximum: 25 }
@@ -99,7 +103,7 @@ class Index::Workspace::Corpus < ActiveRecord::Base
   end
 
   # --------------------------赞--------------------------- #
-  def thumb_up
+  def thumb_ups
     Index::ThumbUp.get(self, slef.file_type)
   end
 
@@ -166,6 +170,6 @@ class Index::Workspace::Corpus < ActiveRecord::Base
   end
 
   def delete_thumb_up
-    Index::ThumbUp.destroy self
+    # Index::ThumbUp.destroy self
   end
 end

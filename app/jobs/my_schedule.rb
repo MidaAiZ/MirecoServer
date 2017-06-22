@@ -9,6 +9,6 @@ class MySchedule
 
   def perform
     puts "sidetip 测试"
-    puts Index::User.first
+    puts Time.now
   end
 end

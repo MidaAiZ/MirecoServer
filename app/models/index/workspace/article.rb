@@ -36,10 +36,14 @@ class Index::Workspace::Article < ActiveRecord::Base
                            class_name: 'Index::Workspace::EditComment',
                            dependent: :destroy
 
-  # # -------------------------赞--------------------------- #
-  # has_one :thumb_up, as: :resource,
-  #                    class_name: 'Index::ThumbUp',
-  #                    dependent: :destroy
+  # -------------------------赞--------------------------- #
+  has_one :thumb_up, as: :resource,
+                     class_name: 'Index::ThumbUp',
+                     dependent: :destroy
+
+  has_one :thumb_ct, -> { t_counts },
+          as: :resource,
+          class_name: 'Index::ThumbUp'
 
   # ------------------------历史-------------------------- #
   has_many :history,
@@ -97,7 +101,7 @@ class Index::Workspace::Article < ActiveRecord::Base
   end
 
   # --------------------------赞--------------------------- #
-  def thumb_up
+  def thumb_ups
     Index::ThumbUp.get(self)
   end
 
@@ -107,7 +111,7 @@ class Index::Workspace::Article < ActiveRecord::Base
   end
 
   # ------------------------判断赞------------------------- #
-  def has_thumb_up? user
+  def has_thumb_up?(user)
     Index::ThumbUp.has?(self, user)
   end
 
@@ -147,6 +151,6 @@ class Index::Workspace::Article < ActiveRecord::Base
   end
 
   def delete_thumb_up
-    Index::ThumbUp.destroy self
+    # Index::ThumbUp.destroy self
   end
 end

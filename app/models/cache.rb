@@ -50,7 +50,7 @@ class Cache
   private
 
   def full_key(name)
-    "Tutor-#{@prefix}-#{name}"
+    "Mireco-#{@prefix}-#{name}"
   end
 
   def expires(expire)
