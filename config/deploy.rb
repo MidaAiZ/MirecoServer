@@ -6,7 +6,7 @@ lock '3.6.1'
 set :application, 'Mireco'
 
 # 源码地址
-set :repo_url, 'git@git.coding.net:SinnerAiZ/Mireco.git'
+set :repo_url, 'https://github.com/SinnerAiZ/MirecoServer.git'
 
 # Default branch is :master
 # ask :branch, `git rev-parse --abbrev-ref HEAD`.chomp
