@@ -9,6 +9,8 @@ Rails.application.routes.draw do
   # API
   get 'api' => 'api#index'
 
+  get 'download/:filename' => 'download#download'
+
   # 定时任务页面
   require 'sidekiq/web'
   mount Sidekiq::Web => '/sidekiq'
