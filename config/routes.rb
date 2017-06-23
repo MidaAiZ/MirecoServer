@@ -4,12 +4,10 @@ Rails.application.routes.draw do
   resources :controller
 
   # 验证码
-  mount RuCaptcha::Engine => '/rucaptcha'
+  # mount RuCaptcha::Engine => '/rucaptcha'
 
   # API
   get 'api' => 'api#index'
-
-  get 'download/:filename' => 'download#download'
 
   # 定时任务页面
   require 'sidekiq/web'
