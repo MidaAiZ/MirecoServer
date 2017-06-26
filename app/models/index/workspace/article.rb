@@ -68,6 +68,8 @@ class Index::Workspace::Article < ActiveRecord::Base
   # 由于文章的内容一般比较大(text), 所以当批量查询数据库时应该避开content字段
   scope :no_content, -> { select(:id, :name, :tag, :is_shown, :is_deleted, :file_seed_id, :is_marked, :created_at, :updated_at, :dir_type, :dir_id) }
   scope :with_content, -> { unscope(:select) }
+  # 简略的文件信息可以提高查询和加载速度
+  scope :brief, -> { unscope(:select).select(:id, :name, :tag, :is_shown, :created_at, :updated_at) }
   scope :sort, ->(tag) { where('index_articles.tag LIKE ?', "%#{tag}") }
   # 默认作用域, 不包含content字段, id降序, 未删除的文章
   default_scope { undeleted.order('index_articles.id DESC') }

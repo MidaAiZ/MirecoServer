@@ -26,6 +26,8 @@ Rails.application.routes.draw do
     end
 
     namespace :workspace do # 工作台
+      get 'files' => 'center#index'
+        
       resources :articles do
         collection do
           put '/:id/publish' => 'articles#publish'

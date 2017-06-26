@@ -1,6 +1,6 @@
 class Index::Workspace::FileSeed < ActiveRecord::Base
   # ----------------------根目录文件----------------------- #
-  belongs_to :root_file, -> { with_deleted },
+  belongs_to :root_file, -> { with_deleted.brief },
              polymorphic: true
 
   # ----------------------所有未删文件---------------------- #

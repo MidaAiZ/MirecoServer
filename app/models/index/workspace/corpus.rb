@@ -70,6 +70,8 @@ class Index::Workspace::Corpus < ActiveRecord::Base
   scope :deleted, -> { rewhere(is_deleted: true) }
   scope :undeleted, -> { where(is_deleted: false) }
   scope :with_deleted, -> { rewhere(is_deleted: [true, false]) }
+  # 简略的文件信息可以提高查询和加载速度
+  scope :brief, -> { unscope(:select).select(:id, :name, :tag, :is_shown, :created_at, :updated_at) }
   scope :sort, ->(tag) { where(index_corpus.tag(LIKE("'", "%#{tag}"))) }
   # 默认域
   default_scope { undeleted.order('index_corpus.id DESC') }

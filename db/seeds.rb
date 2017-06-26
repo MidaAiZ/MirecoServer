@@ -5,73 +5,31 @@
 #
 #   cities = City.create([{ name: 'Chicago' }, { name: 'Copenhagen' }])
 #   Mayor.create(name: 'Emanuel', city: cities.first)
-
+u = Index::User.first
 1.times do
   t = Time.now
-  1_000_000.times do |i|
-    begin
-      ActiveRecord::Base.transaction do # 出错将回滚
+  3_000_000.times do |i|
+    lo = i % 3
+    ActiveRecord::Base.transaction do # 出错将回滚
+      case lo
+      when 0
         a = Index::Workspace::Article.new name: [*('A'..'z')].sample(10).join, content: [*('A'..'z'), *(0..9)].sample(100).join * 100
-        a.save
-        f = a.build_file_seed
-        f.root_file = a
-        # f.files_count = 1
-        f.save
-        a.save
-        Index::User.find(i % 15_000).add_edit_role :own, a
-        puts '这是第' + i.to_s + '个'
-      end
-    rescue
-      puts '出错'
-    end
-  end
-  puts Time.now - t
-end
-
-1.times do
-  t = Time.now
-  1_000_000.times do |i|
-    begin
-      ActiveRecord::Base.transaction do # 出错将回滚
-        a = Index::Workspace::Corpus.new name: [*('A'..'z')].sample(10).join
-        a.save
-        f = a.build_file_seed
-        f.root_file = a
-        # f.files_count = 1
-        f.save
-        a.save
-        Index::User.find(i % 15_000).add_edit_role :own, a
-        puts '这是第' + i.to_s + '个'
-      end
-    rescue
-      puts '出错'
-    end
-  end
-  puts Time.now - t
-end
-
-1.times do
-  t = Time.now
-  1_000_000.times do |i|
-    begin
-      ActiveRecord::Base.transaction do # 出错将回滚
+      when 1
         a = Index::Workspace::Folder.new name: [*('A'..'z')].sample(10).join
-        a.save
-        f = a.build_file_seed
-        f.root_file = a
-        # f.files_count = 1
-        f.save
-        a.save
-        Index::User.find(i % 15_000).add_edit_role :own, a
-        puts '这是第' + i.to_s + '个'
+      when 2
+        a = Index::Workspace::Corpus.new name: [*('A'..'z')].sample(10).join
       end
-    rescue
-      puts '出错'
+      a.save
+      f = a.build_file_seed
+      f.root_file = a
+      f.save
+      a.save
+      u.add_edit_role :own, a
+      puts '这是第' + i.to_s + '个'
     end
   end
   puts Time.now - t
 end
-
 
 # 超级无敌的初始化测试数据
 # 10.times do |j|

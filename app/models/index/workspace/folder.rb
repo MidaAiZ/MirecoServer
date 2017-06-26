@@ -64,6 +64,8 @@ class Index::Workspace::Folder < ActiveRecord::Base
   scope :with_deleted, -> { rewhere(is_deleted: [true, false]) }
   # 默认域
   default_scope { undeleted.order('index_folders.id DESC') }
+  # 简略的文件信息可以提高查询和加载速度
+  scope :brief, -> { unscope(:select).select(:id, :name, :created_at, :updated_at) }
 
   #---------------------------搜索-----------------------------
   def self.filter(cdt = {}, offset = 0, limit = 100)
