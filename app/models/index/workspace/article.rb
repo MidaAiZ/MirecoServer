@@ -1,12 +1,14 @@
-class Index::Workspace::Article < ActiveRecord::Base
-  after_destroy :delete_thumb_up
+class Index::Workspace::Article < ApplicationRecord
+  after_update :update_cache
+  after_destroy :delete_thumb_up, :clear_cache
+  store_accessor :info, :tbp_counts, :cmt_counts, :read_times # 点赞数/评论数/阅读次数
 
-  belongs_to :file_seed, -> { with_deleted },
+  belongs_to :file_seed,
              class_name: 'Index::Workspace::FileSeed',
              foreign_key: :file_seed_id
 
   # ---------------------作者和作者角色---------------------- #
-  has_many :editor_roles,
+  has_many :editor_roles, -> { all_with_del },
            through: :file_seed,
            source: :editor_roles
 
@@ -24,7 +26,8 @@ class Index::Workspace::Article < ActiveRecord::Base
 
   # -----------------------文件目录------------------------ #
   belongs_to :dir,
-             polymorphic: true
+             polymorphic: true,
+             optional: true
 
   # -----------------------读者评论------------------------ #
   has_many :comments, as: :resource,
@@ -64,12 +67,12 @@ class Index::Workspace::Article < ActiveRecord::Base
   scope :unroot, -> { where(is_inner: true) }
   scope :deleted, -> { rewhere(is_deleted: true) }
   scope :undeleted, -> { where(is_deleted: false) }
-  scope :with_deleted, -> { rewhere(is_deleted: [true, false]) }
+  scope :with_del, -> { unscope(where: :is_deleted) }
   # 由于文章的内容一般比较大(text), 所以当批量查询数据库时应该避开content字段
-  scope :no_content, -> { select(:id, :name, :tag, :is_shown, :is_deleted, :file_seed_id, :is_marked, :created_at, :updated_at, :dir_type, :dir_id) }
+  scope :no_content, -> { select(:id, :name, :tag, :is_shown, :is_deleted, :file_seed_id, :is_marked, :info, :created_at, :updated_at, :dir_type, :dir_id) }
   scope :with_content, -> { unscope(:select) }
   # 简略的文件信息可以提高查询和加载速度
-  scope :brief, -> { unscope(:select).select(:id, :name, :tag, :is_shown, :created_at, :updated_at) }
+  scope :brief, -> { unscope(:select).select(:id, :name, :tag, :is_shown, :info, :created_at, :updated_at) }
   scope :sort, ->(tag) { where('index_articles.tag LIKE ?', "%#{tag}") }
   # 默认作用域, 不包含content字段, id降序, 未删除的文章
   default_scope { undeleted.order('index_articles.id DESC') }
@@ -117,6 +120,11 @@ class Index::Workspace::Article < ActiveRecord::Base
     Index::ThumbUp.has?(self, user)
   end
 
+  # -----------------------点赞信息------------------------ #
+  def thumb_up_info(user)
+    Index::ThumbUp.counts_and_has?(self, user)
+  end
+
   # ----------------------判断是否为根文件--------------------- #
   def is_root?
     file_seed.root_file_id == id && file_seed.root_file_type == itself.class.name
@@ -155,4 +163,15 @@ class Index::Workspace::Article < ActiveRecord::Base
   def delete_thumb_up
     # Index::ThumbUp.destroy self
   end
+
+  def update_cache
+    Cache.new["edit_article_#{self.id}"] = self
+    Cache.new["article_#{self.id}"] = self if self.is_shown
+  end
+
+  def clear_cache
+    Cache.new["article_#{self.id}"] = nil
+    Cache.new["article_#{self.id}"] = nil if self.is_shown
+  end
+
 end

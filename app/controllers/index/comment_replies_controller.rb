@@ -1,5 +1,5 @@
 class Index::CommentRepliesController < IndexController
-  before_action :check_login, only: [:create, :destroy]
+  before_action :require_login, only: [:create, :destroy]
   before_action :set_comment
   before_action :set_comment_reply, only: [:show, :destroy]
 
@@ -17,11 +17,8 @@ class Index::CommentRepliesController < IndexController
   def create
     @reply = Index::CommentReply.new(comment_reply_params)
     unless @code
-      @reply.user = @user
-      @reply.comment = @comment
-      @code = @reply.save ? 'Success' : 'Fail'
+      @code = @reply.create(@comment, @user) ? 'Success' : 'Fail'
     end
-    @code ||= 'Fail'
     respond_to do |format|
       format.json { render :show, status: @reply.id.nil? ? :unprocessable_entity : :created }
     end
@@ -32,10 +29,11 @@ class Index::CommentRepliesController < IndexController
       if @reply.user == @user ||  # 删除条件1: 该回复的用户
           @comment.user == @user ||  # 删除条件2: 该回复的评论用户
           @user.can_edit?(:delete_comment, @comment.resource) # 删除条件3: 对文件具有编辑评论权限的协同作者
-        @code = @reply.destroy ? 'Success' : 'Fail' if @reply
+        @code = @reply.drop(@comment) ? 'Success' : 'Fail'
+      else
+        @code = 'NoPermission'
       end
     end
-    @code ||= 'Fail'
     render json: { code: @code }
   end
 
@@ -43,12 +41,12 @@ class Index::CommentRepliesController < IndexController
 
   # Use callbacks to share common setup or constraints between actions.
   def set_comment_reply
-    @reply = @comment.replies.find_by_id(params[:id]) if @comment
+    reply_cache params[:id] if @comment
     @code ||= 'ResourceNotExist' unless @reply
   end
 
   def set_comment
-    @comment = Index::Comment.find_by_id params[:comment_id]
+    comment_cache params[:comment_id]
     @code ||= 'ResourceNotExist' unless @comment
   end
 

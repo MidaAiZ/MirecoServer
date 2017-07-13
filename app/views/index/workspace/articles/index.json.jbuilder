@@ -1,3 +1,4 @@
+json.counts @counts
 json.articles do
   json.array! @articles do |a|
     json.call(a, :id, :name, :tag, :is_shown, :is_marked, :created_at, :updated_at)

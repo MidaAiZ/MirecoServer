@@ -1,3 +1,4 @@
+json.counts @counts
 json.corpuses do
   json.array! @corpuses do |c|
     json.call(c, :id, :name, :tag, :is_shown, :is_marked, :created_at, :updated_at)

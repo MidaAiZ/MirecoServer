@@ -1,5 +1,6 @@
 class AutoThumbWorker
   include Sidekiq::Worker
+  sidekiq_options queue: 'autothumb'
 
   def perform(id, prefix)
     init id, prefix
@@ -47,11 +48,14 @@ class AutoThumbWorker
   def save
     t = Time.now
     if $redis.HLEN(@prefix) == 1 # 没有人点赞时(唯一key为:last_time)删除thumb_up
-      @thumb.delete
+      @thumb.resource.update tbp_counts: 0
       $redis.DEL @prefix
+      @thumb.delete
       @thumb = nil
     else
-      @thumb.update! thumbs: to_hash($redis.HGETALL(@prefix)), thumbs_count: $redis.hlen(@prefix) - 1
+      counts = $redis.hlen(@prefix) - 1 # 获取点赞数，减去last_time
+      @thumb.update! thumbs: to_hash($redis.HGETALL(@prefix)), thumbs_count: counts
+      @thumb.resource.update tbp_counts: counts
       $redis.EXPIRE @prefix, 10.days.to_i # 每次更新将数据的生命期重置为10天
     end
     puts '时间消耗----------------------------------------'

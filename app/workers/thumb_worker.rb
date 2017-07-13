@@ -1,5 +1,6 @@
 class ThumbWorker
   include Sidekiq::Worker
+  sidekiq_options queue: 'thumb'
 
   def perform(type, id, prefix, temp_prefix)
     init type, id, prefix, temp_prefix
@@ -27,9 +28,9 @@ class ThumbWorker
   def set_resource
     case @type.to_s
     when 'articles'
-      Index::Workspace::Article.with_deleted.find_by_id @id
+      Index::Workspace::Article.with_del.find_by_id @id
     when 'corpuses'
-      Index::Workspace::Corpus.with_deleted.find_by_id @id
+      Index::Workspace::Corpus.with_del.find_by_id @id
     when 'comments'
       Index::Comment.find_by_id @id
     when 'replies'

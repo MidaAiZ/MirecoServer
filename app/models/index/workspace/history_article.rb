@@ -1,4 +1,4 @@
-class Index::Workspace::HistoryArticle < ActiveRecord::Base
+class Index::Workspace::HistoryArticle < ApplicationRecord
   belongs_to :origin,
               class_name: 'Index::Workspace::Article',
               foreign_key: 'article_id'

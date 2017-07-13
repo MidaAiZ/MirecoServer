@@ -11,7 +11,7 @@ class Index::SessionController < IndexController
   def login
     # 检查是否已经登录
     if session[:user_id]
-      @user = Index::User.find_by_id(session[:user_id])
+      user_cache session[:user_id]
       #防止极端情况下user_id作废,例如用户被删除, 从健壮性考虑以下处理session[:user_id]
       session[:user_id] = nil unless @user
     else

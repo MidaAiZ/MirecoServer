@@ -1,5 +1,5 @@
 class Index::UsersController < IndexController
-  before_action :check_login, except: [:new, :create, :check_uniq, :search]
+  before_action :require_login, except: [:new, :create, :check_uniq, :search]
 
   # GET /index/users/profile
   def show
@@ -12,8 +12,7 @@ class Index::UsersController < IndexController
   end
 
   # GET /index/users/1/edit
-  def edit
-  end
+  def edit; end
 
   # POST /index/users
   # POST /index/users.json
@@ -58,11 +57,7 @@ class Index::UsersController < IndexController
   # PATCH/PUT /index/users/1
   # PATCH/PUT /index/users/1.json
   def update
-    if @user
-      @code = 'Success'if @user.update(index_user_params_update)
-    else
-      @code = 'NotLoggedIn' # 帐号未登录
-    end
+      @code = 'Success' if @user.update(index_user_params_update)
 
     respond_to do |format|
       if @code == 'Success'
@@ -94,8 +89,8 @@ class Index::UsersController < IndexController
 
       # 当查询到验证码记录时通过参数获取新密码
       if msg_record && params[:msg_code] == msg_record[:code]
-        @code = 'Success'if @user.update(password: new_password)
-        @cache[msg_cache_key] = nil if @code == 'Success' #清除缓存
+        @code = 'Success' if @user.update(password: new_password)
+        @cache[msg_cache_key] = nil if @code == 'Success' # 清除缓存
       elsif msg_record
         # 重新设置缓存, 记录验证失败次数, 失败5次时, 验证码失效
         record_fail msg_record, msg_cache_key
@@ -103,10 +98,10 @@ class Index::UsersController < IndexController
     # 默认原密码修改
     else
       old_password = params[:old_password] # 通过参数获取原密码
-      user_password = BCrypt::Password.new(@user.password_digest) #解码获取用户密码
+      user_password = BCrypt::Password.new(@user.password_digest) # 解码获取用户密码
 
       if user_password == old_password
-        @code = 'Success'if @user.update(password: new_password)
+        @code = 'Success' if @user.update(password: new_password)
       end
     end
 
@@ -160,12 +155,10 @@ class Index::UsersController < IndexController
   end
 
   # 验证邮箱 目前即可通过这个动作实现验证又可实现修改，但修改无需旧邮箱验证，存在安全隐患
-  def valid_email
-  end
+  def valid_email; end
 
   # 以下处理忘记密码和重置密码
-  def reset_pwd
-  end
+  def reset_pwd; end
 
   # 检查用户名/邮箱/电话是否被注册
   def check_uniq
@@ -194,19 +187,18 @@ class Index::UsersController < IndexController
 
   # 新建时允许传入的参数
   def index_user_params
-      params.require(:user).permit(:number, :password, :name, :phone, :email, :gender, :birthday, :address, :intro, :avatar)
+    params.require(:user).permit(:number, :password, :name, :phone, :email, :gender, :birthday, :address, :intro, :avatar)
   end
 
   # 更新时允许传入的参数
   def index_user_params_update
-      params.require(:user).permit(:name, :gender, :birthday, :address, :intro, :avatar)
+    params.require(:user).permit(:name, :gender, :birthday, :address, :intro, :avatar)
   end
 
-  def record_fail record, cache_key
+  def record_fail(record, cache_key)
     # 为防止暴力破解, 同一条短信验证码最多允许验证失败5次
     # 修改旧手机号验证码记录
     tem_cache = record[:times] > 4 ? nil : { code: record[:code], times: record[:times] + 1 }
     @cache[cache_key, 10.minutes] = tem_cache
   end
-
 end

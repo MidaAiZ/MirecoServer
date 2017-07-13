@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20170616163254) do
+ActiveRecord::Schema.define(version: 20170702123323) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -54,9 +54,11 @@ ActiveRecord::Schema.define(version: 20170616163254) do
     t.string   "content"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.jsonb    "info"
   end
 
   add_index "index_comment_replies", ["comment_id"], name: "index_comment_reply_on_com_id", using: :btree
+  add_index "index_comment_replies", ["info"], name: "index_comment_replies_on_info", using: :gin
   add_index "index_comment_replies", ["user_id"], name: "index_comment_reply_on_user_id", using: :btree
 
   create_table "index_comments", force: :cascade do |t|
@@ -66,8 +68,10 @@ ActiveRecord::Schema.define(version: 20170616163254) do
     t.string   "resource_type"
     t.datetime "created_at",    null: false
     t.datetime "updated_at",    null: false
+    t.jsonb    "info"
   end
 
+  add_index "index_comments", ["info"], name: "index_comments_on_info", using: :gin
   add_index "index_comments", ["resource_type", "resource_id"], name: "index_comment_on_name_rsc", using: :btree
   add_index "index_comments", ["user_id"], name: "index_comment_on_user_id", using: :btree
 
@@ -111,7 +115,6 @@ ActiveRecord::Schema.define(version: 20170616163254) do
     t.integer "root_file_id"
     t.string  "root_file_type"
     t.integer "editors_count",  default: 0
-    t.boolean "is_deleted",     default: false
   end
 
   add_index "index_file_seeds", ["root_file_type", "root_file_id"], name: "index_file_seed_on_file_type_id", using: :btree
@@ -147,15 +150,15 @@ ActiveRecord::Schema.define(version: 20170616163254) do
 
   create_table "index_role_edits", force: :cascade do |t|
     t.string   "name"
-    t.string   "editor_name"
+    t.string   "nickname"
     t.integer  "user_id"
     t.datetime "created_at"
     t.datetime "updated_at"
     t.integer  "file_seed_id"
-    t.boolean  "is_root",      default: true
     t.jsonb    "info"
     t.integer  "dir_id"
     t.string   "dir_type"
+    t.boolean  "is_deleted",   default: false
   end
 
   add_index "index_role_edits", ["dir_id", "dir_type"], name: "index_role_edit_on_dir_id_type", using: :btree

@@ -1,39 +1,35 @@
 class Index::ThumbUpsController < IndexController
-  before_action :check_login
+  before_action :require_login
   before_action :set_resource
 
   def create
     if @resource
-      @code = Index::ThumbUp.add(@resource, @user) ? 'Success' : 'Fail'
+      @code = 'Success' if Index::ThumbUp.add(@resource, @user)
     end
-    @code ||= 'Fail'
-    render json: { code: @code }
+    render json: { code: @code || 'Fail' }
   end
 
   def destroy
     if @resource
-      @code = Index::ThumbUp.cancel(@resource, @user) ? 'Success' : 'Fail'
+      @code = 'Success' if Index::ThumbUp.cancel(@resource, @user)
     end
-    @code ||= 'Fail'
-    render json: { code: @code }
+    render json: { code: @code || 'Fail' }
   end
 
   private
 
   def set_resource
-    # return nil unless @user
-    @user = Index::User.first
     resource_type = params[:resource_type]
     resource_id = params[:resource_id]
     @resource = case resource_type
                 when 'articles'
-                  Index::Workspace::Article.shown.find_by_id resource_id
+                  shown_article_cache resource_id
                 when 'corpuses'
-                  Index::Workspace::Corpus.shown.find_by_id resource_id
+                  shown_corpus_cache resource_id
                 when 'comments'
-                  Index::Comment.find_by_id resource_id
+                  comment_cache resource_id
                 when 'replies'
-                  Index::CommentReply.find_by_id resource_id
+                  reply_cache resource_id
                 end
     @code ||= 'ResourceNotExist' unless @resource
   end

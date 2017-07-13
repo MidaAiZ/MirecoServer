@@ -1,5 +1,8 @@
-class Index::Comment < ActiveRecord::Base
-  after_destroy :delete_thumb_up
+class Index::Comment < ApplicationRecord
+  after_update :update_cache
+  after_destroy :delete_thumb_up, :clear_cache
+
+  store_accessor :info, :tbp_counts, :rep_counts, :read_times # 点赞数/回复数/阅读次数
 
   belongs_to :user,
              class_name: 'Index::User',
@@ -10,6 +13,9 @@ class Index::Comment < ActiveRecord::Base
   has_many :replies,
            class_name: 'Index::CommentReply',
            dependent: :destroy
+
+  has_many :limit_3_replies, -> { limit(3) },
+           class_name: 'Index::CommentReply'
 
   # -------------------------赞--------------------------- #
   has_one :thumb_up, as: :resource,
@@ -27,9 +33,28 @@ class Index::Comment < ActiveRecord::Base
   validates :resource_type, presence: true, inclusion: { in: ['Index::Workspace::Article', 'Index::Workspace::Corpus'] }
   validates :content, presence: true, length: { minimum: 1, maximum: 255 }
 
+  #----------------------------域------------------------------
+  default_scope { order('index_comments.id DESC') }
+
   # ------------------------文件类型------------------------- #
   def file_type
     :comments
+  end
+
+  def create rsc, user
+    ApplicationRecord.transaction do
+      self.resource = rsc
+      self.user = user
+      self.save!
+      rsc.update! cmt_counts: (rsc.cmt_counts || 0) + 1
+    end
+  end
+
+  def drop rsc
+    ApplicationRecord.transaction do
+      self.destroy!
+      rsc.update! cmt_counts: (rsc.cmt_counts || 0) - 1
+    end
   end
 
   # --------------------------赞--------------------------- #
@@ -47,7 +72,20 @@ class Index::Comment < ActiveRecord::Base
     Index::ThumbUp.has?(self, user)
   end
 
+  # -----------------------点赞信息------------------------ #
+  def thumb_up_info(user)
+    Index::ThumbUp.counts_and_has?(self, user)
+  end
+
   def delete_thumb_up
     # Index::ThumbUp.destroy self
+  end
+
+  def update_cache
+    Cache.new["comment_#{self.id}"] = self
+  end
+
+  def clear_cache
+    Cache.new["comment_#{self.id}"] = nil
   end
 end

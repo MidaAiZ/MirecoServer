@@ -1,11 +1,12 @@
-class Index::Workspace::Folder < ActiveRecord::Base
-  after_destroy :auto_delete_son_roles
+class Index::Workspace::Folder < ApplicationRecord
+  after_update :update_cache
+  after_destroy :auto_delete_son_roles, :clear_cache
 
-  belongs_to :file_seed, -> { with_deleted },
+  belongs_to :file_seed,
              class_name: 'Index::Workspace::FileSeed',
              foreign_key: :file_seed_id
 
-  has_many :editor_roles,
+  has_many :editor_roles, -> { all_with_del },
            through: :file_seed,
            source: :editor_roles
 
@@ -18,7 +19,8 @@ class Index::Workspace::Folder < ActiveRecord::Base
           source: :own_editor
 
   belongs_to :dir,
-             polymorphic: true
+             polymorphic: true,
+             optional: true
 
   has_many :son_articles, -> { no_content },
            as: :dir,
@@ -32,17 +34,17 @@ class Index::Workspace::Folder < ActiveRecord::Base
            as: :dir,
            class_name: 'Index::Workspace::Folder'
 
-  has_many :son_articles_with_deleted, -> { no_content.with_deleted },
+  has_many :son_articles_with_del, -> { no_content.with_del },
            as: :dir,
            class_name: 'Index::Workspace::Article',
            dependent: :destroy
 
-  has_many :son_corpuses_with_deleted, -> { with_deleted },
+  has_many :son_corpuses_with_del, -> { with_del },
            as: :dir,
            class_name: 'Index::Workspace::Corpus',
            dependent: :destroy
 
-  has_many :son_folders_with_deleted, -> { with_deleted },
+  has_many :son_folders_with_del, -> { with_del },
            as: :dir,
            class_name: 'Index::Workspace::Folder',
            dependent: :destroy
@@ -61,7 +63,7 @@ class Index::Workspace::Folder < ActiveRecord::Base
   scope :shown, -> { where(is_shown: true) }
   scope :deleted, -> { rewhere(is_deleted: true) }
   scope :undeleted, -> { where(is_deleted: false) }
-  scope :with_deleted, -> { rewhere(is_deleted: [true, false]) }
+  scope :with_del, -> { unscope(where: :is_deleted) }
   # 默认域
   default_scope { undeleted.order('index_folders.id DESC') }
   # 简略的文件信息可以提高查询和加载速度
@@ -113,9 +115,9 @@ class Index::Workspace::Folder < ActiveRecord::Base
     article_ids = info['articles']
     corpus_ids = info['corpuses']
     folder_ids = info['folders']
-    articles = (son_articles_with_deleted if article_ids) || []
-    corpuses = (son_corpuses_with_deleted if corpus_ids) || []
-    folders = (son_folders_with_deleted if folder_ids) || []
+    articles = (son_articles_with_del if article_ids) || []
+    corpuses = (son_corpuses_with_del if corpus_ids) || []
+    folders = (son_folders_with_del if folder_ids) || []
     # 返回的文件hash
     files_hash = { files_count: 0, articles: [], corpuses: [], folders: [] }
 
@@ -175,5 +177,13 @@ class Index::Workspace::Folder < ActiveRecord::Base
         end
       end
     end
+  end
+
+  def update_cache
+    Cache.new["edit_folder_#{self.id}"] = self
+  end
+
+  def clear_cache
+    Cache.new["edit_folder_#{self.id}"] = nil
   end
 end

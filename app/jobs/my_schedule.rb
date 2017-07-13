@@ -1,4 +1,4 @@
-class MySchedule
+class MySchedule < ApplicationJob
   include Sidekiq::Worker
   include Sidetiq::Schedulable
 

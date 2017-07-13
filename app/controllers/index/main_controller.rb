@@ -1,35 +1,43 @@
 class Index::MainController < IndexController
   before_action :check_login
+  before_action :init, only: [:articles, :corpus]
 
-  def index
-  end
+  def index; end
 
   def articles
-    tag = params[:tag]
-    count = params[:count] || 15
-    page = params[:page] || 1
-    count = 100 if count.to_i > 100  # 限制返回的条数
-
-    @nonpaged_articles = Index::Workspace::Article.shown.sort(tag)
-    @articles = @nonpaged_articles.page(page).per(count)
+    @res = Rails.cache.fetch("#{cache_key}/#{@page}/#{@count}", expires_in: 3.minutes) do
+      @nonpaged_articles = Index::Workspace::Article.shown # .sort(@tag)
+      res = @nonpaged_articles.page(@page).per(@count)
+      { record: res.records, counts: count_cache(cache_key, res) }
+    end
+    @articles = @res[:record]; @counts = @res[:counts]
   end
 
   def show_article
-    @article = Index::Workspace::Article.shown.find_by_id(params[:id])
+    shown_article_cache params[:id]
+    # @comments = @article.comments.limit(10).includes(:user) if @article
   end
 
   def corpus
-    tag = params[:tag]
-    count = params[:count] || 15
-    page = params[:page] || 1
-
-    count = 100 if count.to_i > 100  # 限制返回的条数
-    @nonpaged_corpus = Index::Workspace::Corpus.shown.sort(tag)
-    @corpus = @nonpaged_corpus.page(page).per(count)
+    @res = Rails.cache.fetch("#{cache_key}/#{@page}/#{@count}", expires_in: 3.minutes) do
+      @nonpaged_corpus = Index::Workspace::Corpus.shown # .sort(@tag)
+      res = @nonpaged_corpus.page(@page).per(@count)
+      { record: res.records, counts: count_cache(cache_key, res) }
+    end
+    @corpuses = @res[:record]; @counts = @res[:counts]
   end
 
   def show_corpus
-    @corpus = Index::Workspace::Corpus.shown.find_by_id(params[:id])
+    shown_corpus_cache params[:id]
   end
 
+  private
+
+  def init
+    @tag = params[:tag]
+    @count = params[:count] || 15
+    @page = params[:page] || 1
+
+    @count = 100 if @count.to_i > 100 # 限制返回的条数
+  end
 end

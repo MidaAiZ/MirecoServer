@@ -1,11 +1,11 @@
 class Index::Workspace::TrashesController < IndexController
-  before_action :check_login
+  before_action :require_login
+  before_action :set_file, only: [:create]
   before_action :set_trash, only: [:show, :recover]
 
   # GET /index/trashes
   # GET /index/trashes.json
   def index
-    return @code unless @user
     file_seed_id = params[:file_seed_id]
     count = params[:count] || 15
     page = params[:page] || 1
@@ -17,38 +17,31 @@ class Index::Workspace::TrashesController < IndexController
       @nonpaged_trashes = @user.trashes
     end
     @trashes = @nonpaged_trashes.page(page).per(count)
-
   end
 
   # GET /index/trashes/1
   # GET /index/trashes/1.json
-  def show
-  end
+  def show; end
 
   # POST /index/trashes
   # POST /index/trashes.json
   def create
-    file = set_file
-    if file
-      @code = if @user.can_edit? :delete, file
-                @trash = Index::Workspace::Trash.delete_files(file)
-                @trash ? 'Success' : 'Fail'
-              else
-                'NoPermission'
-              end
-    end
+    @code = if @user.can_edit? :delete, @file
+              @trash = Index::Workspace::Trash.delete_files(@file)
+              @trash ? 'Success' : 'Fail'
+            else
+              'NoPermission'
+            end
 
     @code ||= 'Fail'
     render :show
   end
 
   def recover
-    if @trash
-      if @user.can_edit? :delete, @trash.file_seed
-        @code = @trash.recover_files ? 'Success' : 'Fail'
-      else
-        @code ||= 'NoPermission'
-      end
+    if @user.can_edit? :delete, @trash.file_seed
+      @code = @trash.recover_files(@user) ? 'Success' : 'Fail'
+    else
+      @code ||= 'NoPermission'
     end
     @code ||= 'Fail'
 
@@ -59,11 +52,11 @@ class Index::Workspace::TrashesController < IndexController
   # DELETE /index/trashes/1.json
   def destroy # 仅文件拥有者才允许彻底删除文件
     @trash = @user.trashes.find_by_id(params[:id]) if @user
-    if @trash
-      @code = @trash.destroy_files ? 'Success' : 'Fail'
-    else
-      @code = 'ResourceNotExist'
-    end
+    @code = if @trash
+              @trash.destroy_files ? 'Success' : 'Fail'
+            else
+              'ResourceNotExist'
+            end
 
     @code ||= 'Fail'
     render json: { code: @code }
@@ -72,20 +65,19 @@ class Index::Workspace::TrashesController < IndexController
   private
 
   def set_trash
-    if @user
-      file_seed_id = params[:file_seed_id]
+    file_seed_id = params[:file_seed_id]
 
-      if file_seed_id
-        @file_seed = @user.file_seeds.find_by_id(file_seed_id)
-        if @file_seed
-          @trash = @file_seed.trashes.find_by_id params[:id]
-        else
-          @code ||= 'ResourceNotExist'
-        end
+    if file_seed_id
+      @file_seed = @user.file_seeds.find_by_id(file_seed_id)
+      if @file_seed
+        @trash = @file_seed.trashes.find_by_id params[:id]
       else
-        @trash = @user.trashes.find_by_id params[:id]
+        @code ||= 'ResourceNotExist'
       end
+    else
+      @trash = @user.trashes.find_by_id params[:id]
     end
+    render(json: { code: 'ResourceNotExist' }) && return unless @trash
   end
 
   # Never trust parameters from the scary internet, only allow the white list through.
@@ -97,17 +89,16 @@ class Index::Workspace::TrashesController < IndexController
     prms = trash_params
     file_type = prms[:file_type]
     file_id = prms[:file_id]
-    if @user && file_id && allow_files.include?(file_type)
-      case file_type
-      when 'articles'
-        file = @user.all_articles_with_content.find_by_id file_id
-      when 'corpuses'
-        file = @user.all_corpuses.find_by_id file_id
-      when 'folders'
-        file = @user.all_folders.find_by_id file_id
+    if file_id && allow_files.include?(file_type)
+      @file = case file_type
+              when 'articles'
+                @user.all_articles_with_content.find_by_id file_id
+              when 'corpuses'
+                @user.all_corpuses.find_by_id file_id
+              when 'folders'
+                @user.all_folders.find_by_id file_id
       end
     end
-    file ||= nil
   end
 
   def allow_files

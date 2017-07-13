@@ -1,7 +1,8 @@
-class Index::Workspace::FileSeed < ActiveRecord::Base
+class Index::Workspace::FileSeed < ApplicationRecord
   # ----------------------根目录文件----------------------- #
-  belongs_to :root_file, -> { with_deleted.brief },
-             polymorphic: true
+  belongs_to :root_file, -> { with_del.brief },
+             polymorphic: true,
+             optional: true
 
   # ----------------------所有未删文件---------------------- #
   has_many :articles, -> { no_content },
@@ -17,23 +18,23 @@ class Index::Workspace::FileSeed < ActiveRecord::Base
            foreign_key: 'file_seed_id'
 
   # ----------------包括所有子目录下的所有文件,包含已删除的---------------- #
-  has_many :articles_with_deleted, -> { no_content.with_deleted },
+  has_many :articles_with_del, -> { no_content.with_del },
            class_name: 'Index::Workspace::Article',
            foreign_key: 'file_seed_id',
            dependent: :delete_all
 
-  has_many :folders_with_deleted, -> { with_deleted },
+  has_many :folders_with_del, -> { with_del },
            class_name: 'Index::Workspace::Folder',
            foreign_key: 'file_seed_id',
            dependent: :delete_all
 
-  has_many :corpuses_with_deleted, -> { with_deleted },
+  has_many :corpuses_with_del, -> { with_del },
            class_name: 'Index::Workspace::Corpus',
            foreign_key: 'file_seed_id',
            dependent: :delete_all
 
   # ---------------------作者角色和作者---------------------- #
-  has_many :editor_roles, -> { root_and_unroot },
+  has_many :editor_roles, -> { all_with_del },
            class_name: 'Index::Role::Edit',
            foreign_key: 'file_seed_id',
            dependent: :destroy
@@ -42,7 +43,7 @@ class Index::Workspace::FileSeed < ActiveRecord::Base
            through: :editor_roles,
            source: :editor
 
-  has_one :own_editor_role, -> { where(name: :own).root_and_unroot },
+  has_one :own_editor_role, -> { where(name: :own).all_with_del },
           class_name: 'Index::Role::Edit',
           foreign_key: 'file_seed_id'
 
@@ -58,10 +59,8 @@ class Index::Workspace::FileSeed < ActiveRecord::Base
 
   #--------------------------作用域--------------------------- #
   scope :deleted, -> { rewhere(is_deleted: true) }
-  scope :undeleted, -> { where(is_deleted: false) }
-  scope :with_deleted, -> { rewhere(is_deleted: [true, false]) }
   # 默认域
-  default_scope { undeleted.order('index_file_seeds.id DESC') }
+  default_scope { order('index_file_seeds.id DESC') }
 
   # ---------------------判断是否是协作文件---------------------- #
   def is_cooperate?
@@ -71,35 +70,33 @@ class Index::Workspace::FileSeed < ActiveRecord::Base
   # -----------------------创建并设置目录----------------------- #
   def self.create(_self, dir, user)
     return false if _self.id
-    begin
-      ActiveRecord::Base.transaction do
-        if dir == 0
-          file_seed = _self.create_file_seed(editors_count: 0)
-          _self.save!
-          file_seed.root_file = _self
-          file_seed.save!
-          user.add_edit_role :own, file_seed
-        else
-          return false if _self.allow_dir_types.exclude? dir.file_type
-          _self.dir = dir
-          _self.file_seed = _self.dir.file_seed
-          _self.file_seed.save!
-          _self.save!
-          set_file_info _self, dir
-        end
-        return true
+    ApplicationRecord.transaction do
+      if dir == 0
+        file_seed = _self.create_file_seed!(editors_count: 0)
+        _self.file_seed = file_seed
+        _self.save!
+        file_seed.root_file = _self
+        file_seed.save!
+        user.add_edit_role :own, file_seed
+      else
+        return false if _self.allow_dir_types.exclude? dir.file_type
+        _self.dir = dir
+        _self.file_seed = _self.dir.file_seed
+        _self.save!
+        set_file_info _self, dir
       end
-    rescue
-      return false
+      return true
     end
+    # rescue
+    #   return false
   end
 
   # ----------------------查询所有文件---------------------- #
   def files
     f_hash = {}
-    articles = articles_with_deleted || Index::Workspace::Article.none
-    corpuses = corpuses_with_deleted || Index::Workspace::Corpus.none
-    folders = folders_with_deleted || Index::Fodler.none
+    articles = articles_with_del || Index::Workspace::Article.none
+    corpuses = corpuses_with_del || Index::Workspace::Corpus.none
+    folders = folders_with_del || Index::Fodler.none
     f_hash[:files_count] = articles.to_ary.size + corpuses.to_ary.size + folders.to_ary.size
     f_hash[:articles] = articles
     f_hash[:corpuses] = corpuses
@@ -117,16 +114,14 @@ class Index::Workspace::FileSeed < ActiveRecord::Base
     if target_dir != 0
 
       target_seed = target_dir.file_seed
-       # 不允许将外部文件夹移入协作文件夹, 会造成意外的嵌套　条件：１．协作　２．文件夹　３．外部
-      return false if (target_seed.is_cooperate? && # 判断是否是协作文件
-                      target_dir.file_type == :folders && #　判断是否是文件夹
-                      file_seed != target_dir.file_seed) # 判断是否是外部文件
+      # 不允许将外部文件夹移入协作文件夹, 会造成意外的嵌套　条件：１．协作　２．文件夹　３．外部
+      return false if target_seed.is_cooperate? && # 判断是否是协作文件
+                      target_dir.file_type == :folders && # 　判断是否是文件夹
+                      file_seed != target_dir.file_seed # 判断是否是外部文件
     end
-    ActiveRecord::Base.transaction do # 出错将回滚
-      if _self.is_root? # 移动一整个协同的文件,仅更改文件在其个人文件系统中的目录
-        return change_edit_dir _self, target_dir, user
-      end
-    　return false unless user.can_edit?(:move_dir, _self) # 检验用户对被移动文件的权限
+    ApplicationRecord.transaction do # 出错将回滚
+      return change_edit_dir _self, target_dir, user if _self.is_root? # 移动一整个协同的文件,仅更改文件在其个人文件系统中的目录
+      　return false unless user.can_edit?(:move_dir, _self) # 检验用户对被移动文件的权限
       if target_dir == 0 # 将文件移动到根目录
         # 将协同协作的文件夹(文集)内的文件移动到根目录,仅拥有者具有该权限
         return move_to_root(_self, user)
@@ -202,7 +197,7 @@ class Index::Workspace::FileSeed < ActiveRecord::Base
   def self.move_to_root(_self, user)
     return false unless user.has_edit_role?(:own, _self)
     # 以下将文件移动到根目录, 首先新建一个file_seed, 再移动文件
-    target_seed = Index::Workspace::FileSeed.new() # 新建fileseed
+    target_seed = Index::Workspace::FileSeed.new # 新建fileseed
     target_seed.root_file = _self # 复制根文件
     target_seed.save!
     # 更新拥有者, 原协同协作用户对该被移动文件的权限将失效

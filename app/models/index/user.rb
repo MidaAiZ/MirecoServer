@@ -1,4 +1,6 @@
-class Index::User < ActiveRecord::Base
+class Index::User < ApplicationRecord
+  after_update :update_cache
+
   rolify # 角色管理
 
   mount_uploader :avatar, UserAvatarUploader # 头像上传
@@ -15,7 +17,11 @@ class Index::User < ActiveRecord::Base
            class_name: 'Index::Role::Edit',
            foreign_key: 'user_id'
 
-  has_many :all_edit_roles, -> { root_and_unroot },
+  has_many :all_edit_roles, -> { all_dir },
+           class_name: 'Index::Role::Edit',
+           foreign_key: 'user_id'
+
+  has_many :all_edit_roles_with_del, -> { all_with_del },
            class_name: 'Index::Role::Edit',
            foreign_key: 'user_id'
 
@@ -25,10 +31,6 @@ class Index::User < ActiveRecord::Base
 
   has_many :all_file_seeds,
            through: :all_edit_roles,
-           source: :file_seed
-
-  has_many :file_seeds_with_deleted, -> { with_deleted },
-           through: :edit_roles,
            source: :file_seed
 
   has_many :articles, -> { undeleted.no_content },
@@ -62,17 +64,17 @@ class Index::User < ActiveRecord::Base
            through: :all_file_seeds,
            source: :folders
 
-  # has_many :all_articles_with_deleted, -> { no_content.with_deleted },
+  # has_many :all_articles_with_del, -> { no_content.with_del },
   #          through: :file_seeds,
-  #          source: :articles_with_deleted
+  #          source: :articles_with_del
   #
-  # has_many :all_corpuses_with_deleted, -> { with_deleted },
+  # has_many :all_corpuses_with_del, -> { with_del },
   #          through: :file_seeds,
-  #          source: :corpuses_with_deleted
+  #          source: :corpuses_with_del
   #
-  # has_many :all_folders_with_deleted, -> { with_deleted },
+  # has_many :all_folders_with_del, -> { with_del },
   #          through: :file_seeds,
-  #          source: :folders_with_deleted
+  #          source: :folders_with_del
 
   #--------------------------回收站--------------------------- #
 
@@ -132,7 +134,7 @@ class Index::User < ActiveRecord::Base
     return nil unless file_seed = get_file_seed(resource)
     unless file_seeds.find_by_id file_seed.id # 未曾添加过该权限
       role = Index::Role::Edit.new(name: name)
-      ActiveRecord::Base.transaction do
+      ApplicationRecord.transaction do
         file_seed.editors_count += 1
         role.file_seed = file_seed
         edit_roles << role
@@ -148,7 +150,7 @@ class Index::User < ActiveRecord::Base
   def update_edit_role(attrs = {}, resource)
     return false if attrs.blank? || resource.nil?
     return false unless file_seed = get_file_seed(resource)
-    role = all_edit_roles.find_by(file_seed_id: file_seed.id)
+    role = all_edit_roles_with_del.find_by(file_seed_id: file_seed.id)
     if role
       role.update!(attrs)
       bool = true
@@ -160,9 +162,9 @@ class Index::User < ActiveRecord::Base
   def remove_edit_role(resource)
     return false if resource.nil?
     return false unless file_seed = get_file_seed(resource)
-    role = all_edit_roles.find_by(file_seed_id: file_seed.id)
+    role = all_edit_roles_with_del.find_by(file_seed_id: file_seed.id)
     if role
-      ActiveRecord::Base.transaction do
+      ApplicationRecord.transaction do
         role.destroy!
         file_seed.editors_count -= 1
         file_seed.save!
@@ -176,7 +178,7 @@ class Index::User < ActiveRecord::Base
   def has_edit_role?(name, resource)
     return false if resource.nil?
     return false unless file_seed = get_file_seed(resource)
-    role = all_edit_roles.find_by(file_seed_id: file_seed.id, name: name)
+    role = all_edit_roles_with_del.find_by(file_seed_id: file_seed.id, name: name)
     role ? true : false
   end
 
@@ -184,7 +186,7 @@ class Index::User < ActiveRecord::Base
   def find_edit_role(resource)
     return nil if resource.nil?
     return nil unless file_seed = get_file_seed(resource)
-    role = all_edit_roles.find_by(file_seed_id: file_seed.id)
+    role = all_edit_roles_with_del.find_by(file_seed_id: file_seed.id)
     role ? role.name : nil
   end
 
@@ -197,8 +199,12 @@ class Index::User < ActiveRecord::Base
   end
 
   # ------------------------判断赞------------------------- #
-  def has_thumb_up? resource
+  def has_thumb_up?(resource)
     Index::ThumbUp.has?(resource, self)
+  end
+
+  def update_cache
+    Cache.new["user_#{self.id}"] = self
   end
 
   private

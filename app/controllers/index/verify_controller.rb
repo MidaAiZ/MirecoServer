@@ -11,9 +11,9 @@ class Index::VerifyController < IndexController
     # 判断短信是发送给已登录用户还是发送给参数中的号码
     case params[:phone]
     when 'user_phone' # 发送给已登录用户
-      @user = Index::User.find_by_id(session[:user_id])
+      check_login
       # 如果用户登录,则正常发送, 否则返回'NotLoggedIn'(用户未登录)
-      @code = @user ? Valicode.set_msg_code(@user.phone, params[:handle]) : 'NotLoggedIn'
+      @code = Valicode.set_msg_code(@user.phone, params[:handle]) if @user
     else
       @code = Valicode.set_msg_code(params[:phone], params[:handle])
     end
@@ -25,7 +25,7 @@ class Index::VerifyController < IndexController
     # 判断发送短信的手机号
     case params[:phone]
     when 'user_phone' #发送给已登录用户的手机号的验证码
-      @user = Index::User.find_by_id(session[:user_id])
+      check_login
       # 如果用户登录,则正常发送, 否则返回'NotLoggedIn'(用户未登录)
       msg_cache_key = Valicode.msg_cache_key(@user.phone, params[:handle]) if @user
     else #发送给参数中手机号的验证码

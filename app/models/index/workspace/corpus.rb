@@ -1,12 +1,15 @@
-class Index::Workspace::Corpus < ActiveRecord::Base
-  after_destroy :auto_delete_son_roles, :delete_thumb_up
+class Index::Workspace::Corpus < ApplicationRecord
+  after_update :update_cache
+  after_destroy :auto_delete_son_roles, :delete_thumb_up, :clear_cache
+  store_accessor :info, :tbp_counts, :cmt_counts, :read_times # 点赞数/评论数/阅读次数
 
-  belongs_to :file_seed, -> { with_deleted },
+  belongs_to :file_seed,
              class_name: 'Index::Workspace::FileSeed',
              foreign_key: :file_seed_id
+            #  optional: true
 
   # ---------------------作者和作者角色---------------------- #
-  has_many :editor_roles,
+  has_many :editor_roles, -> { all_with_del },
            through: :file_seed,
            source: :editor_roles
 
@@ -20,7 +23,8 @@ class Index::Workspace::Corpus < ActiveRecord::Base
 
   # -----------------------文件目录------------------------ #
   belongs_to :dir,
-             polymorphic: true
+             polymorphic: true,
+             optional: true
 
   # -----------------------包含文章------------------------ #
   has_many :son_articles, -> { no_content },
@@ -31,12 +35,12 @@ class Index::Workspace::Corpus < ActiveRecord::Base
            as: :dir,
            class_name: 'Index::Workspace::Article'
 
-  has_many :son_articles_with_deleted, -> { no_content.with_deleted },
+  has_many :son_articles_with_del, -> { no_content.with_del },
            as: :dir,
            class_name: 'Index::Workspace::Article',
            dependent: :destroy
 
-  has_many :son_articles_with_deleted_with_content, -> { with_deleted },
+  has_many :son_articles_with_del_with_content, -> { with_del },
            as: :dir,
            class_name: 'Index::Workspace::Article'
 
@@ -69,10 +73,10 @@ class Index::Workspace::Corpus < ActiveRecord::Base
   scope :unroot, -> { where(is_inner: true) }
   scope :deleted, -> { rewhere(is_deleted: true) }
   scope :undeleted, -> { where(is_deleted: false) }
-  scope :with_deleted, -> { rewhere(is_deleted: [true, false]) }
+  scope :with_del, -> { unscope(where: :is_deleted) }
   # 简略的文件信息可以提高查询和加载速度
   scope :brief, -> { unscope(:select).select(:id, :name, :tag, :is_shown, :created_at, :updated_at) }
-  scope :sort, ->(tag) { where(index_corpus.tag(LIKE("'", "%#{tag}"))) }
+  scope :sort, ->(tag) { where('index_corpus.tag LIKE ?', "%#{tag}") }
   # 默认域
   default_scope { undeleted.order('index_corpus.id DESC') }
 
@@ -119,6 +123,11 @@ class Index::Workspace::Corpus < ActiveRecord::Base
     Index::ThumbUp.has?(self, slef.file_type, user)
   end
 
+  # -----------------------点赞信息------------------------ #
+  def thumb_up_info(user)
+    Index::ThumbUp.counts_and_has?(self, user)
+  end
+
   # ----------------------判断是否为根文件-------------------- #
   def is_root?
     file_seed.root_file_id == id && file_seed.root_file_type == itself.class.name
@@ -131,7 +140,7 @@ class Index::Workspace::Corpus < ActiveRecord::Base
 
   # ------------------------文件数目------------------------ #
   def files
-    articles = (son_articles_with_deleted if info['articles']) || []
+    articles = (son_articles_with_del if info['articles']) || []
     { files_count: articles.to_ary.size, articles: articles, corpuses: [], folders: [] }
   end
 
@@ -173,5 +182,15 @@ class Index::Workspace::Corpus < ActiveRecord::Base
 
   def delete_thumb_up
     # Index::ThumbUp.destroy self
+  end
+
+  def update_cache
+    Cache.new["edit_corpus_#{self.id}"] = self
+    Cache.new["corpus_#{self.id}"] = self if self.is_shown
+  end
+
+  def clear_cache
+    Cache.new["corpus_#{self.id}"] = nil
+    Cache.new["corpus_#{self.id}"] = nil if self.is_shown
   end
 end

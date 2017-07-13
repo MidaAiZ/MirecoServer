@@ -27,7 +27,10 @@ Rails.application.routes.draw do
 
     namespace :workspace do # 工作台
       get 'files' => 'center#index'
-        
+      get 'articles/published' => 'center#published_articles'
+      get 'corpuses/published' => 'center#published_corpuses'
+      post '/:resource_type/:resource_id/withdraw' => 'center#withdraw'
+
       resources :articles do
         collection do
           put '/:id/publish' => 'articles#publish'

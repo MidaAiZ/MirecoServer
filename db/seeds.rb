@@ -10,7 +10,7 @@ u = Index::User.first
   t = Time.now
   3_000_000.times do |i|
     lo = i % 3
-    ActiveRecord::Base.transaction do # 出错将回滚
+    ApplicationRecord.transaction do # 出错将回滚
       case lo
       when 0
         a = Index::Workspace::Article.new name: [*('A'..'z')].sample(10).join, content: [*('A'..'z'), *(0..9)].sample(100).join * 100

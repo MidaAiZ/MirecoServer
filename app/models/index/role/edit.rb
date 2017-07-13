@@ -1,4 +1,4 @@
-class Index::Role::Edit < ActiveRecord::Base
+class Index::Role::Edit < ApplicationRecord
   belongs_to :editor,
              class_name: 'Index::User',
              foreign_key: 'user_id'
@@ -7,16 +7,20 @@ class Index::Role::Edit < ActiveRecord::Base
              class_name: 'Index::Workspace::FileSeed',
              foreign_key: 'file_seed_id'
 
-  belongs_to :dir, polymorphic: true
+  belongs_to :dir, polymorphic: true,
+             optional: true 
 
   validates :file_seed_id, presence: true
   validates :name, inclusion: { in: %w(own admin editor readonly) }
 
   #----------------------------域------------------------------
-  scope :root, -> { where(is_root: true) }
-  scope :unroot, -> { rewhere(is_root: false) }
-  scope :root_and_unroot, -> { rewhere(is_root: [true, false]) }
-  default_scope -> { root }
+  scope :root, -> { where(dir_id: nil) }
+  scope :all_dir, -> { unscope(where: :dir_id) }
+  scope :deleted, -> { rewhere(is_deleted: true) }
+  scope :undeleted, -> { rewhere(is_deleted: false) }
+  scope :all_with_del, -> { all_dir.unscope(where: :is_deleted) }
+
+  default_scope -> { root.undeleted }
 
   def self.allow_actions(role)
     ROLES[role]
