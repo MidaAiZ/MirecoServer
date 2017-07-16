@@ -45,7 +45,7 @@ class Index::Workspace::CorpusController < IndexController
   # PATCH/PUT /index/corpuss/1.json
   def update
     prms = corpus_update_params # 获取更新数据
-    if prms.any? && @user.can_edit?(:update, @corpus)
+    if prms.empty? && @user.can_edit?(:update, @corpus)
       @code = if @corpus.is_shown || @corpus.is_deleted # 已发表或者删除的文集禁止编辑
                 'StatusError'
               else

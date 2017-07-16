@@ -50,16 +50,14 @@ class Index::Workspace::ArticlesController < IndexController
   # PATCH/PUT /index/articles/1
   def update
     prms = article_update_params # 获取更新数据
-    if prms.any?
-      if @user.can_edit? :update, @article
-        @code = if @article.is_shown || @article.is_deleted # 已发表或者删除的文章禁止编辑
-                  'StatusError'
-                else
-                  @article.update(prms) ? 'Success' : 'Fail'
-                end
-      else
-        @code ||= 'NoPermission'
-      end
+    if !prms.empty? && @user.can_edit?(:update, @article)
+      @code = if @article.is_shown || @article.is_deleted # 已发表或者删除的文章禁止编辑
+                'StatusError'
+              else
+                @article.update(prms) ? 'Success' : 'Fail'
+              end
+    else
+      @code ||= 'NoPermission'
     end
 
     do_update_response

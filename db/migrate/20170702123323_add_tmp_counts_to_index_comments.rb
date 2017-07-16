@@ -1,4 +1,4 @@
-class AddTmpCountsToIndexComments < ActiveRecord::Migration[4.2]
+class AddTmpCountsToIndexComments < ActiveRecord::Migration
   def change
     add_column :index_comments, :info, :jsonb
     add_column :index_comment_replies, :info, :jsonb
