@@ -4,6 +4,7 @@ if @article
     json.article do
       json.extract! @article, :id, :name, :tag, :created_at, :content
       json.comment_counts @article.cmt_counts || 0
+      json.read_times @article.read_times
       tf = @article.thumb_up_info(@user)
       json.thumb_counts tf[:counts]
       json.has_thumb tf[:has]

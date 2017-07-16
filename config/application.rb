@@ -45,6 +45,7 @@ module Server
 
     # 定时任务
     config.active_job.queue_adapter = :sidekiq
+
     # 配置跨域
     # Avoid CORS issues when API is called from the frontend app.
     # Handle Cross-Origin Resource Sharing (CORS) in order to accept cross-origin AJAX requests.

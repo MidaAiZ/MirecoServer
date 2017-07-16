@@ -45,7 +45,7 @@ class Index::Workspace::FoldersController < IndexController
   # PATCH/PUT /index/folders/1.json
   def update
     prms = folder_update_params # 获取更新数据
-    if prms.empty? && @user.can_edit?(:update, @folder)
+    if @user.can_edit?(:update, @folder)
       @code = if @folder.is_deleted # 已删除的文集禁止编辑
                 'StatusError'
               else

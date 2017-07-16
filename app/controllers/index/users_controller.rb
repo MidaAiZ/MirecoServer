@@ -43,9 +43,8 @@ class Index::UsersController < IndexController
         session[:user_id] = @user.id # 注册后即登录
         @cache[msg_cache_key] = nil if @user # 注册后删除缓存
         @code = 'Success' # 注册成功
-        try_send_vali_email '注册新账号'
-        format.json { render :show, status: :created, location: @user }
-        format.html { redirect_to @user, notice: 'User was successfully created.' }
+        # try_send_vali_email '注册新账号'
+        format.json { render :show, status: :created }
       else
         @code ||= 'Fail' # 注册失败
         format.json { render json: { code: @code, errors: @user.errors }, status: :unprocessable_entity }
@@ -57,17 +56,10 @@ class Index::UsersController < IndexController
   # PATCH/PUT /index/users/1
   # PATCH/PUT /index/users/1.json
   def update
-      @code = 'Success' if @user.update(index_user_params_update)
+    @code = @user.update(index_user_params_update) ? 'Success' : 'Fail'
 
     respond_to do |format|
-      if @code == 'Success'
-        format.json { render :show, status: :ok, location: @user }
-        format.html { redirect_to @user, notice: 'User was successfully updated.' }
-      else
-        @code ||= 'Fail'
-        format.json { render :show, status: :unprocessable_entity }
-        format.html { render :edit }
-      end
+      format.json { render :show, status: @code == 'Success' ? :ok : :unprocessable_entity }
     end
   end
 

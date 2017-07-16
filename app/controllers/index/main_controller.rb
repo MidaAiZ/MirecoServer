@@ -15,6 +15,7 @@ class Index::MainController < IndexController
 
   def show_article
     shown_article_cache params[:id]
+    @article.add_read_times mark if @article
     # @comments = @article.comments.limit(10).includes(:user) if @article
   end
 
@@ -39,5 +40,9 @@ class Index::MainController < IndexController
     @page = params[:page] || 1
 
     @count = 100 if @count.to_i > 100 # 限制返回的条数
+  end
+
+  def mark
+    @user.id || request.remote_ip
   end
 end

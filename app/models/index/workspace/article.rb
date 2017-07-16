@@ -1,7 +1,7 @@
 class Index::Workspace::Article < ApplicationRecord
   after_update :update_cache
   after_destroy :delete_thumb_up, :clear_cache
-  store_accessor :info, :tbp_counts, :cmt_counts, :read_times # 点赞数/评论数/阅读次数
+  store_accessor :info, :tbp_counts, :cmt_counts, :rd_times # 点赞数/评论数/阅读次数
 
   belongs_to :file_seed,
              class_name: 'Index::Workspace::FileSeed',
@@ -164,6 +164,17 @@ class Index::Workspace::Article < ApplicationRecord
     # Index::ThumbUp.destroy self
   end
 
+  # -------------------------阅读次数------------------------- #
+  def add_read_times mark
+    prefix = read_prefix
+    ReadWorker.perform_at(3.hours.from_now, self.id, prefix) if $redis.EXISTS(prefix) == 0
+    $redis.SADD(read_prefix, mark)
+  end
+
+  def read_times
+    (self.rd_times || 0) + $redis.SCARD(read_prefix)
+  end
+
   def update_cache
     Cache.new["edit_article_#{self.id}"] = self
     Cache.new["article_#{self.id}"] = self if self.is_shown
@@ -172,6 +183,13 @@ class Index::Workspace::Article < ApplicationRecord
   def clear_cache
     Cache.new["article_#{self.id}"] = nil
     Cache.new["article_#{self.id}"] = nil if self.is_shown
+  end
+
+  private
+
+  def read_prefix
+    $redis.select 3
+    "index_#{self.id}_article_readtimes"
   end
 
 end
