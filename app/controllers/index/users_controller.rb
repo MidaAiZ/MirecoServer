@@ -27,39 +27,37 @@ class Index::UsersController < IndexController
     msg_code = params[:msg_code] # 从注册参数中获取短信验证码
 
     # 验证注册传入的短信验证码是否正确
-    if msg_record
-      if msg_code != msg_record[:code]
+    unless msg_record && (msg_code == msg_record[:code])
         # 每条验证码最多允许5次验证失败
         tem_cache = msg_record[:times] > 4 ? nil : { code: msg_record[:code], times: msg_record[:times] + 1 }
         @cache[msg_cache_key, 10.minutes] = tem_cache
-        @code = 'WrongMsgCode' # 短信验证码错误
-      end
-    else
-      @code = 'WrongMsgCode' # 短信验证码错误(不存在)
+        @code ||= 'WrongMsgCode' # 短信验证码错误
     end
 
-    respond_to do |format|
-      if !@code && @user.save
+    if !@code && @user.save
         session[:user_id] = @user.id # 注册后即登录
-        @cache[msg_cache_key] = nil if @user # 注册后删除缓存
+        @cache[msg_cache_key] = nil # 注册后删除缓存
         @code = 'Success' # 注册成功
         # try_send_vali_email '注册新账号'
-        format.json { render :show, status: :created }
-      else
-        @code ||= 'Fail' # 注册失败
-        format.json { render json: { code: @code, errors: @user.errors }, status: :unprocessable_entity }
-        format.html { render :new }
-      end
     end
+    @code ||= 'Fail'
+    render :show, status: @user.id.nil? ? :unprocessable_entity : :created
   end
 
   # PATCH/PUT /index/users/1
   # PATCH/PUT /index/users/1.json
   def update
-    @code = @user.update(index_user_params_update) ? 'Success' : 'Fail'
+      @code = 'Success' if @user.update(index_user_params_update)
 
     respond_to do |format|
-      format.json { render :show, status: @code == 'Success' ? :ok : :unprocessable_entity }
+      if @code == 'Success'
+        format.json { render :show, status: :ok, location: @user }
+        format.html { redirect_to @user, notice: 'User was successfully updated.' }
+      else
+        @code ||= 'Fail'
+        format.json { render :show, status: :unprocessable_entity }
+        format.html { render :edit }
+      end
     end
   end
 

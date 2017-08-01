@@ -1,4 +1,4 @@
-# redis_server = '127.0.0.1' # redis服务器
+# redis_server = '127.0.0.1:3000' # redis服务器
 # redis_port = 6379 # redis端口
 # redis_db_num = 0 # redis 数据库序号
 # redis_namespace = 'highlander22_sidekiq' #命名空间，自定义的

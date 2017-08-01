@@ -43,6 +43,6 @@ class Index::MainController < IndexController
   end
 
   def mark
-    @user.id || request.remote_ip
+    session[:user_id] || request.remote_ip
   end
 end
