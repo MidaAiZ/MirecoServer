@@ -29,6 +29,7 @@ Rails.application.routes.draw do
       get 'files' => 'center#index'
       get 'articles/published' => 'center#published_articles'
       get 'corpuses/published' => 'center#published_corpuses'
+      get 'marked_files' => 'center#marked_files'
       post '/:resource_type/:resource_id/withdraw' => 'center#withdraw'
 
       resources :articles do

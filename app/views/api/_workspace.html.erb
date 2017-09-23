@@ -1,0 +1,220 @@
+<section class='api' data-type='articles'>
+  <div class="api-header">工作台</div>
+  <div class="api-body">
+    <div class="notice">
+      <h4>本目录下的API要求用户在已登录情况下才可以访问,否则返回code='NotLoggedIn',表示用户未登录</h4>
+    </div>
+    <table class="table" width="100%" cellspacing="0">
+      <thead>
+        <tr>
+          <td width="10%">操作</td>
+          <td width="15%">接口</td>
+          <td width="10%">方法</td>
+          <td width="20%">参数</td>
+          <td width="25%">响应</td>
+          <td width="20%">说明</td>
+        </tr>
+      </thead>
+      <tbody>
+        <!-- 获取所有文件 -->
+        <tr>
+          <td>获取所有文件</td>
+          <td>workspace/files</td>
+          <td>GET</td>
+          <td>
+            <textarea cols="30" rows="10">
+page:页码
+count:数量
+             </textarea>
+          </td>
+          <td>
+            <textarea cols="30" rows="10">
+{
+    counts: 100, // 文件总数
+    files: [
+		{
+			"role": "own", // 权限
+			"editors_count": 1, // 协同写作者人数
+			"file_type": "folders", // 文件类型
+			"file": {  // 文件具体信息
+				"id": 1,
+				"name": "测试文件夹",
+				"is_marked": false,
+				"created_at": "2017-06-24T00:34:50.872+08:00",
+                "updated_at": "2017-06-24T00:34:50.881+08:00"
+			}
+		},
+		{
+			...
+		},
+		...
+	]
+}
+              </textarea>
+          </td>
+          <td>
+            <ul>
+              <li>服务器返回json格式的数组</li>
+              <li>此接口返回用户的所有文件,需要用户已登录才可以访问</li>
+            </ul>
+          </td>
+        </tr>
+
+		<!-- 获取标星文件 -->
+        <tr>
+          <td>获取标星文件</td>
+          <td>workspace/marked_files</td>
+          <td>GET</td>
+          <td>
+            <textarea cols="30" rows="10">
+page:页码
+count:数量
+             </textarea>
+          </td>
+          <td>
+            <textarea cols="30" rows="10">
+{
+    counts: 100, // 标星文件总数
+    files: [
+		{
+			"file_type": "folders", // 文件类型
+			"file": {  // 文件具体信息
+				"id": 1,
+				"name": "测试文件夹",
+				"is_marked": false,
+				"created_at": "2017-06-24T00:34:50.872+08:00",
+                "updated_at": "2017-06-24T00:34:50.881+08:00"
+			}
+		},
+		{
+			...
+		},
+		...
+	]
+}
+              </textarea>
+          </td>
+          <td>
+            <ul>
+              <li>服务器返回json格式的数组</li>
+              <li>此接口返回用户的所有文件,需要用户已登录才可以访问</li>
+            </ul>
+          </td>
+        </tr>
+
+		<!-- 获取已发表文章 -->
+		<tr>
+		  <td>获取已发表文章</td>
+		  <td>workspace/published_articles</td>
+		  <td>GET</td>
+		  <td>
+			<textarea cols="30" rows="10">
+page:页码
+count:数量
+			 </textarea>
+		  </td>
+		  <td>
+			<textarea cols="30" rows="10">
+{
+	counts: 100, // 文章总数
+	"articles": [
+		{
+			"id": 123,
+			"name": "已发表文章",
+			"tag": null,
+			"is_shown": true,
+			"is_marked": null,
+			"created_at": "2017-06-26T14:27:56.669+08:00",
+			"updated_at": "2017-06-26T14:27:56.690+08:00",
+			"comment_counts": 0, // 评论数
+			"thumb_counts": 0, // 点赞数
+			"has_thumb": false // 自己是否有点赞
+		},
+		{
+			...
+		},
+		...
+	]
+}
+			  </textarea>
+		  </td>
+		  <td>
+			<ul>
+			  <li>服务器返回json格式的数组</li>
+			  <li>此接口返回用户已发表的文章,需要用户已登录才可以访问</li>
+			</ul>
+		  </td>
+		</tr>
+
+		<!-- 获取已发表文集 -->
+		<tr>
+		  <td>获取已发表文集</td>
+		  <td>workspace/published_corpuses</td>
+		  <td>GET</td>
+		  <td>
+			<textarea cols="30" rows="10">
+		page:页码
+		count:数量
+			 </textarea>
+		  </td>
+		  <td>
+			<textarea cols="30" rows="10">
+{
+	counts: 100, // 文集总数
+	"corpuses": [
+		{
+			"id": 1,
+			"name": "已发表文集",
+			"tag": null,
+			"is_shown": true,
+			"is_marked": null,
+			"created_at": "2017-06-26T14:35:52.207+08:00",
+			"updated_at": "2017-06-26T14:35:52.213+08:00",
+			"comment_counts": 0, // 评论数
+			"thumb_counts": 0, // 点赞数
+			"has_thumb": false // 自己是否有点赞
+		},
+		{
+			...
+		},
+		...
+	]
+}
+			  </textarea>
+		  </td>
+		  <td>
+			<ul>
+			  <li>服务器返回json格式的数组</li>
+			  <li>此接口返回用户已发表的文集,需要用户已登录才可以访问</li>
+			</ul>
+		  </td>
+		</tr>
+
+		<!-- 退出协同写作 -->
+		<tr>
+		  <td>退出协同写作</td>
+		  <td>workspace/:file_type/:file_id/withdraw</td>
+		  <td>POST</td>
+		  <td>
+			<textarea cols="30" rows="10">
+			 </textarea>
+		  </td>
+		  <td>
+			<textarea cols="30" rows="10">
+{
+	"code": "Success"
+}
+			  </textarea>
+		  </td>
+		  <td>
+			<ul>
+			  <li>:file_type指的是文件类型,接受:articles, folders, corpuses</li>
+			  <li>:file_id指的是需要退出的文件id</li>
+			  <li class='notice'>无法退出由自己创建的协作文件,如果强制退出协作,系统会将该文件添加至回收站,协同写作者将失去该文件的协作权</li>
+			</ul>
+		  </td>
+		</tr>
+      </tbody>
+    </table>
+  </div>
+</section>

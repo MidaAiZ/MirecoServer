@@ -17,6 +17,20 @@ class Index::Workspace::FileSeed < ApplicationRecord
            class_name: 'Index::Workspace::Corpus',
            foreign_key: 'file_seed_id'
 
+  # -----------------------标星文件----------------------- #
+
+  has_many :marked_articles, -> { no_content.where(is_marked: true) },
+           class_name: 'Index::Workspace::Article',
+           foreign_key: 'file_seed_id'
+
+  has_many :marked_folders, -> { where(is_marked: true) },
+           class_name: 'Index::Workspace::Folder',
+           foreign_key: 'file_seed_id'
+
+  has_many :marked_corpuses, -> { where(is_marked: true) },
+           class_name: 'Index::Workspace::Corpus',
+           foreign_key: 'file_seed_id'
+
   # ----------------包括所有子目录下的所有文件,包含已删除的---------------- #
   has_many :articles_with_del, -> { no_content.with_del },
            class_name: 'Index::Workspace::Article',

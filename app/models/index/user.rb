@@ -76,6 +76,20 @@ class Index::User < ApplicationRecord
   #          through: :file_seeds,
   #          source: :folders_with_del
 
+  # -----------------------标星文件----------------------- #
+
+  has_many :marked_articles, -> { no_content.where(is_marked: true) },
+           through: :all_file_seeds,
+           source: :articles
+
+  has_many :marked_folders, -> { where(is_marked: true) },
+           through: :all_file_seeds,
+           source: :corpuses
+
+  has_many :marked_corpuses, -> { where(is_marked: true) },
+           through: :all_file_seeds,
+           source: :folders
+
   #--------------------------回收站--------------------------- #
 
   has_many :trashes,

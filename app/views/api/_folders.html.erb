@@ -88,9 +88,11 @@ count:数量
           </td>
           <td>
             <textarea cols="30" rows="10">
-[
-    {
-        "folder": {
+
+{
+    counts: 100, // 文件夹总数
+    "folders": [
+        {
             "id": 1,
             "name": "新建文件夹",
             "tag": "test_tag",
@@ -98,16 +100,13 @@ count:数量
             "folder_id": null,
             "created_at": "2017-05-05T16:38:33.056Z",
             "updated_at": "2017-05-05T16:38:33.056Z"
-        }
-    },
-    {
-        "folder": {
-            "id": 2,
+        },
+        {
             ...
         }
-    },
-    ...
-]
+        ...
+    ]
+}
               </textarea>
           </td>
           <td>
