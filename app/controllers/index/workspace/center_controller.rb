@@ -4,12 +4,8 @@ class Index::Workspace::CenterController < IndexController
 
   def index
     init
-    @res = Rails.cache.fetch("#{cache_key}/#{@user.id}/#{@page}/#{@count}", expires_in: 3.minutes) do
-      @nonpaged_edit_roles = @user.edit_roles.includes(file_seed: :root_file)
-      res = @nonpaged_edit_roles.page(@page).per(@count)
-      { record: res.records, counts: count_cache(cache_key, res) }
-    end
-    @edit_roles = @res[:record]; @counts = @res[:counts]
+    @nonpaged_edit_roles = @user.edit_roles.includes(file_seed: :root_file)
+    @edit_roles = @nonpaged_edit_roles.page(@page).per(@count)
   end
 
   def marked_files

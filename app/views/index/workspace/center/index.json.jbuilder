@@ -1,7 +1,6 @@
 if @code
   json.code @code
 else
-  json.counts @counts
   json.files do
     json.array! @edit_roles do |role|
       seed = role.file_seed

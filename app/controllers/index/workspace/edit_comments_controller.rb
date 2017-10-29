@@ -75,7 +75,7 @@ class Index::Workspace::EditCommentsController < IndexController
 
   # Use callbacks to share common setup or constraints between actions.
   def set_edit_comment
-    edit_comment_cache if @resource
+    edit_comment_cache params[:id] if @resource
     render(json: { code: 'ResourceNotExist' }) && return unless @edit_comment
   end
 
