@@ -31,6 +31,7 @@ Rails.application.routes.draw do
       get 'corpuses/published' => 'center#published_corpuses'
       get 'marked_files' => 'center#marked_files'
       post '/:resource_type/:resource_id/withdraw' => 'center#withdraw'
+      get '/:resource_type/:resource_id/editors' => 'center#get_editors'
 
       resources :articles do
         collection do

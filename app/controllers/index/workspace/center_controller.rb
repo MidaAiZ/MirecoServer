@@ -1,6 +1,6 @@
 class Index::Workspace::CenterController < IndexController
   before_action :require_login
-  before_action :set_resource, only: [:withdraw]
+  before_action :set_resource, only: [:get_editors, :withdraw]
 
   def index
     init
@@ -45,6 +45,14 @@ class Index::Workspace::CenterController < IndexController
       { record: res.records, counts: count_cache(cache_key, res) }
     end
     @corpuses = @res[:record]; @counts = @res[:counts]
+  end
+
+  def get_editors
+    if @user.find_edit_role @resource
+        @edit_roles = @resource.editor_roles.includes(:editor)
+    end
+    @edit_roles ||= []
+    render :editors
   end
 
   def withdraw # 退出协同写作
