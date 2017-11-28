@@ -35,31 +35,47 @@ Rails.application.routes.draw do
 
       resources :articles do
         collection do
-          put '/:id/publish' => 'articles#publish'
-          put '/:id/move_dir' => 'articles#move_dir'
+          put '/:id/name' => 'articles#rename'
+          put '/:id/tag' => 'articles#update_tag'
+          put '/:id/content' => 'articles#update_content'
+          post '/:id/mark' => 'articles#mark'
+          post '/:id/unmark' => 'articles#unmark'
+          post '/:id/publish' => 'articles#publish'
+          post '/:id/move_dir' => 'articles#move_dir'
           post '/:id/add_editor' => 'articles#add_editor'
           post '/:id/remove_editor' => 'articles#remove_editor'
+
           get '/:id/profile' => 'articles#show_profile'
         end
         resources :history_articles, as: :history
       end
 
-      resources :folders do
+      resources :corpus, path: :corpuses do
         collection do
-          put '/:id/move_dir' => 'folders#move_dir'
-          post '/:id/add_editor' => 'folders#add_editor'
-          post '/:id/remove_editor' => 'folders#remove_editor'
-          get '/:id/profile' => 'folders#show_profile'
+          put '/:id/name' => 'corpus#rename'
+          put '/:id/tag' => 'corpus#update_tag'
+          post '/:id/mark' => 'corpus#mark'
+          post '/:id/unmark' => 'corpus#unmark'
+          post '/:id/publish' => 'corpus#publish'
+          post '/:id/move_dir' => 'corpus#move_dir'
+          post '/:id/add_editor' => 'corpus#add_editor'
+          post '/:id/remove_editor' => 'corpus#remove_editor'
+
+          get '/:id/profile' => 'corpus#show_profile'
         end
       end
 
-      resources :corpus do
+      resources :folders do
         collection do
-          put '/:id/publish' => 'corpus#publish'
-          put '/:id/move_dir' => 'corpus#move_dir'
-          post '/:id/add_editor' => 'corpus#add_editor'
-          post '/:id/remove_editor' => 'corpus#remove_editor'
-          get '/:id/profile' => 'corpus#show_profile'
+          put '/:id/name' => 'folders#rename'
+          put '/:id/tag' => 'folders#update_tag'
+          post '/:id/mark' => 'folders#mark'
+          post '/:id/unmark' => 'folders#unmark'
+          post '/:id/move_dir' => 'folders#move_dir'
+          post '/:id/add_editor' => 'folders#add_editor'
+          post '/:id/remove_editor' => 'folders#remove_editor'
+
+          get '/:id/profile' => 'folders#show_profile'
         end
       end
 

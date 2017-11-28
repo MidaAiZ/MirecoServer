@@ -1,4 +1,8 @@
+require_relative 'file_model_module'
+
 class Index::Workspace::Folder < ApplicationRecord
+  include FileModel
+
   after_update :update_cache
   after_destroy :auto_delete_son_roles, :clear_cache
 
@@ -22,7 +26,7 @@ class Index::Workspace::Folder < ApplicationRecord
              polymorphic: true,
              optional: true
 
-  has_many :son_articles, -> { no_content },
+  has_many :son_articles,
            as: :dir,
            class_name: 'Index::Workspace::Article'
 
@@ -34,7 +38,7 @@ class Index::Workspace::Folder < ApplicationRecord
            as: :dir,
            class_name: 'Index::Workspace::Folder'
 
-  has_many :son_articles_with_del, -> { no_content.with_del },
+  has_many :son_articles_with_del, -> { with_del },
            as: :dir,
            class_name: 'Index::Workspace::Article',
            dependent: :destroy
@@ -48,6 +52,11 @@ class Index::Workspace::Folder < ApplicationRecord
            as: :dir,
            class_name: 'Index::Workspace::Folder',
            dependent: :destroy
+
+  # ------------------------标星-------------------------- #
+  has_many :mark_records, as: :file,
+                          class_name: 'Index::Workspace::MarkRecord',
+                          dependent: :destroy
 
   # ---------------------包含协同子文件--------------------- #
   has_many :son_roles, as: :dir,
@@ -69,44 +78,28 @@ class Index::Workspace::Folder < ApplicationRecord
   # 简略的文件信息可以提高查询和加载速度
   scope :brief, -> { unscope(:select).select(:id, :name, :created_at, :updated_at) }
 
-  #---------------------------搜索-----------------------------
-  def self.filter(cdt = {}, offset = 0, limit = 100)
-    allow_hash = { 'name' => 'LIKE', 'tag' => 'LIKE' } # 允许查询的字段集
-    keys = allow_hash.keys
-    sql_arr = []
-    cdt.keys.each do |key|
-      if keys.include? key
-        sql_arr.push "\"index_folders\".\"#{key}\" #{allow_hash[key]} \'#{cdt[key]}\'" unless cdt[key].blank?
-      end
-    end
-    sql = ''
-    sql_arr.each do |s| # 拼接条件
-      sql += s
-      sql += 'OR' if s != sql_arr.last
-    end
-    sql.blank? ? nil : Index::Workspace::Folder.where(sql).offset(offset).limit(limit)
-  end
-
-
-  # --------------------判断是否是协作文件--------------------- #
-  def is_cooperate?
-    file_seed.editors_count > 1
-  end
-
   # ------------------------文件类型------------------------- #
   def file_type
     :folders
-  end
-
-  # ----------------------判断是否为根文件--------------------- #
-  def is_root?
-    file_seed.root_file_id == id && file_seed.root_file_type == itself.class.name
   end
 
   # ----------------------允许的路径类型---------------------- #
   def allow_dir_types
     [:folders, 0] # 目标目录文件仅允许文件夹或者空, 0代表空,即移动到根目录
   end
+
+  # ------------------------下一级文件------------------------ #
+  def profiles user
+    fids = info['folders']
+    cids = info['corpuses']
+    aids = info['articles']
+    folders = (fids && user.all_folders.where(id: fids).includes(:file_seed)) || [] # 子文件夹
+    corpuses = (cids && user.all_corpuses.where(id: cids).includes(:file_seed)) || [] # 子文集
+    articles = (aids && user.all_articles.where(id: aids).includes(:file_seed)) || [] # 子文章
+    # 根据创建日期进行排序
+    (folders += corpuses += articles).sort { |x, y|  x.created_at <=> y.created_at }
+  end
+
 
   # ------------------------所有子文件------------------------ #
   def files
@@ -141,26 +134,6 @@ class Index::Workspace::Folder < ApplicationRecord
     puts Time.now - t
 
     files_hash
-  end
-
-  # -----------------------创建并设置目录----------------------- #
-  def create(target_dir, user)
-    Index::Workspace::FileSeed.create(self, target_dir, user)
-  end
-
-  # ------------------------移动文件------------------------ #
-  def move_dir(target_file, user)
-    Index::Workspace::FileSeed.move_dir self, target_file, user
-  end
-
-  # -------------------------删除文件------------------------- #
-  def delete_files(user = nil)
-    return Index::Workspace::Trash.delete_files(self, user)
-  end
-
-  # --------------------------回收站-------------------------- #
-  def trash
-    Index::Workspace::Trash.find_by file_id: id, file_type: 'Index::Workspace::Folder'
   end
 
   def auto_delete_son_roles

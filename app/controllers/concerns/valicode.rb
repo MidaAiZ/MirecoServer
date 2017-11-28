@@ -42,7 +42,7 @@ class Valicode
 
     rescue RestClient::Exception => e
       puts e.response
-      return 'Fail'
+      return :Fail
       # res[:failed] = true
       # response = JSON.parse(e.response)
       # res[:message] = if response['code'] == 601 # 短信数目超过限制的错误
@@ -55,7 +55,7 @@ class Valicode
     # 将验证码添加至cache
     cache_key = self.msg_cache_key(phone, handle)
     @cache[cache_key, 10 * 60] = { code: @msg_code, times: 0 }
-    return 'Success'
+    return :Success
   end
 
   def self.set_reg_email user

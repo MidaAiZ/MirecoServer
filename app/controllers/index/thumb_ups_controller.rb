@@ -4,16 +4,16 @@ class Index::ThumbUpsController < IndexController
 
   def create
     if @resource
-      @code = 'Success' if Index::ThumbUp.add(@resource, @user)
+      @code = :Success if Index::ThumbUp.add(@resource, @user)
     end
-    render json: { code: @code || 'Fail' }
+    render json: { code: @code || :Fail }
   end
 
   def destroy
     if @resource
-      @code = 'Success' if Index::ThumbUp.cancel(@resource, @user)
+      @code = :Success if Index::ThumbUp.cancel(@resource, @user)
     end
-    render json: { code: @code || 'Fail' }
+    render json: { code: @code || :Fail }
   end
 
   private
@@ -31,6 +31,6 @@ class Index::ThumbUpsController < IndexController
                 when 'replies'
                   reply_cache resource_id
                 end
-    @code ||= 'ResourceNotExist' unless @resource
+    @code ||= :ResourceNotExist unless @resource
   end
 end

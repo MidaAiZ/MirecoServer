@@ -17,7 +17,7 @@ class Index::CommentRepliesController < IndexController
   def create
     @reply = Index::CommentReply.new(comment_reply_params)
     unless @code
-      @code = @reply.create(@comment, @user) ? 'Success' : 'Fail'
+      @code = @reply.create(@comment, @user) ? :Success : :Fail
     end
     respond_to do |format|
       format.json { render :show, status: @reply.id.nil? ? :unprocessable_entity : :created }
@@ -29,9 +29,9 @@ class Index::CommentRepliesController < IndexController
       if @reply.user == @user ||  # 删除条件1: 该回复的用户
           @comment.user == @user ||  # 删除条件2: 该回复的评论用户
           @user.can_edit?(:delete_comment, @comment.resource) # 删除条件3: 对文件具有编辑评论权限的协同作者
-        @code = @reply.drop(@comment) ? 'Success' : 'Fail'
+        @code = @reply.drop(@comment) ? :Success : :Fail
       else
-        @code = 'NoPermission'
+        @code = :NoPermission
       end
     end
     render json: { code: @code }
@@ -42,12 +42,12 @@ class Index::CommentRepliesController < IndexController
   # Use callbacks to share common setup or constraints between actions.
   def set_comment_reply
     reply_cache params[:id] if @comment
-    @code ||= 'ResourceNotExist' unless @reply
+    @code ||= :ResourceNotExist unless @reply
   end
 
   def set_comment
     comment_cache params[:comment_id]
-    @code ||= 'ResourceNotExist' unless @comment
+    @code ||= :ResourceNotExist unless @comment
   end
 
   # Never trust parameters from the scary internet, only allow the white list through.

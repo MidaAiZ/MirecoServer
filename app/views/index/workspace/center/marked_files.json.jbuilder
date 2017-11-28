@@ -1,24 +1,21 @@
 if @code
   json.code @code
 else
-  json.counts @counts
   json.files do
-    json.array! @marked_articles do |file|
+    json.array! @mark_records do |record|
+      file = record.file
+      next unless file
+      seed = record.file_seed
       json.file_type file.file_type
+      json.editors_count seed.editors_count
       json.file do
-        json.extract! file, :id, :name, :tag, :is_shown, :is_marked, :created_at, :updated_at
-      end
-    end
-	json.array! @marked_corpuses do |file|
-	  json.file_type file.file_type
-	  json.file do
-		json.extract! file, :id, :name, :tag, :is_shown, :is_marked, :created_at, :updated_at
-	  end
-	end
-	json.array! @marked_folders do |file|
-      json.file_type file.file_type
-      json.file do
-        json.extract! file, :id, :name, :is_marked, :created_at, :updated_at
+        case file.file_type
+        when :folders
+          json.extract! file, :id, :name, :created_at, :updated_at
+        else
+          json.extract! file, :id, :name, :tag, :is_shown, :created_at, :updated_at
+        end
+        json.is_marked true
       end
     end
   end

@@ -6,16 +6,18 @@ class Index::Workspace::EditCommentsController < IndexController
 
   def index
     @edit_comments = @resource ? @resource.edit_comments : Index::Workspace::EditComment.none
+    Index::Workspace::EditComment.include_users @edit_comments
   end
 
-  def show; end
+  def show
+  end
 
   def create
     @edit_comment = Index::Workspace::EditComment.new(edit_comment_params)
 
     @edit_comment.user = @user
     @edit_comment.resource = @resource
-    @code = @edit_comment.save ? 'Success' : 'Fail'
+    @code = @edit_comment.save ? :Success : :Fail
 
     respond_to do |format|
       format.json { render :show, status: @edit_comment.id.nil? ? :unprocessable_entity : :created }
@@ -28,12 +30,12 @@ class Index::Workspace::EditCommentsController < IndexController
         user_id: @user.id,
         content: params[:reply]
       }
-      @edit_comment.replies[Time.now.strftime('%Y-%m-%d %H:%M:%S')] = reply
-      @code = @edit_comment.save ? 'Success' : 'Fail'
+      @edit_comment.replies[reply_key] = reply
+      @code = @edit_comment.save ? :Success : :Fail
     else
-      @edit_comment.errors[:base] = 'size of reply should be 1-255'
+      @edit_comment.errors.add(:reply, 'size of reply should be 1-255')
     end
-    @code ||= 'Fail'
+    @code ||= :Fail
     respond_to do |format|
       format.json { render :show }
     end
@@ -48,12 +50,12 @@ class Index::Workspace::EditCommentsController < IndexController
          @user.can_edit?(:delete_comment, @resource) # 3. 具有删除评论权限的用户
 
         @edit_comment.replies.delete key
-        @code = @edit_comment.save ? 'Success' : 'Fail'
+        @code = @edit_comment.save ? :Success : :Fail
       else
-        @code = 'NoPermission'
+        @code = :NoPermission
       end
     end
-    @code ||= 'Fail'
+    @code ||= :Fail
     respond_to do |format|
       format.json { render :show }
     end
@@ -64,9 +66,9 @@ class Index::Workspace::EditCommentsController < IndexController
     @code = if @edit_comment.user == @user || # 1: 评论者
                @user.can_edit?(:delete_comment, @resource) # 2: 具有删除评论权限的用户
 
-              @edit_comment.destroy ? 'Success' : 'Fail'
+              @edit_comment.destroy ? :Success : :Fail
             else
-              'NoPermission'
+              :NoPermission
             end
     render json: { code: @code }
   end
@@ -76,7 +78,7 @@ class Index::Workspace::EditCommentsController < IndexController
   # Use callbacks to share common setup or constraints between actions.
   def set_edit_comment
     edit_comment_cache params[:id] if @resource
-    render(json: { code: 'ResourceNotExist' }) && return unless @edit_comment
+    render(json: { code: :ResourceNotExist }) && return unless @edit_comment
   end
 
   # Never trust parameters from the scary internet, only allow the white list through.
@@ -91,10 +93,14 @@ class Index::Workspace::EditCommentsController < IndexController
                 when 'articles'
                   edit_article_cache resource_id
                 end
-    render(json: { code: 'ResourceNotExist' }) && return unless @resource
+    render(json: { code: :ResourceNotExist }) && return unless @resource
   end
 
   def check_permission
-    render(json: { code: 'NoPermission' }) unless @user.can_edit?(:comment, @resource)
+    render(json: { code: :NoPermission }) unless @user.can_edit?(:comment, @resource)
+  end
+
+  def reply_key
+    "#{@user.id}-#{[*('s'..'z'), *(0..9)].sample(4).join}-#{Time.now.to_i}"
   end
 end

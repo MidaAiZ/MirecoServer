@@ -33,7 +33,7 @@ class Index::User < ApplicationRecord
            through: :all_edit_roles,
            source: :file_seed
 
-  has_many :articles, -> { undeleted.no_content },
+  has_many :articles, -> { undeleted },
            through: :file_seeds,
            source: :root_file,
            source_type: 'Index::Workspace::Article'
@@ -48,11 +48,7 @@ class Index::User < ApplicationRecord
            source: :root_file,
            source_type: 'Index::Workspace::Folder'
 
-  has_many :all_articles, -> { no_content },
-           through: :all_file_seeds,
-           source: :articles
-
-  has_many :all_articles_with_content,
+  has_many :all_articles,
            through: :all_file_seeds,
            source: :articles
 
@@ -64,7 +60,11 @@ class Index::User < ApplicationRecord
            through: :all_file_seeds,
            source: :folders
 
-  # has_many :all_articles_with_del, -> { no_content.with_del },
+  # has_many :marked_files,
+  #           class_name: 'Index::Workspace::MarkRecord',
+  #           foreign_key: :user_id
+
+  # has_many :all_articles_with_del, -> { with_del },
   #          through: :file_seeds,
   #          source: :articles_with_del
   #
@@ -78,17 +78,10 @@ class Index::User < ApplicationRecord
 
   # -----------------------标星文件----------------------- #
 
-  has_many :marked_articles, -> { no_content.where(is_marked: true) },
-           through: :all_file_seeds,
-           source: :articles
 
-  has_many :marked_folders, -> { where(is_marked: true) },
-           through: :all_file_seeds,
-           source: :corpuses
-
-  has_many :marked_corpuses, -> { where(is_marked: true) },
-           through: :all_file_seeds,
-           source: :folders
+  has_many :mark_records, ->(id) { where(user_id: id) },
+           through: :file_seeds,
+           source: :mark_records
 
   #--------------------------回收站--------------------------- #
 
@@ -118,6 +111,7 @@ class Index::User < ApplicationRecord
   validates :intro, length: { maximum: 255 }, allow_blank: true
 
   #----------------------------域------------------------------
+  scope :brief, -> { select(:id, :number, :name, :avatar) }
   default_scope { order('index_users.id DESC') }
 
   #---------------------------搜索-----------------------------
@@ -215,6 +209,16 @@ class Index::User < ApplicationRecord
   # ------------------------判断赞------------------------- #
   def has_thumb_up?(resource)
     Index::ThumbUp.has?(resource, self)
+  end
+
+  # ------------------------标星文件------------------------- #
+  def marked_files
+    mark_records = self.mark_records.includes(:file)
+    marked_files = []
+    mark_records.each do |m|
+        marked_files << m.file if m.file
+    end
+    marked_files
   end
 
   def update_cache

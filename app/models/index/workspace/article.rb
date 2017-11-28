@@ -1,4 +1,8 @@
+require_relative 'file_model_module'
+
 class Index::Workspace::Article < ApplicationRecord
+  include FileModel
+
   after_update :update_cache
   after_destroy :delete_thumb_up, :clear_cache
   store_accessor :info, :tbp_counts, :cmt_counts, :rd_times # 点赞数/评论数/阅读次数
@@ -6,6 +10,11 @@ class Index::Workspace::Article < ApplicationRecord
   belongs_to :file_seed,
              class_name: 'Index::Workspace::FileSeed',
              foreign_key: :file_seed_id
+
+  # -----------------------文章内容------------------------ #
+  has_one :content,
+          class_name: 'Index::Workspace::ArticleContent',
+          foreign_key: :article_id
 
   # ---------------------作者和作者角色---------------------- #
   has_many :editor_roles, -> { all_with_del },
@@ -54,10 +63,15 @@ class Index::Workspace::Article < ApplicationRecord
            foreign_key: :article_id,
            dependent: :destroy
 
+  # ------------------------标星-------------------------- #
+  has_many :mark_records, as: :file,
+                          class_name: 'Index::Workspace::MarkRecord',
+                          dependent: :destroy
+
+
   # 数据验证
   validates :tag, length: { maximum: 25 }
   validates :name, presence: { message: '文件名不能为空' }, length: { maximum: 255 }
-  validates :content, presence: { message: '内容不能为空' }, length: { maximum: 100_000 }
   validates :dir_type, inclusion: { in: ['Index::Workspace::Corpus', 'Index::Workspace::Folder'] }, allow_blank: true
 
   #----------------------------域------------------------------
@@ -68,66 +82,17 @@ class Index::Workspace::Article < ApplicationRecord
   scope :deleted, -> { rewhere(is_deleted: true) }
   scope :undeleted, -> { where(is_deleted: false) }
   scope :with_del, -> { unscope(where: :is_deleted) }
-  # 由于文章的内容一般比较大(text), 所以当批量查询数据库时应该避开content字段
-  scope :no_content, -> { select(:id, :name, :tag, :is_shown, :is_deleted, :file_seed_id, :is_marked, :info, :created_at, :updated_at, :dir_type, :dir_id) }
-  scope :with_content, -> { unscope(:select) }
-  # 简略的文件信息可以提高查询和加载速度
-  scope :brief, -> { unscope(:select).select(:id, :name, :tag, :is_shown, :info, :created_at, :updated_at) }
   scope :sort, ->(tag) { where('index_articles.tag LIKE ?', "%#{tag}") }
   # 默认作用域, 不包含content字段, id降序, 未删除的文章
   default_scope { undeleted.order('index_articles.id DESC') }
 
-  #--------------------------搜索----------------------------#
-  def self.filter(cdt = {}, offset = 0, limit = 100)
-    allow_hash = { 'name' => 'LIKE', 'tag' => 'LIKE' } # 允许查询的字段集
-    keys = allow_hash.keys
-    sql_arr = []
-    cdt.keys.each do |key|
-      if keys.include? key
-        sql_arr.push "\"#{key}\" #{allow_hash[key]} \'#{cdt[key]}\'" unless cdt[key].blank?
-      end
-    end
-    sql = ''
-    sql_arr.each do |s| # 拼接条件
-      sql += s
-      sql += 'OR' if s != sql_arr.last
-    end
-    sql.blank? ? nil : Index::Workspace::Article.where(sql).offset(offset).limit(limit)
-  end
-
-  # ---------------------判断是否是协作文件---------------------- #
-  def is_cooperate?
-    file_seed.editors_count > 1
+  def html_content
+    self.content.content.safe_html  
   end
 
   # ------------------------文件类型------------------------- #
   def file_type
     :articles
-  end
-
-  # --------------------------赞--------------------------- #
-  def thumb_ups
-    Index::ThumbUp.get(self)
-  end
-
-  # -------------------------赞数-------------------------- #
-  def thumb_up_counts
-    Index::ThumbUp.counts(self)
-  end
-
-  # ------------------------判断赞------------------------- #
-  def has_thumb_up?(user)
-    Index::ThumbUp.has?(self, user)
-  end
-
-  # -----------------------点赞信息------------------------ #
-  def thumb_up_info(user)
-    Index::ThumbUp.counts_and_has?(self, user)
-  end
-
-  # ----------------------判断是否为根文件--------------------- #
-  def is_root?
-    file_seed.root_file_id == id && file_seed.root_file_type == itself.class.name
   end
 
   # ----------------------允许的路径类型----------------------- #
@@ -140,34 +105,10 @@ class Index::Workspace::Article < ApplicationRecord
     { files_count: 0, articles: [], corpuses: [], folders: [] }
   end
 
-  # ----------------------创建并设置目录----------------------- #
-  def create(target_dir, user)
-    Index::Workspace::FileSeed.create(self, target_dir, user)
-  end
-
-  # -------------------------移动文件------------------------- #
-  def move_dir(target_file, user)
-    Index::Workspace::FileSeed.move_dir self, target_file, user
-  end
-
-  # -------------------------删除文件------------------------- #
-  def delete_file(user = nil)
-    Index::Workspace::Trash.delete_files(self, user)
-  end
-
-  # --------------------------回收站-------------------------- #
-  def trash
-    Index::Workspace::Trash.find_by file_id: id, file_type: 'Index::Workspace::Article'
-  end
-
-  def delete_thumb_up
-    # Index::ThumbUp.destroy self
-  end
-
   # -------------------------阅读次数------------------------- #
   def add_read_times mark
     prefix = read_prefix
-    ReadWorker.perform_at(3.hours.from_now, self.id, prefix) if $redis.EXISTS(prefix) == 0
+    puts ReadWorker.perform_at(3.hours.from_now, self.id, prefix) if $redis.EXISTS(prefix) == 0
     $redis.SADD(read_prefix, mark)
   end
 

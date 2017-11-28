@@ -22,7 +22,7 @@ class Index::CommentsController < IndexController
   def create
     @comment = Index::Comment.new(comment_params)
     unless @code
-      @code = @comment.create(@resource, @user) ? 'Success' : 'Fail'
+      @code = @comment.create(@resource, @user) ? :Success : :Fail
     end
     respond_to do |format|
       format.json { render :show, status: @comment.id.nil? ? :unprocessable_entity : :created }
@@ -34,9 +34,9 @@ class Index::CommentsController < IndexController
   def destroy
     unless @code
       if @user = @comment.user || @user.can_edit?(:comment, @resource)  # 判断用户是否有权限删除评论
-        @code = @comment.drop(@resource) ? 'Success' : 'Fail'
+        @code = @comment.drop(@resource) ? :Success : :Fail
       else
-        @code = 'NoPermission'
+        @code = :NoPermission
       end
     end
     render json: { code: @code }
@@ -47,7 +47,7 @@ class Index::CommentsController < IndexController
   # Use callbacks to share common setup or constraints between actions.
   def set_comment
     comment_cache params[:id] if @resource
-    @code ||= 'ResourceNotExist' unless @comment
+    @code ||= :ResourceNotExist unless @comment
   end
 
   # Never trust parameters from the scary internet, only allow the white list through.
@@ -64,6 +64,6 @@ class Index::CommentsController < IndexController
       when 'corpuses'
         @resource = shown_corpus_cache resource_id
       end
-      @code = 'ResourceNotExist' unless @resource
+      @code = :ResourceNotExist unless @resource
   end
 end

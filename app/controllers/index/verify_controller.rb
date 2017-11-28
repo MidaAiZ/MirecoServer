@@ -1,9 +1,9 @@
 class Index::VerifyController < IndexController
   def check_code
     if verify_rucaptcha? params[:_rucaptcha], keep_session: true
-      render json: { code: 'Success' }
+      render json: { code: :Success }
     else
-      render json: { code: 'Fail' }
+      render json: { code: :Fail }
     end
   end
 
@@ -12,7 +12,7 @@ class Index::VerifyController < IndexController
     case params[:phone]
     when 'user_phone' # 发送给已登录用户
       check_login
-      # 如果用户登录,则正常发送, 否则返回'NotLoggedIn'(用户未登录)
+      # 如果用户登录,则正常发送, 否则返回:NotLoggedIn(用户未登录)
       @code = Valicode.set_msg_code(@user.phone, params[:handle]) if @user
     else
       @code = Valicode.set_msg_code(params[:phone], params[:handle])
@@ -26,7 +26,7 @@ class Index::VerifyController < IndexController
     case params[:phone]
     when 'user_phone' #发送给已登录用户的手机号的验证码
       check_login
-      # 如果用户登录,则正常发送, 否则返回'NotLoggedIn'(用户未登录)
+      # 如果用户登录,则正常发送, 否则返回:NotLoggedIn(用户未登录)
       msg_cache_key = Valicode.msg_cache_key(@user.phone, params[:handle]) if @user
     else #发送给参数中手机号的验证码
       msg_cache_key = Valicode.msg_cache_key(params[:phone], params[:handle]) # 获取注册cache的key值
@@ -41,15 +41,15 @@ class Index::VerifyController < IndexController
         # 每条验证码最多允许10次验证失败
         tem_cache = msg_record[:times] > 9 ? nil : { code: msg_record[:code], times: msg_record[:times] + 1 }
         @cache[msg_cache_key, 10.minutes] = tem_cache
-        @code = 'Fail' # 短信验证码错误
+        @code = :Fail # 短信验证码错误
       else
-        @code = 'Success'# 验证成功
+        @code = :Success# 验证成功
       end
     else
       @code = 'MsgCodeNotExist' # 短信验证码失效(不存在)
     end
 
-    @code ||= 'Fail'
+    @code ||= :Fail
     render json: { code: @code }
   end
 

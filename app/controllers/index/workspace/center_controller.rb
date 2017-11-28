@@ -9,22 +9,7 @@ class Index::Workspace::CenterController < IndexController
   end
 
   def marked_files
-    init
-    @res = Rails.cache.fetch("#{cache_key}/#{@user.id}/#{@page}/#{@count}", expires_in: 3.minutes) do
-      @nonpaged_articles = @user.marked_articles
-      @nonpaged_corpuses = @user.marked_corpuses
-      @nonpaged_folders = @user.marked_folders
-
-      # TODO 暂时实现比较ZZ的标星文件获取
-      res_art = @nonpaged_articles.page(@page).per(@count)
-      res_cor = @nonpaged_corpuses.page(@page).per(@count)
-      res_fol = @nonpaged_folders.page(@page).per(@count)
-      {
-        articles: res_art.records, folders: res_fol.records, corpuses: res_cor.records,
-        counts: count_cache("#{cache_key}_art", res_art) + count_cache("#{cache_key}_cor", res_cor)  + count_cache("#{cache_key}_fol", res_fol)
-       }
-    end
-    @marked_articles = @res[:articles];@marked_corpuses = @res[:corpuses];@marked_folders = @res[:folders]; @counts = @res[:counts]
+    @mark_records = @user.mark_records.includes(:file, :file_seed)
   end
 
   def published_articles
@@ -57,11 +42,11 @@ class Index::Workspace::CenterController < IndexController
 
   def withdraw # 退出协同写作
     @code = if @user.can_edit?(:all, @resource)
-              @resource.file_seed.destroy ? 'Success' : 'Fail'
+              @resource.file_seed.destroy ? :Success : :Fail
             else
-              @user.remove_edit_role(@resource) ? 'Success' : 'Fail'
+              @user.remove_edit_role(@resource) ? :Success : :Fail
             end
-    @code ||= 'Fail'
+    @code ||= :Fail
     render json: { code: @code }
   end
 
@@ -83,6 +68,6 @@ class Index::Workspace::CenterController < IndexController
                 when 'folders'
                   edit_folder_cache resource_id
                 end
-    render(json: { code: 'ResourceNotExist' }) && return unless @resource
+    render(json: { code: :ResourceNotExist }) && return unless @resource
   end
 end

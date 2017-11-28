@@ -84,7 +84,7 @@ class Index::Workspace::Trash < ApplicationRecord
     when :articles
       @files = { files_count: 0 } # 以下创建trash时使用
     when :corpuses
-      articles = @file.son_articles_with_content
+      articles = @file.son_articles
       articles.update_all is_deleted: true
       @files = { files_count: articles.size } # 以下创建trash时使用
     else # :folders
@@ -117,7 +117,7 @@ class Index::Workspace::Trash < ApplicationRecord
     when :articles
       # do nothing
     when :corpuses
-      @file.son_articles_with_del_with_content.update_all is_deleted: false
+      @file.son_articles_with_del.update_all is_deleted: false
     else # :folders
       @files = @file_seed.files
       @files[:articles].update_all is_deleted: false unless @files[:articles].blank?

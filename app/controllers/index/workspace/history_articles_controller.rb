@@ -25,7 +25,7 @@ class Index::Workspace::HistoryArticlesController < IndexController
     @history_article = Index::Workspace::HistoryArticle.new
 
     art_id = params[:article_id]
-    @article = @user.all_articles_with_content.find_by_id(art_id)
+    @article = @user.all_articles.find_by_id(art_id)
 
     if @article && @user.can_edit?(:add_history, @article)
       # 如果检索到该文章则将各值赋给历史文章
@@ -33,9 +33,9 @@ class Index::Workspace::HistoryArticlesController < IndexController
       @history_article.name = @article.name
       @history_article.tag = @article.tag
       @history_article.content = @article.content
-      @code = 'Success' if @history_article.save
+      @code = :Success if @history_article.save
     else # 检索不到目标文章
-      @code = 'NoPermission'
+      @code = :NoPermission
       @history_article.errors.add(:base, '找不到文章或没有权限')
     end
 
@@ -46,9 +46,9 @@ class Index::Workspace::HistoryArticlesController < IndexController
   # DELETE /index/history_articles/1.json
   def destroy
     if @user.can_edit? :add_history, @article
-      @code = @history_article.destroy ? 'Success' : 'Fail'
+      @code = @history_article.destroy ? :Success : :Fail
     else
-      @code = 'NoPermission'
+      @code = :NoPermission
     end
 
     render json { render json: { code: @code } }
@@ -64,6 +64,6 @@ class Index::Workspace::HistoryArticlesController < IndexController
     # 3.该历史文章的源文章属于登录用户
     @article = @user.all_articles.find_by_id(params[:article_id])
     @history_article = @article.history.find_by_id(params[:id]) if @article
-    render(json: { code: 'ResourceNotExist' }) && return unless @history_article
+    render(json: { code: :ResourceNotExist }) && return unless @history_article
   end
 end

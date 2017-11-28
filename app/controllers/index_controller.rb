@@ -3,7 +3,7 @@ class IndexController < ApplicationController
 
   def check_login
     user_cache session[:user_id]
-    @code = 'NotLoggedIn' unless @user # 用户未登录
+    @code = :NotLoggedIn unless @user # 用户未登录
     check_access # 检查用户帐号是否正常
   end
 
@@ -42,7 +42,7 @@ class IndexController < ApplicationController
   def shown_article_cache(id)
     @article = init_cache :article, id
     unless @article
-      @article = Index::Workspace::Article.shown.with_content.find_by_id id
+      @article = Index::Workspace::Article.shown.find_by_id id
       @cache[@prefix] = @article if @article
     end
     @article
@@ -51,7 +51,7 @@ class IndexController < ApplicationController
   def edit_article_cache(id)
     @article = init_cache :article, id, :edit_
     unless @article
-      @article = @user.all_articles.with_content.find_by_id id
+      @article = @user.all_articles.find_by_id id
       @cache[@prefix] = @article if @article
     end
     @article

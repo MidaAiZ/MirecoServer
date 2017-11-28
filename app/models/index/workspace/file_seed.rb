@@ -1,11 +1,11 @@
 class Index::Workspace::FileSeed < ApplicationRecord
   # ----------------------根目录文件----------------------- #
-  belongs_to :root_file, -> { with_del.brief },
+  belongs_to :root_file, -> { with_del },
              polymorphic: true,
              optional: true
 
   # ----------------------所有未删文件---------------------- #
-  has_many :articles, -> { no_content },
+  has_many :articles,
            class_name: 'Index::Workspace::Article',
            foreign_key: 'file_seed_id'
 
@@ -18,21 +18,12 @@ class Index::Workspace::FileSeed < ApplicationRecord
            foreign_key: 'file_seed_id'
 
   # -----------------------标星文件----------------------- #
-
-  has_many :marked_articles, -> { no_content.where(is_marked: true) },
-           class_name: 'Index::Workspace::Article',
-           foreign_key: 'file_seed_id'
-
-  has_many :marked_folders, -> { where(is_marked: true) },
-           class_name: 'Index::Workspace::Folder',
-           foreign_key: 'file_seed_id'
-
-  has_many :marked_corpuses, -> { where(is_marked: true) },
-           class_name: 'Index::Workspace::Corpus',
-           foreign_key: 'file_seed_id'
+  has_many :mark_records,
+            class_name: 'Index::Workspace::MarkRecord',
+            foreign_key: :file_seed_id
 
   # ----------------包括所有子目录下的所有文件,包含已删除的---------------- #
-  has_many :articles_with_del, -> { no_content.with_del },
+  has_many :articles_with_del, -> { with_del },
            class_name: 'Index::Workspace::Article',
            foreign_key: 'file_seed_id',
            dependent: :delete_all
@@ -99,6 +90,8 @@ class Index::Workspace::FileSeed < ApplicationRecord
         _self.save!
         set_file_info _self, dir
       end
+      _self.create_content! if _self.file_type == :articles
+
       return true
     end
     # rescue
@@ -124,23 +117,24 @@ class Index::Workspace::FileSeed < ApplicationRecord
     file_type = target_dir == 0 ? 0 : target_dir.file_type
     return false if _self.allow_dir_types.exclude? file_type # 检查目标目录是否合法
     # begin
-    file_seed = _self.file_seed # 获取当前文件的file_seed
-    if target_dir != 0
 
+    file_seed = _self.file_seed # 获取当前文件的file_seed
+    if target_dir != 0 # 非移入根目录
+      return false if target_dir == _self # 防止自循环嵌套
       target_seed = target_dir.file_seed
       # 不允许将外部文件夹移入协作文件夹, 会造成意外的嵌套　条件：１．协作　２．文件夹　３．外部
       return false if target_seed.is_cooperate? && # 判断是否是协作文件
                       target_dir.file_type == :folders && # 　判断是否是文件夹
                       file_seed != target_dir.file_seed # 判断是否是外部文件
     end
+
     ApplicationRecord.transaction do # 出错将回滚
       return change_edit_dir _self, target_dir, user if _self.is_root? # 移动一整个协同的文件,仅更改文件在其个人文件系统中的目录
-      　return false unless user.can_edit?(:move_dir, _self) # 检验用户对被移动文件的权限
+      return false unless user.can_edit?(:move_dir, _self) # 检验用户对被移动文件的权限
       if target_dir == 0 # 将文件移动到根目录
         # 将协同协作的文件夹(文集)内的文件移动到根目录,仅拥有者具有该权限
         return move_to_root(_self, user)
       else # 将文件移入另一个文件夹内
-        return false if target_dir == _self # 防止自循环嵌套
         if file_seed == target_seed # 如果目标文件和该文件属于同一个file_seed, 只需保存新路径即可
           return move_to_same_seed _self, target_dir
         else
@@ -175,7 +169,6 @@ class Index::Workspace::FileSeed < ApplicationRecord
         return false if files.include? target_dir # 防止文件夹嵌套
         reset_seed _self, target_dir, files
       else
-        role.is_root = false
         role.dir = target_dir # 仅修改协作用户个人的显示目录, 所以修改的是role的dir属性
         role.save!
         set_roles_info target_dir, role
@@ -188,8 +181,9 @@ class Index::Workspace::FileSeed < ApplicationRecord
   end
 
   def self.reset_seed(_self, target_dir, files)
-    _self.dir = target_dir
     file_seed = _self.file_seed
+    return true if file_seed == target_dir.file_seed # 相同seed无需重设
+    _self.dir = target_dir
     target_seed = target_dir.file_seed
     update_target_seed(_self, target_seed, files)
     file_seed.trashes.update_all file_seed_id: target_seed.id
@@ -222,15 +216,13 @@ class Index::Workspace::FileSeed < ApplicationRecord
   end
 
   def self.move_to_same_seed(_self, target_dir)
-    if _self.dir != target_dir
-      if _self.files[target_dir.file_type].exclude?(target_dir) # 防止文件夹嵌套
-        origin_dir = _self.dir
-        _self.dir = target_dir
-        set_file_info(_self, target_dir, origin_dir)
-        return _self.save!
-      end
+    return true if _self.dir == target_dir
+    if _self.files[target_dir.file_type].exclude?(target_dir) # 防止文件夹嵌套
+      origin_dir = _self.dir
+      _self.dir = target_dir
+      set_file_info(_self, target_dir, origin_dir)
+      return _self.save!
     end
-    false
   end
 
   def self.move_to_other_seed(_self, target_dir, user)
@@ -256,7 +248,7 @@ class Index::Workspace::FileSeed < ApplicationRecord
 
   def self.update_target_seed(_self, target_seed, files)
     f_s_id = target_seed.id
-    Index::Workspace::Article.with_content.where(id: files[:articles].map(&:id)).update_all file_seed_id: f_s_id if files[:articles].any? # 更新file_seed
+    Index::Workspace::Article.where(id: files[:articles].map(&:id)).update_all file_seed_id: f_s_id if files[:articles].any? # 更新file_seed
     Index::Workspace::Corpus.where(id: files[:corpuses].map(&:id)).update_all file_seed_id: f_s_id if files[:corpuses].any? # 更新file_seed
     Index::Workspace::Folder.where(id: files[:folders].map(&:id)).update_all file_seed_id: f_s_id if files[:folders].any? # 更新file_seed
 

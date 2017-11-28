@@ -60,14 +60,14 @@ class Index::SessionController < IndexController
 
     respond_to do |format|
       if @user
-        @code = 'Success' # 登录成功
+        @code = :Success # 登录成功
         session[:user_id] = @user.id
         clear_record
         format.json { render 'index/users/show' }
         format.html { redirect_to root_path }
       else
         record_fail
-        @code ||= 'Fail'
+        @code ||= :Fail
         format.json { render json: { code: @code } }
         format.html { redirect_to login_path, notice: @code }
       end
@@ -76,7 +76,7 @@ class Index::SessionController < IndexController
 
   def logout
     session[:user_id] = nil
-    @code = session[:user_id] ? 'Fail' : 'Success'
+    @code = session[:user_id] ? :Fail : :Success
     respond_to do |format|
       format.json { render json: { code: @code } }
       format.html { redirect_to root_path }

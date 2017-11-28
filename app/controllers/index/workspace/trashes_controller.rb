@@ -28,22 +28,22 @@ class Index::Workspace::TrashesController < IndexController
   def create
     @code = if @user.can_edit? :delete, @file
               @trash = Index::Workspace::Trash.delete_files(@file)
-              @trash ? 'Success' : 'Fail'
+              @trash ? :Success : :Fail
             else
-              'NoPermission'
+              :NoPermission
             end
 
-    @code ||= 'Fail'
+    @code ||= :Fail
     render :show
   end
 
   def recover
     if @user.can_edit? :delete, @trash.file_seed
-      @code = @trash.recover_files(@user) ? 'Success' : 'Fail'
+      @code = @trash.recover_files(@user) ? :Success : :Fail
     else
-      @code ||= 'NoPermission'
+      @code ||= :NoPermission
     end
-    @code ||= 'Fail'
+    @code ||= :Fail
 
     render json: { code: @code }
   end
@@ -53,12 +53,12 @@ class Index::Workspace::TrashesController < IndexController
   def destroy # 仅文件拥有者才允许彻底删除文件
     @trash = @user.trashes.find_by_id(params[:id]) if @user
     @code = if @trash
-              @trash.destroy_files ? 'Success' : 'Fail'
+              @trash.destroy_files ? :Success : :Fail
             else
-              'ResourceNotExist'
+              :ResourceNotExist
             end
 
-    @code ||= 'Fail'
+    @code ||= :Fail
     render json: { code: @code }
   end
 
@@ -72,12 +72,12 @@ class Index::Workspace::TrashesController < IndexController
       if @file_seed
         @trash = @file_seed.trashes.find_by_id params[:id]
       else
-        @code ||= 'ResourceNotExist'
+        @code ||= :ResourceNotExist
       end
     else
       @trash = @user.trashes.find_by_id params[:id]
     end
-    render(json: { code: 'ResourceNotExist' }) && return unless @trash
+    render(json: { code: :ResourceNotExist }) && return unless @trash
   end
 
   # Never trust parameters from the scary internet, only allow the white list through.
@@ -92,7 +92,7 @@ class Index::Workspace::TrashesController < IndexController
     if file_id && allow_files.include?(file_type)
       @file = case file_type
               when 'articles'
-                @user.all_articles_with_content.find_by_id file_id
+                @user.all_articles.find_by_id file_id
               when 'corpuses'
                 @user.all_corpuses.find_by_id file_id
               when 'folders'

@@ -3,7 +3,7 @@ class Index::UsersController < IndexController
 
   # GET /index/users/profile
   def show
-    @code ||= 'Success'
+    @code ||= :Success
   end
 
   # GET /index/users/new
@@ -37,24 +37,24 @@ class Index::UsersController < IndexController
     if !@code && @user.save
         session[:user_id] = @user.id # 注册后即登录
         @cache[msg_cache_key] = nil # 注册后删除缓存
-        @code = 'Success' # 注册成功
+        @code = :Success # 注册成功
         # try_send_vali_email '注册新账号'
     end
-    @code ||= 'Fail'
+    @code ||= :Fail
     render :show, status: @user.id.nil? ? :unprocessable_entity : :created
   end
 
   # PATCH/PUT /index/users/1
   # PATCH/PUT /index/users/1.json
   def update
-      @code = 'Success' if @user.update(index_user_params_update)
+      @code = :Success if @user.update(index_user_params_update)
 
     respond_to do |format|
-      if @code == 'Success'
+      if @code == :Success
         format.json { render :show, status: :ok, location: @user }
         format.html { redirect_to @user, notice: 'User was successfully updated.' }
       else
-        @code ||= 'Fail'
+        @code ||= :Fail
         format.json { render :show, status: :unprocessable_entity }
         format.html { render :edit }
       end
@@ -64,9 +64,9 @@ class Index::UsersController < IndexController
   # 修改密码
   def update_password
     new_password = params[:new_password] # 通过参数获取新密码
-    @code = 'Fail' unless Validate::VALID_PASSWORD_REGEX.match(new_password) # 验证新密码是否合法
+    @code = :Fail unless Validate::VALID_PASSWORD_REGEX.match(new_password) # 验证新密码是否合法
 
-    render(json: { code: @code }) && return if @code # 用户未登录(@code=='NotLoggedIn')或者传入的新密码不合法
+    render(json: { code: @code }) && return if @code # 用户未登录(@code==:NotLoggedIn)或者传入的新密码不合法
 
     # 判断修改方式, 支持原密码修改和短信验证码修改, 默认原密码修改
     case params[:update_type]
@@ -79,8 +79,8 @@ class Index::UsersController < IndexController
 
       # 当查询到验证码记录时通过参数获取新密码
       if msg_record && params[:msg_code] == msg_record[:code]
-        @code = 'Success' if @user.update(password: new_password)
-        @cache[msg_cache_key] = nil if @code == 'Success' # 清除缓存
+        @code = :Success if @user.update(password: new_password)
+        @cache[msg_cache_key] = nil if @code == :Success # 清除缓存
       elsif msg_record
         # 重新设置缓存, 记录验证失败次数, 失败5次时, 验证码失效
         record_fail msg_record, msg_cache_key
@@ -91,11 +91,11 @@ class Index::UsersController < IndexController
       user_password = BCrypt::Password.new(@user.password_digest) # 解码获取用户密码
 
       if user_password == old_password
-        @code = 'Success' if @user.update(password: new_password)
+        @code = :Success if @user.update(password: new_password)
       end
     end
 
-    @code ||= 'Fail'
+    @code ||= :Fail
     render :show
   end
 
@@ -124,7 +124,7 @@ class Index::UsersController < IndexController
       # 当查询到记录时 !@code = true 继续执行, 如果不做此判断将报错
       if !@code && old_msg_code == old_msg_record[:code] && new_msg_code == new_msg_record[:code]
         if @user.update(phone: new_phone) # 修改成功
-          @code = 'Success'
+          @code = :Success
           # 清空缓存记录
           @cache[new_msg_cache_key] = nil
           @cache[new_msg_cache_key] = nil
@@ -136,7 +136,7 @@ class Index::UsersController < IndexController
       end
     end
 
-    @code ||= 'Fail'
+    @code ||= :Fail
     render :show
   end
 
