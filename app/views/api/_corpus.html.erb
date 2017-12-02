@@ -18,7 +18,7 @@
       <tbody>
         <tr>
           <td>新建文集</td>
-          <td>workspace/corpus</td>
+          <td>workspace/corpuses</td>
           <td>POST</td>
           <td>
             <textarea cols="30" rows="10">
@@ -76,7 +76,7 @@
         <!-- 获取多条文集记录 -->
         <tr>
           <td>获取多条文集记录</td>
-          <td>workspace/corpus</td>
+          <td>workspace/corpuses</td>
           <td>GET</td>
           <td>
             <textarea cols="30" rows="10">
@@ -212,7 +212,20 @@ count:数量
           </td>
           <td>
             <textarea cols="30" rows="10">
-              //更新成功 { "code": "Success", "corpus": { "name": "new_name", ... } } //更新失败 { "code": "Fail", errors: { ... } }
+              //更新成功
+              {
+                "code": "Success",
+                "corpus": {
+                    "name": "new_name", ...
+                 }
+             }
+             //更新失败
+             {
+                 "code": "Fail",
+                 errors: {
+                     ...
+                 }
+             }
             </textarea>
           </td>
           <td>
@@ -238,7 +251,20 @@ count:数量
           </td>
           <td>
             <textarea cols="30" rows="10">
-              //更新成功 { "code": "Success", "corpus": { "tag": "new_tag", ... } } //更新失败 { "code": "Fail", errors: { ... } }
+                //更新成功
+                {
+                  "code": "Success",
+                  "corpus": {
+                      "tag": "new_tag", ...
+                   }
+               }
+               //更新失败
+               {
+                   "code": "Fail",
+                   errors: {
+                       ...
+                   }
+               }
             </textarea>
           </td>
           <td>
@@ -262,7 +288,21 @@ count:数量
           </td>
           <td>
             <textarea cols="30" rows="10">
-              //更新成功 { "code": "Success", "corpus": { "is_marked": "true", ... } } //更新失败 { "code": "Fail", errors: { ... } }
+                //更新成功
+                {
+                  "code": "Success",
+                  "corpus": {
+                      "is_marked": "true",
+                       ...
+                   }
+               }
+               //更新失败
+               {
+                   "code": "Fail",
+                   errors: {
+                       ...
+                   }
+               }
             </textarea>
           </td>
 
@@ -287,7 +327,21 @@ count:数量
           </td>
           <td>
             <textarea cols="30" rows="10">
-              //更新成功 { "code": "Success", "corpus": { "is_marked": "false", ... } } //更新失败 { "code": "Fail", errors: { ... } }
+                //更新成功
+                {
+                  "code": "Success",
+                  "corpus": {
+                      "is_marked": "false",
+                       ...
+                   }
+               }
+               //更新失败
+               {
+                   "code": "Fail",
+                   errors: {
+                       ...
+                   }
+               }
             </textarea>
           </td>
 
