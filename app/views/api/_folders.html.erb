@@ -217,66 +217,110 @@ count:数量
         </tr>
         <!-- 更新文件夹信息 -->
         <tr>
-          <td>更新文件夹信息</td>
-          <td>workspace/folders:id</td>
+          <td>更新文件夹名字</td>
+          <td>workspace/folders/:id/name</td>
           <td>PUT</td>
           <td>
             <textarea cols="30" rows="10">
-{
-    "folder": {
-        "name": "new_name",
-        "tag": "new_tag",
-        "is_marked": true
-    }
-}
-              </textarea>
+              { "name": "new_name", }
+            </textarea>
           </td>
           <td>
             <textarea cols="30" rows="10">
-//更新成功
-{
-    "code": "Success",
-    "folder": {
-        "id": 1,
-        "name": "new_name",
-        "tag": "new_tag",
-        "is_marked": true
-        ...
-    }
-}
-
-//更新失败
-{
-    "code": "Fail",
-    errors: {
-        ...
-    }
-}
-              </textarea>
+              //更新成功 { "code": "Success", "folder": { "name": "new_name", ... } } //更新失败 { "code": "Fail", errors: { ... } }
+            </textarea>
           </td>
           <td>
             <ul>
-              <li><span>code: 状态码</span><br>
+              <li>
+                <span>code: 状态码</span><br>
                 <span>Success：修改成功， Fail：修改失败, Nopermisson: 没有权限， ResourceNotExist: 文件夹不存在</span>
               </li>
               <li>
-                <span>用户只有在<span class="notice">已登录</span>情况下才能修改<span class="notice">具有编辑权限的</span>文件夹</span>
+                <span>用户只有在<span class="notice">已登录</span>情况下才能修改<span class="notice">自己的</span>文件夹</span>
+              </li>
+            </ul>
+          </td>
+        </tr>
+        <tr>
+          <td>更新文件夹标签</td>
+          <td>workspace/folders/:id/tag</td>
+          <td>PUT</td>
+          <td>
+            <textarea cols="30" rows="10">
+              { "tag": "new_tag", }
+            </textarea>
+          </td>
+          <td>
+            <textarea cols="30" rows="10">
+              //更新成功 { "code": "Success", "folder": { "tag": "new_tag", ... } } //更新失败 { "code": "Fail", errors: { ... } }
+            </textarea>
+          </td>
+          <td>
+            <ul>
+              <li>
+                <span>code: 状态码</span><br>
+                <span>Success：修改成功， Fail：修改失败, Nopermisson: 没有权限， ResourceNotExist: 文件夹不存在</span>
               </li>
               <li>
-                <span>通过update接口允许修改的属性有：</span>
-                <ol>
-                  <li>name</li>
-                  <li>tag</li>
-                  <li>is_marked</li>
-                </ol>
-                <span>更新时传入需要修改的字段的键值对即可</span>
+                <span>用户只有在<span class="notice">已登录</span>情况下才能修改<span class="notice">自己的</span>文件夹</span>
+              </li>
+            </ul>
+          </td>
+        </tr>
+        <tr>
+          <td>文件夹标星</td>
+          <td>workspace/folders/:id/mark</td>
+          <td>POST</td>
+          <td>
+            <textarea cols="30" rows="10"></textarea>
+          </td>
+          <td>
+            <textarea cols="30" rows="10">
+              //更新成功 { "code": "Success", "folder": { "is_marked": "true", ... } } //更新失败 { "code": "Fail", errors: { ... } }
+            </textarea>
+          </td>
+
+          <td>
+            <ul>
+              <li>
+                <span>code: 状态码</span><br>
+                <span>Success：修改成功， Fail：修改失败, Nopermisson: 没有权限， ResourceNotExist: 文件夹不存在</span>
+              </li>
+              <li>
+                <span>用户只有在<span class="notice">已登录</span>情况下才能修改<span class="notice">自己的</span>文件夹</span>
+              </li>
+            </ul>
+          </td>
+        </tr>
+        <tr>
+          <td>取消文件夹标星</td>
+          <td>workspace/folders/:id/unmark</td>
+          <td>POST</td>
+          <td>
+            <textarea cols="30" rows="10"></textarea>
+          </td>
+          <td>
+            <textarea cols="30" rows="10">
+              //更新成功 { "code": "Success", "folder": { "is_marked": "false", ... } } //更新失败 { "code": "Fail", errors: { ... } }
+            </textarea>
+          </td>
+
+          <td>
+            <ul>
+              <li>
+                <span>code: 状态码</span><br>
+                <span>Success：修改成功， Fail：修改失败, Nopermisson: 没有权限， ResourceNotExist: 文件夹不存在</span>
+              </li>
+              <li>
+                <span>用户只有在<span class="notice">已登录</span>情况下才能修改<span class="notice">自己的</span>文件夹</span>
               </li>
             </ul>
           </td>
         </tr>
         <!-- 更新文件夹的路径 -->
         <tr>
-          <td>更新文件夹的路径</td>
+          <td>移动文件夹</td>
           <td>workspace/folders:id/move_dir</td>
           <td>POST</td>
           <td>

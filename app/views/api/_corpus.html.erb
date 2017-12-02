@@ -124,7 +124,7 @@ count:数量
         <!-- 获取一条文集记录 -->
         <tr>
           <td>获取一条文集记录</td>
-          <td>workspace/corpus/:id</td>
+          <td>workspace/corpuses/:id</td>
           <td>GET</td>
           <td>
             <textarea cols="30" rows="10">
@@ -157,7 +157,7 @@ count:数量
         <!-- 获取文集包含的文章 -->
         <tr>
           <td>获取文集包含的文章</td>
-          <td>workspace/corpus/:id/profile</td>
+          <td>workspace/corpuses/:id/profile</td>
           <td>GET</td>
           <td>
             <textarea cols="30" rows="10">
@@ -202,44 +202,18 @@ count:数量
         </tr>
         <!-- 更新文集信息 -->
         <tr>
-          <td>更新文集信息</td>
-          <td>workspace/corpus/:id</td>
+          <td>更新文集名字</td>
+          <td>workspace/corpuses/:id/name</td>
           <td>PUT</td>
           <td>
             <textarea cols="30" rows="10">
-{
-    "corpus": {
-        "name": "new_name",
-        "tag": "new_tag",
-        "is_shown": true,
-        "is_marked": true
-    }
-}
-              </textarea>
+              { "name": "new_name", }
+            </textarea>
           </td>
           <td>
             <textarea cols="30" rows="10">
-//更新成功
-{
-    "code": "Success",
-    "corpus": {
-        "id": 1,
-        "name": "new_name",
-        "tag": "new_tag",
-        "is_shown": true,
-        "is_marked": true
-        ...
-    }
-}
-
-//更新失败
-{
-    "code": "Fail",
-    errors: {
-        ...
-    }
-}
-              </textarea>
+              //更新成功 { "code": "Success", "corpus": { "name": "new_name", ... } } //更新失败 { "code": "Fail", errors: { ... } }
+            </textarea>
           </td>
           <td>
             <ul>
@@ -248,25 +222,90 @@ count:数量
                 <span>Success：修改成功， Fail：修改失败, Nopermisson: 没有权限， ResourceNotExist: 文集不存在</span>
               </li>
               <li>
-                <span>用户只有在<span class="notice">已登录</span>情况下才能修改<span class="notice">具有编辑权限的</span>文集</span>
-              </li>
-              <li>
-                <span>通过update接口允许修改的属性有：</span>
-                <ol>
-                  <li>name</li>
-                  <li>tag</li>
-                  <li>is_shown</li>
-                  <li>is_marked</li>
-                </ol>
-                <span>更新时传入需要修改的字段的键值对即可</span>
+                <span>用户只有在<span class="notice">已登录</span>情况下才能修改<span class="notice">自己的</span>文集</span>
               </li>
             </ul>
           </td>
         </tr>
-        <!-- 发表文集 -->
+        <tr>
+          <td>更新文集标签</td>
+          <td>workspace/corpuses/:id/tag</td>
+          <td>PUT</td>
+          <td>
+            <textarea cols="30" rows="10">
+              { "tag": "new_tag", }
+            </textarea>
+          </td>
+          <td>
+            <textarea cols="30" rows="10">
+              //更新成功 { "code": "Success", "corpus": { "tag": "new_tag", ... } } //更新失败 { "code": "Fail", errors: { ... } }
+            </textarea>
+          </td>
+          <td>
+            <ul>
+              <li>
+                <span>code: 状态码</span><br>
+                <span>Success：修改成功， Fail：修改失败, Nopermisson: 没有权限， ResourceNotExist: 文集不存在</span>
+              </li>
+              <li>
+                <span>用户只有在<span class="notice">已登录</span>情况下才能修改<span class="notice">自己的</span>文集</span>
+              </li>
+            </ul>
+          </td>
+        </tr>
+        <tr>
+          <td>文集标星</td>
+          <td>workspace/corpuses/:id/mark</td>
+          <td>POST</td>
+          <td>
+            <textarea cols="30" rows="10"></textarea>
+          </td>
+          <td>
+            <textarea cols="30" rows="10">
+              //更新成功 { "code": "Success", "corpus": { "is_marked": "true", ... } } //更新失败 { "code": "Fail", errors: { ... } }
+            </textarea>
+          </td>
+
+          <td>
+            <ul>
+              <li>
+                <span>code: 状态码</span><br>
+                <span>Success：修改成功， Fail：修改失败, Nopermisson: 没有权限， ResourceNotExist: 文集不存在</span>
+              </li>
+              <li>
+                <span>用户只有在<span class="notice">已登录</span>情况下才能修改<span class="notice">自己的</span>文集</span>
+              </li>
+            </ul>
+          </td>
+        </tr>
+        <tr>
+          <td>取消文集标星</td>
+          <td>workspace/corpuses/:id/unmark</td>
+          <td>POST</td>
+          <td>
+            <textarea cols="30" rows="10"></textarea>
+          </td>
+          <td>
+            <textarea cols="30" rows="10">
+              //更新成功 { "code": "Success", "corpus": { "is_marked": "false", ... } } //更新失败 { "code": "Fail", errors: { ... } }
+            </textarea>
+          </td>
+
+          <td>
+            <ul>
+              <li>
+                <span>code: 状态码</span><br>
+                <span>Success：修改成功， Fail：修改失败, Nopermisson: 没有权限， ResourceNotExist: 文集不存在</span>
+              </li>
+              <li>
+                <span>用户只有在<span class="notice">已登录</span>情况下才能修改<span class="notice">自己的</span>文集</span>
+              </li>
+            </ul>
+          </td>
+        </tr>        <!-- 发表文集 -->
         <tr>
           <td>发表文集</td>
-          <td>workspace/corpus/:id/publish</td>
+          <td>workspace/corpuses/:id/publish</td>
           <td>PUT</td>
           <td>
             <textarea cols="30" rows="10">
@@ -322,8 +361,8 @@ count:数量
         </tr>
         <!-- 更新文集的文件夹路径 -->
         <tr>
-          <td>更新文集的文件夹路径</td>
-          <td>workspace/corpus/:id/move_dir</td>
+          <td>移动文集</td>
+          <td>workspace/corpuses/:id/move_dir</td>
           <td>POST</td>
           <td>
             <textarea cols="30" rows="10">
@@ -385,7 +424,7 @@ count:数量
         <!-- 删除文集 -->
         <tr>
           <td>删除文集</td>
-          <td>workspace/corpus/:id</td>
+          <td>workspace/corpuses/:id</td>
           <td>DELETE</td>
           <td>无</td>
           <td>
@@ -415,7 +454,7 @@ count:数量
         <!-- 添加协同作者 -->
         <tr>
           <td>添加协同作者</td>
-          <td>workspace/corpus/:id/add_editor</td>
+          <td>workspace/corpuses/:id/add_editor</td>
           <td>POST</td>
           <td>
             <textarea cols="30" rows="10">
@@ -459,7 +498,7 @@ count:数量
         <!-- 移除协同作者 -->
         <tr>
           <td>移除协同作者</td>
-          <td>workspace/corpus/:id/remove_editor</td>
+          <td>workspace/corpuses/:id/remove_editor</td>
           <td>POST</td>
           <td>
             <textarea cols="30" rows="10">
