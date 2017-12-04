@@ -8,14 +8,17 @@ class Index::CommentsController < IndexController
     page = params[:page] || 1
     count = params[:count] || 15
     count = 100 if count.to_i > 100  # 限制返回的评论条数
-    @nonpaged_comments = @resource ? @resource.comments : Index::Comment.none
+    @nonpaged_comments = @resource ? @resource.comments.includes(:user) : Index::Comment.none
     @comments = @nonpaged_comments.page(page).per(count).includes(:limit_3_replies)
   end
 
   # GET /index/comments/1
   # GET /index/comments/1.json
   def show
-    # @replies = @comment ? @comment.replies.limit(15) : Index::Comment.none
+    page = params[:page] || 1
+    count = params[:count] || 15
+    count = 100 if count.to_i > 100  # 限制返回的回复条数
+    @replies = @comment ? @comment.replies.page(page).per(count).includes(:user) : Index::Comment.none
   end
 
   # POST /:resource_type/:resource_id/comments
