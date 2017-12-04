@@ -97,7 +97,7 @@ Rails.application.routes.draw do
     # 主页
     get 'main' => 'main#index'
     get 'articles' => 'main#articles'
-    get 'corpuses' => 'main#corpus'
+    get 'corpuses' => 'main#corpuses'
     get 'articles/:id' => 'main#show_article'
     get 'corpuses/:id' => 'main#show_corpus'
 

@@ -7,7 +7,7 @@ class Index::MainController < IndexController
   def articles
     @res = Rails.cache.fetch("#{cache_key}/#{@page}/#{@count}", expires_in: 3.minutes) do
       @nonpaged_articles = Index::Workspace::Article.shown # .sort(@tag)
-      res = @nonpaged_articles.page(@page).per(@count)
+      res = @nonpaged_articles.page(@page).per(@count).includes(:own_editor)
       { record: res.records, counts: count_cache(cache_key, res) }
     end
     @articles = @res[:record]; @counts = @res[:counts]
@@ -15,14 +15,17 @@ class Index::MainController < IndexController
 
   def show_article
     shown_article_cache params[:id]
-    @article.add_read_times mark if @article
+    if @article
+        @article.add_read_times mark
+        @editors = @article.editor_roles.includes(:editor)
+    end
     # @comments = @article.comments.limit(10).includes(:user) if @article
   end
 
-  def corpus
+  def corpuses
     @res = Rails.cache.fetch("#{cache_key}/#{@page}/#{@count}", expires_in: 3.minutes) do
       @nonpaged_corpus = Index::Workspace::Corpus.shown # .sort(@tag)
-      res = @nonpaged_corpus.page(@page).per(@count)
+      res = @nonpaged_corpus.page(@page).per(@count).includes(:own_editor)
       { record: res.records, counts: count_cache(cache_key, res) }
     end
     @corpuses = @res[:record]; @counts = @res[:counts]
@@ -30,6 +33,9 @@ class Index::MainController < IndexController
 
   def show_corpus
     shown_corpus_cache params[:id]
+    if @corpus
+        @editors = @corpus.editor_roles.includes(:editor)
+    end
   end
 
   private
