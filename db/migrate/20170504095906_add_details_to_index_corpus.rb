@@ -1,4 +1,4 @@
-class AddDetailsToIndexCorpus < ActiveRecord::Migration
+class AddDetailsToIndexCorpus < ActiveRecord::Migration[4.2]
   def change
     change_table :index_corpus do |t|
       t.boolean :is_shown

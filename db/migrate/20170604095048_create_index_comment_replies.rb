@@ -1,4 +1,4 @@
-class CreateIndexCommentReplies < ActiveRecord::Migration
+class CreateIndexCommentReplies < ActiveRecord::Migration[4.2]
   def change
     create_table :index_comment_replies do |t|
       t.integer :comment_id

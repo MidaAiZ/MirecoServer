@@ -1,4 +1,4 @@
-class ChangeFatherFilesRefOfIndexArticles < ActiveRecord::Migration
+class ChangeFatherFilesRefOfIndexArticles < ActiveRecord::Migration[4.2]
   def change
     change_table :index_articles do |t|
       t.remove :index_folder_id

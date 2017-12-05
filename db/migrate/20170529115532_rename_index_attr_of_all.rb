@@ -1,4 +1,4 @@
-class RenameIndexAttrOfAll < ActiveRecord::Migration
+class RenameIndexAttrOfAll < ActiveRecord::Migration[4.2]
   def change
     remove_column :index_articles, :index_user_id
     remove_column :index_corpus, :index_user_id

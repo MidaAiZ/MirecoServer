@@ -1,4 +1,4 @@
-class CreateIndexTrashes < ActiveRecord::Migration
+class CreateIndexTrashes < ActiveRecord::Migration[4.2]
   def change
     create_table :index_trashes do |t|
       t.integer :file_seed_id, index: true

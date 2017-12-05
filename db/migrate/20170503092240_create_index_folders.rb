@@ -1,4 +1,4 @@
-class CreateIndexFolder < ActiveRecord::Migration
+class CreateIndexFolder < ActiveRecord::Migration[4.2]
   def change
     create_table :index_folders do |t|
       t.string :name

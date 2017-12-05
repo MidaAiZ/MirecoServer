@@ -1,4 +1,4 @@
-class CreateIndexArticles < ActiveRecord::Migration
+class CreateIndexArticles < ActiveRecord::Migration[4.2]
   def change
     create_table :index_articles do |t|
       t.string :title

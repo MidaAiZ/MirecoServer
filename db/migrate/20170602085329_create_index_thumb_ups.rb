@@ -1,4 +1,4 @@
-class CreateIndexThumbUps < ActiveRecord::Migration
+class CreateIndexThumbUps < ActiveRecord::Migration[4.2]
   def change
     create_table :index_thumb_ups do |t|
       t.references :resource,  :polymorphic => true

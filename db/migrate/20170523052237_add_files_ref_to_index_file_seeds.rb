@@ -1,4 +1,4 @@
-class AddFilesRefToIndexFileSeeds < ActiveRecord::Migration
+class AddFilesRefToIndexFileSeeds < ActiveRecord::Migration[4.2]
   def change
     change_table :index_file_seeds do |t|
       t.references :root_file, :polymorphic => true
