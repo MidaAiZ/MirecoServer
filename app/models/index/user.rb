@@ -108,7 +108,6 @@ class Index::User < ApplicationRecord
   validates :phone, presence: true, uniqueness: { message: '该手机号已被注册' },
                     format: { with: Validate::VALID_PHONE_REGEX },
                     allow_blank: false
-  validates :gender, inclusion: ['男', '女'], allow_blank: true
   validates :intro, length: { maximum: 255 }, allow_blank: true
 
   #----------------------------域------------------------------

@@ -7,7 +7,7 @@ class Index::CommentRepliesController < IndexController
     page = params[:page] || 1
     count = params[:count] || 15
     count = 100 if count.to_i > 100 # 限制返回的评论条数
-    @nonpaged_replies = @comment ? @comment.replies.includes(:user) : Index::CommentReply.none
+    @nonpaged_replies = @comment ? @comment.replies : Index::CommentReply.none
     @replies = @nonpaged_replies.page(page).per(count)
   end
 

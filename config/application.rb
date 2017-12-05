@@ -57,4 +57,7 @@ module Server
       end
     end
   end
+  ENV["DB_USER"] = 'mida'
+  ENV["DB_PASSWORD"] = '112420'
+  ENV["SECRET_KEY_BASE"] = 'f13760bb00730dca6334207b7339526310205d1891f3007c9c81052e67c241c87e249874f136c3522a8ab8b30398e8ea18ef78ef7c88541a3f44e3da6966asdad69'
 end

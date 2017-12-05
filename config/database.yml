@@ -86,6 +86,6 @@ production:
   adapter: postgresql
   encoding: unicode
   pool: 5
-  database: Mireco
+  database: mireco
   username: <%= ENV["DB_USER"] %>
   password: <%= ENV["DB_PASSWORD"] %>
