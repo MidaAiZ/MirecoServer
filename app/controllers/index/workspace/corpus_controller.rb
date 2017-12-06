@@ -5,7 +5,7 @@ class Index::Workspace::CorpusController < IndexController
 
   before_action :require_login
   before_action :set_corpus, except: [:index, :new, :create]
-  before_action :set_file, only: [:update, :mark, :unmark, :rename, :add_editor, :remove_editor, :move_dir, :destroy]
+  before_action :set_file, only: [:update, :mark, :unmark, :rename, :add_editor, :remove_editor, :move_dir, :publish, :destroy]
 
   # GET /index/corpuss
   # GET /index/corpuss.json
