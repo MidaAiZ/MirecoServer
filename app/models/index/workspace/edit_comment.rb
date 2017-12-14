@@ -8,6 +8,10 @@ class Index::Workspace::EditComment < ApplicationRecord
 
   belongs_to :resource, polymorphic: true
 
+  has_many :replies,
+            class_name: 'Index::Workspace::EditCommentReply',
+            foreign_key: :edit_comment_id
+
   # -------------------------赞--------------------------- #
   validates :user_id, presence: true
   validates :resource_id, presence: true
@@ -21,24 +25,5 @@ class Index::Workspace::EditComment < ApplicationRecord
 
   def clear_cache
     Cache.new["edit_comment_#{self.id}"] = nil
-  end
-
-  def self.include_users edit_comments = []
-    ids = Set.new
-    edit_comments.each do |co|
-      co.replies.each_value do |re|
-        ids.add re['user_id']
-      end
-    end
-    users = {}
-    _users = Index::User.where(id: ids.to_a).brief
-    _users.each do |u|
-      users[u.id] = u
-    end
-    edit_comments.each do |co|
-      co.replies.each_value do |re|
-        re[:user] = users[re['user_id']]
-      end
-    end
   end
 end
