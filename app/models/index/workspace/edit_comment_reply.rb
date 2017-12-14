@@ -12,6 +12,6 @@ class Index::Workspace::EditCommentReply < ApplicationRecord
   validates :user_id, presence: true
   validates :content, presence: true, length: { minimum: 1, maximum: 255 }
 
-  default_scope { order(id: :DESC) }
+  default_scope { order(id: :ASC) }
 
 end
