@@ -21,14 +21,14 @@ class Index::Workspace::EditCommentsController < IndexController
         @edit_comment.resource = @resource
         @code = @edit_comment.save ? :Success : :Fail
     else
-        @code ||= :NoPermission
+        @code = :NoPermission
     end
 
     respond_to do |format|
       if  @edit_comment.id.nil?
-        format.json { render :show, status: :created }
-      else
         format.json { render json: { code: @code }, status: :unprocessable_entity }
+      else
+        format.json { render :show, status: :created }
       end
     end
   end
