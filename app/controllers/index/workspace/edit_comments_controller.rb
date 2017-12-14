@@ -3,10 +3,11 @@ class Index::Workspace::EditCommentsController < IndexController
   before_action :set_resource
   before_action :check_permission, only: [:add_reply, :remove_reply, :destroy]
   before_action :set_edit_comment, only: [:show, :add_reply, :remove_reply, :destroy]
+  before_action :set_replies, only: [:show, :add_reply, :remove_reply]
+  
 
   def index
-    @edit_comments = @resource ? @resource.edit_comments : Index::Workspace::EditComment.none
-    Index::Workspace::EditComment.include_users @edit_comments
+    @edit_comments = @resource ? @resource.edit_comments.includes(replies: :user) : Index::Workspace::EditComment.none
   end
 
   def show
@@ -25,37 +26,32 @@ class Index::Workspace::EditCommentsController < IndexController
   end
 
   def add_reply
-    if params[:reply] && params[:reply].size < 255
-      reply = {
-        user_id: @user.id,
-        content: params[:reply]
-      }
-      @edit_comment.replies[reply_key] = reply
-      @code = @edit_comment.save ? :Success : :Fail
-    else
-      @edit_comment.errors.add(:reply, 'size of reply should be 1-255')
-    end
-    @code ||= :Fail
+    @reply = Index::Workspace::EditCommentReply.new content: params[:reply]
+    @reply.user = @user
+    @reply.edit_comment = @edit_comment
+      
+    @code = @reply.save ? :Success : :Fail
+    
     respond_to do |format|
       format.json { render :show }
     end
   end
 
   def remove_reply
-    key = params[:hash_key]
-    if @edit_comment.replies.key?(key)
+    @reply = @edit_comment.replies.find(params[:reply_id])
+    if @reply
       # 允许删除回复的条件
-      if @edit_comment.replies[key]['user_id'] == @user.id || # 1: 回复者
+      if @reply.user == @user || # 1: 回复者
          @edit_comment.user == @user || # 2: 评论者
          @user.can_edit?(:delete_comment, @resource) # 3. 具有删除评论权限的用户
 
-        @edit_comment.replies.delete key
-        @code = @edit_comment.save ? :Success : :Fail
+        @code = @reply.destroy ? :Success : :Fail
       else
         @code = :NoPermission
       end
     end
     @code ||= :Fail
+
     respond_to do |format|
       format.json { render :show }
     end
@@ -94,6 +90,10 @@ class Index::Workspace::EditCommentsController < IndexController
                   edit_article_cache resource_id
                 end
     render(json: { code: :ResourceNotExist }) && return unless @resource
+  end
+
+  def set_replies
+    @replies = @edit_comment.replies.includes(:user)
   end
 
   def check_permission

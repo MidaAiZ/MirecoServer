@@ -4,7 +4,7 @@ class Index::Workspace::ArticlesController < IndexController
 
   before_action :require_login
   before_action :set_article, except: [:index, :new, :create]
-  before_action :set_file, only: [:update, :mark, :unmark, :rename, :add_editor, :remove_editor, :move_dir, :destroy]
+  before_action :set_file, only: [:update, :mark, :unmark, :rename, :add_editor, :remove_editor, :move_dir, :publish, :destroy]
 
   # GET /index/articles
   # GET /index/articles.json

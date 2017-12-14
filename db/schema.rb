@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20171115033706) do
+ActiveRecord::Schema.define(version: 20171213174533) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -94,6 +94,12 @@ ActiveRecord::Schema.define(version: 20171115033706) do
     t.index ["info"], name: "index_corpus_on_files", using: :gin
     t.index ["name"], name: "index_corpus_on_name"
     t.index ["tag"], name: "index_corpus_on_tag"
+  end
+
+  create_table "index_edit_comment_replies", force: :cascade do |t|
+    t.bigint "edit_comment_id"
+    t.bigint "user_id"
+    t.string "content"
   end
 
   create_table "index_edit_comments", id: :serial, force: :cascade do |t|
