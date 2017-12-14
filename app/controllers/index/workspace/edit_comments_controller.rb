@@ -25,7 +25,11 @@ class Index::Workspace::EditCommentsController < IndexController
     end
 
     respond_to do |format|
-      format.json { render :show, status: @edit_comment.id.nil? ? :unprocessable_entity : :created }
+      if  @edit_comment.id.nil?
+        format.json { render :show, status: :created }
+      else
+        format.json { render json: { code: @code }, status: :unprocessable_entity }
+      end
     end
   end
 
