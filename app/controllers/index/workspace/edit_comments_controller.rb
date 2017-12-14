@@ -4,7 +4,7 @@ class Index::Workspace::EditCommentsController < IndexController
   before_action :check_permission, only: [:add_reply, :remove_reply, :destroy]
   before_action :set_edit_comment, only: [:show, :add_reply, :remove_reply, :destroy]
   before_action :set_replies, only: [:show, :add_reply, :remove_reply]
-  
+
 
   def index
     @edit_comments = @resource ? @resource.edit_comments.includes(replies: :user) : Index::Workspace::EditComment.none
@@ -15,25 +15,38 @@ class Index::Workspace::EditCommentsController < IndexController
 
   def create
     @edit_comment = Index::Workspace::EditComment.new(edit_comment_params)
-
-    @edit_comment.user = @user
-    @edit_comment.resource = @resource
-    @code = @edit_comment.save ? :Success : :Fail
+    # 权限
+    if @user.can_edit?(:comment, @resource)
+        @edit_comment.user = @user
+        @edit_comment.resource = @resource
+        @code = @edit_comment.save ? :Success : :Fail
+    else
+        @code = :NoPermission
+    end
 
     respond_to do |format|
-      format.json { render :show, status: @edit_comment.id.nil? ? :unprocessable_entity : :created }
+      if  @edit_comment.id.nil?
+        format.json { render json: { code: @code }, status: :unprocessable_entity }
+      else
+        format.json { render :show, status: :created }
+      end
     end
   end
 
   def add_reply
     @reply = Index::Workspace::EditCommentReply.new content: params[:reply]
-    @reply.user = @user
-    @reply.edit_comment = @edit_comment
-      
-    @code = @reply.save ? :Success : :Fail
-    
+
+    # 权限
+    if @user.can_edit?(:comment, @resource)
+        @reply.user = @user
+        @reply.edit_comment = @edit_comment
+
+        @code = @reply.save ? :Success : :Fail
+    else
+        @code ||= :NoPermission
+    end
     respond_to do |format|
-      format.json { render :show }
+      format.json { render :show, status: @reply.id.nil? ? :unprocessable_entity : :created  }
     end
   end
 
