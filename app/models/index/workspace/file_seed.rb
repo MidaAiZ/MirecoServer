@@ -76,21 +76,21 @@ class Index::Workspace::FileSeed < ApplicationRecord
   def self.create(_self, dir, user)
     return false if _self.id
     ApplicationRecord.transaction do
-      if dir == 0
+      if dir == 0 # 在根目录内创建文件
         file_seed = _self.create_file_seed!(editors_count: 0)
         _self.file_seed = file_seed
         _self.save!
-        file_seed.root_file = _self
+        file_seed.root_file = _self # 将fileseed根文件指针指向新建文件
         file_seed.save!
-        user.add_edit_role :own, file_seed
-      else
-        return false if _self.allow_dir_types.exclude? dir.file_type
+        user.add_edit_role :own, file_seed # 设置文件所有权
+      else # 在父目录内创建文件
+        return false if _self.allow_dir_types.exclude? dir.file_type # 检查文件类型合法性
         _self.dir = dir
         _self.file_seed = _self.dir.file_seed
         _self.save!
-        set_file_info _self, dir
+        set_file_info _self, dir # 设置文件目录信息
       end
-      _self.create_content! if _self.file_type == :articles
+      _self.create_content! if _self.file_type == :articles # 当文件类型为文章时创建文章内容
 
       return true
     end
@@ -130,7 +130,7 @@ class Index::Workspace::FileSeed < ApplicationRecord
 
     ApplicationRecord.transaction do # 出错将回滚
       return change_edit_dir _self, target_dir, user if _self.is_root? # 移动一整个协同的文件,仅更改文件在其个人文件系统中的目录
-      return false unless user.can_edit?(:move_dir, _self) # 检验用户对被移动文件的权限
+      return false unless user.can_edit?(:move_dir, _self) # 检验用户对被移动文件的权限 TODO：耦合太高，之后考虑将权限验证改到控制器里
       if target_dir == 0 # 将文件移动到根目录
         # 将协同协作的文件夹(文集)内的文件移动到根目录,仅拥有者具有该权限
         return move_to_root(_self, user)
@@ -180,7 +180,7 @@ class Index::Workspace::FileSeed < ApplicationRecord
     _self.save!
   end
 
-  def self.reset_seed(_self, target_dir, files)
+  def self.reset_seed(_self, target_dir, files) # 重置fileseed指针
     file_seed = _self.file_seed
     return true if file_seed == target_dir.file_seed # 相同seed无需重设
     _self.dir = target_dir
@@ -191,18 +191,18 @@ class Index::Workspace::FileSeed < ApplicationRecord
     file_seed.delete
   end
 
-  def self.set_roles_info(dir, role, status = 'add')
+  def self.set_roles_info(dir, role, status = 'add') # 设置父目录的子文件信息，弱关联，提供由父文件查找子文件的反向关联信息
     return false unless dir
-    if status == 'add'
+    if status == 'add' # 父目录添加子文件，操作对象：移动的目标目录
       dir.info['son_roles'] = Set.new(dir.info['son_roles']).add role.id
-    elsif status == 'delete'
+    elsif status == 'delete' # 父目录移除子文件，操作对象： 移出的原目录
       dir.info['son_roles'] = Set.new(dir.info['son_roles']).delete role.id
       dir.info.delete 'son_roles' if dir.info['son_roles'].blank?
     end
     dir.save!
   end
 
-  def self.move_to_root(_self, user)
+  def self.move_to_root(_self, user) # 移动目标文件到根目录
     return false unless user.has_edit_role?(:own, _self)
     # 以下将文件移动到根目录, 首先新建一个file_seed, 再移动文件
     target_seed = Index::Workspace::FileSeed.new # 新建fileseed
@@ -215,7 +215,7 @@ class Index::Workspace::FileSeed < ApplicationRecord
     do_move _self, target_seed, origin_dir
   end
 
-  def self.move_to_same_seed(_self, target_dir)
+  def self.move_to_same_seed(_self, target_dir) # 移动目标文件到同一个fileseed下的目录内
     return true if _self.dir == target_dir
     if _self.files[target_dir.file_type].exclude?(target_dir) # 防止文件夹嵌套
       origin_dir = _self.dir
@@ -225,8 +225,8 @@ class Index::Workspace::FileSeed < ApplicationRecord
     end
   end
 
-  def self.move_to_other_seed(_self, target_dir, user)
-    return false unless user.has_edit_role?(:own, _self)
+  def self.move_to_other_seed(_self, target_dir, user) # 移动文件到另一个fileseed内的目录内
+    return false unless user.has_edit_role?(:own, _self) # TODO 降低权限耦合
     return false unless user.has_edit_role?(:own, target_dir)
     files = _self.files
     if files[target_dir.file_type].exclude?(target_dir) # 防止文件夹嵌套
@@ -237,7 +237,7 @@ class Index::Workspace::FileSeed < ApplicationRecord
     false
   end
 
-  def self.do_move(_self, target_seed, origin_dir, files = nil)
+  def self.do_move(_self, target_seed, origin_dir, files = nil) # 移动操作
     # 获取_self文件的子文件
     files ||= _self.files
     # 修改目标file_seed信息并将_self的file_seed指向target_seed
@@ -246,7 +246,7 @@ class Index::Workspace::FileSeed < ApplicationRecord
     set_file_info _self, _self.dir, origin_dir
   end
 
-  def self.update_target_seed(_self, target_seed, files)
+  def self.update_target_seed(_self, target_seed, files) # 更新目标目录的fileseed信息
     f_s_id = target_seed.id
     Index::Workspace::Article.where(id: files[:articles].map(&:id)).update_all file_seed_id: f_s_id if files[:articles].any? # 更新file_seed
     Index::Workspace::Corpus.where(id: files[:corpuses].map(&:id)).update_all file_seed_id: f_s_id if files[:corpuses].any? # 更新file_seed
@@ -257,7 +257,7 @@ class Index::Workspace::FileSeed < ApplicationRecord
     _self.save!
   end
 
-  def self.set_file_info(_self, target_dir, origin_dir = nil)
+  def self.set_file_info(_self, target_dir, origin_dir = nil) # 设置文件的信息
     if target_dir
       info = target_dir.info
       key = _self.file_type.to_s

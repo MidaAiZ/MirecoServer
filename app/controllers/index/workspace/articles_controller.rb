@@ -47,7 +47,7 @@ class Index::Workspace::ArticlesController < IndexController
   end
 
   def update_content
-    if @user.can_edit?(:update, @article)
+    if @user.can_edit?(:edit, @article)
         if params[:content]
             @code = @article.content.update(text: params[:content]) ? :Success : :Fail
         end

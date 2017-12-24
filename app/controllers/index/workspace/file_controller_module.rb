@@ -17,30 +17,23 @@ module FileController
       do_update_response
     end
 
+    # 文件标星和取消标星属于个人目录内的操作，不检查权限
     def mark
-      if @user.can_edit?(:update, @file)
-          @code = Index::Workspace::MarkRecord._create(@user, @file) ? :Success : :Fail
-      else
-        @code = :NoPermission
-      end
+      @code = Index::Workspace::MarkRecord._create(@user, @file) ? :Success : :Fail
       do_update_response
     end
 
     def unmark
-      if @user.can_edit?(:update, @file)
-          @mark_records = @file.mark_records.find_by_user_id(@user.id)
-          @code = @mark_records && @mark_records._destroy(@user, @file) ? :Success : :Fail
-      else
-          @code = :NoPermission
-      end
+      @mark_record = @file.mark_records.find_by_user_id(@user.id)
+      @code = @mark_record && @mark_record._destroy(@user, @file) ? :Success : :Fail
       do_update_response
     end
 
     def rename
       if @user.can_edit?(:update, @file)
-          @code = @file.update(name: params[:name]) ? :Success : :Fail
+        @code = @file.update(name: params[:name]) ? :Success : :Fail
       else
-          @code = :NoPermission
+        @code = :NoPermission
       end
       do_update_response
     end
