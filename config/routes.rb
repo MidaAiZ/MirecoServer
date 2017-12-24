@@ -84,7 +84,7 @@ Rails.application.routes.draw do
       get '/:resource_type/:resource_id/edit_comments' => 'edit_comments#index'
       get '/:resource_type/:resource_id/edit_comments/:id' => 'edit_comments#show'
       post '/:resource_type/:resource_id/edit_comments/:id/replies' => 'edit_comments#add_reply'
-      delete '/:resource_type/:resource_id/edit_comments/:id/replies' => 'edit_comments#remove_reply'
+      delete '/:resource_type/:resource_id/edit_comments/:id/replies/:reply_id' => 'edit_comments#remove_reply'
       delete '/:resource_type/:resource_id/edit_comments/:id' => 'edit_comments#destroy'
 
       resources :trashes do
