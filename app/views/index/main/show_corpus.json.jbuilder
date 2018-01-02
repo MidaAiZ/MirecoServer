@@ -2,7 +2,7 @@ json.code @code if @code
 if @corpus
   # json.cache! @corpus.cache_key, expires_in: 3.minute do
     json.corpus do
-      json.extract! @corpus, :id, :name, :tag, :created_at
+      json.extract! @corpus, :id, :name, :tag, :created_at, :cover
       json.comments_count @corpus.cmt_counts || 0
       json.read_times @corpus.read_times || 0
       json.editors_count @corpus.file_seed.editors_count

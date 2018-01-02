@@ -2,7 +2,7 @@ json.code @code if @code
 if @article
   # json.cache! @article.cache_key, expires_in: 3.minute do
     json.article do
-      json.extract! @article, :id, :name, :tag, :created_at, :content
+      json.extract! @article, :id, :name, :tag, :created_at, :content, :cover
       json.comments_count @article.cmt_counts || 0
       json.read_times @article.read_times
       json.editors_count @article.file_seed.editors_count

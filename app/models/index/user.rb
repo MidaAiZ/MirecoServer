@@ -48,15 +48,15 @@ class Index::User < ApplicationRecord
            source: :root_file,
            source_type: 'Index::Workspace::Folder'
 
-  has_many :all_articles,
+  has_many :all_articles, -> { undeleted },
            through: :all_file_seeds,
            source: :articles
 
-  has_many :all_corpuses,
+  has_many :all_corpuses, -> { undeleted },
            through: :all_file_seeds,
            source: :corpuses
 
-  has_many :all_folders,
+  has_many :all_folders, -> { undeleted },
            through: :all_file_seeds,
            source: :folders
 
