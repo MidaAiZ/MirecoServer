@@ -37,6 +37,7 @@ Rails.application.routes.draw do
         collection do
           put '/:id/name' => 'articles#rename'
           put '/:id/tag' => 'articles#update_tag'
+          put '/:id/cover' => 'articles#update_cover'
           put '/:id/content' => 'articles#update_content'
           post '/:id/mark' => 'articles#mark'
           post '/:id/unmark' => 'articles#unmark'
@@ -54,6 +55,7 @@ Rails.application.routes.draw do
         collection do
           put '/:id/name' => 'corpus#rename'
           put '/:id/tag' => 'corpus#update_tag'
+          put '/:id/cover' => 'corpus#update_cover'
           post '/:id/mark' => 'corpus#mark'
           post '/:id/unmark' => 'corpus#unmark'
           post '/:id/publish' => 'corpus#publish'

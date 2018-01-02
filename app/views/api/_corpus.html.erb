@@ -279,6 +279,54 @@ count:数量
             </ul>
           </td>
         </tr>
+        <!-- 更新文集封面 -->
+        <tr>
+          <td>更新文集封面</td>
+          <td>workspace/corpuses/:id/cover</td>
+          <td>PUT</td>
+          <td>
+            <textarea cols="30" rows="10">
+// 图片比例 1：1
+{
+    "cover": new_cover, // blob/URL/base64等图片格式均可
+}
+
+            </textarea>
+          </td>
+          <td>
+            <textarea cols="30" rows="10">
+              //更新成功
+              {
+                "code": "Success",
+                "corpus": {
+                    "cover": url object,
+                     ...
+                 }
+             }
+             //更新失败
+             {
+                 "code": "Fail",
+                 errors: {
+                     ...
+                 }
+             }
+            </textarea>
+          </td>
+          <td>
+            <ul>
+              <li>
+                <span>code: 状态码</span><br>
+                <span>Success：修改成功， Fail：修改失败, Nopermisson: 没有权限， ResourceNotExist: 文集不存在</span>
+              </li>
+              <li>
+                <span class="notice">返回的封面是一个对象，里面包含了封面的两个url，其中thumb url为略缩图（大小200×200），另一个url图片为大图（400×400）</span>
+              </li>
+              <li>
+                <span>用户只有在<span class="notice">已登录</span>情况下才能修改<span class="notice">自己的</span>文集</span>
+              </li>
+            </ul>
+          </td>
+        </tr>
         <tr>
           <td>文集标星</td>
           <td>workspace/corpuses/:id/mark</td>

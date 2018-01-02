@@ -3,6 +3,8 @@ require_relative 'file_model_module'
 class Index::Workspace::Article < ApplicationRecord
   include FileModel
 
+  mount_uploader :cover, FileCoverUploader # 封面上传
+
   after_update :update_cache
   after_destroy :delete_thumb_up, :clear_cache
   store_accessor :info, :tbp_counts, :cmt_counts, :rd_times # 点赞数/评论数/阅读次数
@@ -118,7 +120,7 @@ class Index::Workspace::Article < ApplicationRecord
 
   def update_cache
     Cache.new["edit_article_#{self.id}"] = self
-    Cache.new["article_#{self.id}"] = self 
+    Cache.new["article_#{self.id}"] = self
   end
 
   def clear_cache

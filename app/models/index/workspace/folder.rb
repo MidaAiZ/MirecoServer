@@ -83,6 +83,10 @@ class Index::Workspace::Folder < ApplicationRecord
     :folders
   end
 
+  def self.file_type
+    :folders
+  end
+
   # ----------------------允许的路径类型---------------------- #
   def allow_dir_types
     [:folders, 0] # 目标目录文件仅允许文件夹或者空, 0代表空,即移动到根目录

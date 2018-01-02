@@ -76,12 +76,12 @@ class Index::Workspace::ArticlesController < IndexController
 
   # 新建文章的时候允许传入的参数
   def article_params
-    params.require(:article).permit(:name, :tag, :is_shown)
+    params.require(:article).permit(:name, :tag, :cover)
   end
 
   # 更新文章的时候允许传入的参数
   def article_update_params
-    params.require(:article).permit(:name, :tag, :is_shown)
+    params.require(:article).permit(:name, :tag, :cover)
   end
 
 end

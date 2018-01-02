@@ -3,6 +3,8 @@ require_relative 'file_model_module'
 class Index::Workspace::Corpus < ApplicationRecord
   include FileModel
 
+  mount_uploader :cover, FileCoverUploader # 封面上传
+
   after_update :update_cache
   after_destroy :auto_delete_son_roles, :delete_thumb_up, :clear_cache
   store_accessor :info, :tbp_counts, :cmt_counts, :read_times # 点赞数/评论数/阅读次数
@@ -124,6 +126,6 @@ class Index::Workspace::Corpus < ApplicationRecord
 
   def clear_cache
     Cache.new["edit_corpus_#{self.id}"] = nil
-    Cache.new["corpus_#{self.id}"] = nil 
+    Cache.new["corpus_#{self.id}"] = nil
   end
 end

@@ -47,6 +47,17 @@ module FileController
         do_update_response
     end
 
+    def update_cover
+        return if @file.file_type == Index::Workspace::Folder.file_type # 封面功能暂时只对文集和文章开放
+
+        if @user.can_edit?(:update, @file)
+            @code = @file.update(cover: params[:cover]) ? :Success : :Fail
+        else
+            @code = :NoPermission
+        end
+        do_update_response
+    end
+
     def add_editor
       role = params[:role]
       if @user.can_edit?(:add_role, @file) && Index::Role::Edit.allow_roles.include?(role)
