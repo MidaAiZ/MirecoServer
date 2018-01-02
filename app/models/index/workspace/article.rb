@@ -87,7 +87,7 @@ class Index::Workspace::Article < ApplicationRecord
   default_scope { undeleted.order('index_articles.id DESC') }
 
   def html_content
-    self.content.content.safe_html  
+    self.content.content.safe_html
   end
 
   # ------------------------文件类型------------------------- #
@@ -118,12 +118,12 @@ class Index::Workspace::Article < ApplicationRecord
 
   def update_cache
     Cache.new["edit_article_#{self.id}"] = self
-    Cache.new["article_#{self.id}"] = self if self.is_shown
+    Cache.new["article_#{self.id}"] = self 
   end
 
   def clear_cache
+    Cache.new["edit_article_#{self.id}"] = nil
     Cache.new["article_#{self.id}"] = nil
-    Cache.new["article_#{self.id}"] = nil if self.is_shown
   end
 
   private

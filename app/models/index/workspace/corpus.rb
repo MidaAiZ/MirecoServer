@@ -119,11 +119,11 @@ class Index::Workspace::Corpus < ApplicationRecord
 
   def update_cache
     Cache.new["edit_corpus_#{self.id}"] = self
-    Cache.new["corpus_#{self.id}"] = self if self.is_shown
+    Cache.new["corpus_#{self.id}"] = self
   end
 
   def clear_cache
-    Cache.new["corpus_#{self.id}"] = nil
-    Cache.new["corpus_#{self.id}"] = nil if self.is_shown
+    Cache.new["edit_corpus_#{self.id}"] = nil
+    Cache.new["corpus_#{self.id}"] = nil 
   end
 end
