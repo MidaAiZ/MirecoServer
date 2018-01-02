@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20171213174533) do
+ActiveRecord::Schema.define(version: 20180102094304) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -45,6 +45,7 @@ ActiveRecord::Schema.define(version: 20171213174533) do
     t.string "dir_type"
     t.jsonb "info", default: {}
     t.integer "marked_u_ids", array: true
+    t.string "cover"
     t.index ["dir_type", "dir_id"], name: "index_article_on_dir_type_id"
     t.index ["file_seed_id"], name: "index_articles_on_file_seed_id"
     t.index ["info"], name: "index_corpus_on_info", using: :gin
@@ -89,6 +90,7 @@ ActiveRecord::Schema.define(version: 20171213174533) do
     t.string "dir_type"
     t.jsonb "info", default: {}
     t.integer "marked_u_ids", array: true
+    t.string "cover"
     t.index ["dir_type", "dir_id"], name: "index_corpus_on_dir_type_id"
     t.index ["file_seed_id"], name: "index_corpus_on_file_seed_id"
     t.index ["info"], name: "index_corpus_on_files", using: :gin

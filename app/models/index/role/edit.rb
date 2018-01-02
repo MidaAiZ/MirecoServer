@@ -8,7 +8,7 @@ class Index::Role::Edit < ApplicationRecord
              foreign_key: 'file_seed_id'
 
   belongs_to :dir, polymorphic: true,
-             optional: true 
+             optional: true
 
   validates :file_seed_id, presence: true
   validates :name, inclusion: { in: %w(own admin editor readonly) }
