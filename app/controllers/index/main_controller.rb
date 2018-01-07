@@ -38,6 +38,16 @@ class Index::MainController < IndexController
     end
   end
 
+  def hot_articles
+    articles
+    render :articles
+  end
+
+  def hot_corpuses
+    corpuses
+    render :corpuses
+  end
+
   private
 
   def init

@@ -103,6 +103,10 @@ Rails.application.routes.draw do
     get 'articles/:id' => 'main#show_article'
     get 'corpuses/:id' => 'main#show_corpus'
 
+    # 热门榜单
+    get 'hot_articles' => 'main#hot_articles'
+    get 'hot_corpuses' => 'main#hot_corpuses'
+
     # 点赞
     post '/:resource_type/:resource_id/thumb_ups' => 'thumb_ups#create'
     delete '/:resource_type/:resource_id/thumb_ups' => 'thumb_ups#destroy'
