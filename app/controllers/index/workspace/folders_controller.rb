@@ -5,7 +5,7 @@ class Index::Workspace::FoldersController < IndexController
 
   before_action :require_login
   before_action :set_folder, except: [:index, :new, :create]
-  before_action :set_file, only: [:update, :mark, :unmark, :rename, :add_editor, :remove_editor, :move_dir, :destroy]
+  before_action :set_file, except: [:index, :create, :show_profile]
 
   # GET /index/folders
   # GET /index/folders.json
