@@ -69,7 +69,7 @@ class Index::Workspace::FoldersController < IndexController
   end
 
   # 更新时允许传入的参数
-  def folder_update_params
+  def file_update_params
     params.require(:folder).permit(:name, :tag)
   end
 end

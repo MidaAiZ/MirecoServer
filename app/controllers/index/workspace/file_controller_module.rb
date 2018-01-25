@@ -3,7 +3,7 @@ module FileController
     end
 
     def update
-      prms = article_update_params # 获取更新数据
+      prms = file_update_params # 获取更新数据
       if @user.can_edit?(:update, @file)
         @code = if @file.is_deleted || (@file.methods.include?(:is_shown) && @file.is_shown) # 已发表或者删除的文件禁止编辑
                   :StatusError

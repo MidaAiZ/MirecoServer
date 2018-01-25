@@ -51,6 +51,10 @@ class Index::Workspace::ArticlesController < IndexController
         if params[:content]
             @code = @article.content.update(text: params[:content]) ? :Success : :Fail
         end
+        @oldDelta = @article.get_delta_cache
+        if params[:delta]
+          @article.set_delta_cache params[:delta].as_json
+        end
     else
         @code = :NoPermission
     end
@@ -80,7 +84,7 @@ class Index::Workspace::ArticlesController < IndexController
   end
 
   # 更新文章的时候允许传入的参数
-  def article_update_params
+  def file_update_params
     params.require(:article).permit(:name, :tag, :cover)
   end
 

@@ -70,7 +70,7 @@ class Index::Workspace::CorpusController < IndexController
   end
 
   # 更新文集的时候允许传入的参数
-  def corpus_update_params
+  def file_update_params
     params.require(:corpus).permit(:name, :tag, :cover)
   end
 
