@@ -6,7 +6,6 @@ if @article
     json.corpus_id @article.dir_id if @article.dir_type == 'Index::Workspace::Corpus'
     json.is_marked @article.is_marked @user.id
     json.content @article.content.text
-    json.delta @oldDelta
   end
   json.errors @article.errors if @article.errors.any?
 end

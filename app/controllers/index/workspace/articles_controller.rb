@@ -49,11 +49,7 @@ class Index::Workspace::ArticlesController < IndexController
   def update_content
     if @user.can_edit?(:edit, @article)
         if params[:content]
-            @code = @article.content.update(text: params[:content]) ? :Success : :Fail
-        end
-        @oldDelta = @article.get_delta_cache
-        if params[:delta]
-          @article.set_delta_cache params[:delta].as_json
+          @code = @article.content.update(text: params[:content]) ? :Success : :Fail
         end
     else
         @code = :NoPermission

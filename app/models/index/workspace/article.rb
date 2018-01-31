@@ -128,23 +128,10 @@ class Index::Workspace::Article < ApplicationRecord
     Cache.new["article_#{self.id}"] = nil
   end
 
-  def set_delta_cache delta
-    Cache.new[delta_prefix] = delta
-  end
-
-  def get_delta_cache
-    Cache.new[delta_prefix]
-  end
-
   private
 
   def read_prefix
     $redis.select 3
     "index_#{self.id}_article_readtimes"
   end
-
-  def delta_prefix
-    "index_#{self.id}_article_delta"
-  end
-
 end
