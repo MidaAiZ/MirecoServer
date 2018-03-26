@@ -23,6 +23,7 @@ class Index::Workspace::Trash < ApplicationRecord
         delete_unroot
       end
       file.update! is_deleted: true # 修改文件本身
+      file.clear_cache # 删除文件缓存
       return self.create
     end
     rescue

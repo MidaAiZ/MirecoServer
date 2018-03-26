@@ -16,7 +16,7 @@ class Index::Workspace::EditComment < ApplicationRecord
   validates :user_id, presence: true
   validates :resource_id, presence: true
   validates :resource_type, presence: true, inclusion: { in: ['Index::Workspace::Article'] }
-  validates :hash_key, presence: true, length: { maximum: 32 }, uniqueness: { message: 'hash值已存在' }
+  validates :hash_key, presence: true, length: { maximum: 32 }
   validates :content, presence: true, length: { minimum: 1, maximum: 255 }
 
   def update_cache

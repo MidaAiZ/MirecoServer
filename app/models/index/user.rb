@@ -139,16 +139,20 @@ class Index::User < ApplicationRecord
   # 添加编辑权限
   def add_edit_role(name, resource)
     return false if name.nil? || resource.nil?
-    return nil unless file_seed = get_file_seed(resource)
-    unless file_seeds.find_by_id file_seed.id # 未曾添加过该权限
+    return false unless file_seed = get_file_seed(resource)
+    role = all_edit_roles_with_del.find_by_file_seed_id file_seed.id
+
+    unless role # 未曾添加过该权限
       role = Index::Role::Edit.new(name: name)
       ApplicationRecord.transaction do
-        file_seed.editors_count += 1
-        role.file_seed = file_seed
+        file_seed.editors_count += 1 # 添加协作者个数
+        role.file_seed = file_seed # 绑定fileseed
         edit_roles << role
         file_seed.save!
         role.save!
       end
+    else # 更新权限
+      role.update! name: name
     end
     role && role.id ? role : false
   end
@@ -159,11 +163,8 @@ class Index::User < ApplicationRecord
     return false if attrs.blank? || resource.nil?
     return false unless file_seed = get_file_seed(resource)
     role = all_edit_roles_with_del.find_by(file_seed_id: file_seed.id)
-    if role
-      role.update!(attrs)
-      bool = true
-    end
-    bool ||= false
+    result = role ? role.update!(attrs) : false
+    result
   end
 
   # 移除编辑权限

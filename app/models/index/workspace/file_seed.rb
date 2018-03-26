@@ -122,10 +122,12 @@ class Index::Workspace::FileSeed < ApplicationRecord
     if target_dir != 0 # 非移入根目录
       return false if target_dir == _self # 防止自循环嵌套
       target_seed = target_dir.file_seed
-      # 不允许将外部文件夹移入协作文件夹, 会造成意外的嵌套　条件：１．协作　２．文件夹　３．外部
-      return false if target_seed.is_cooperate? && # 判断是否是协作文件
-                      target_dir.file_type == :folders && # 　判断是否是文件夹
-                      file_seed != target_dir.file_seed # 判断是否是外部文件
+
+      # 不允许将外部协作文件移入新的协作文件, 会造成意外的嵌套　条件：1．属于不同协作域  2．原文件协作　3．目标文件协作　
+      return false if file_seed != target_seed && # 判断是否是外部文件
+                      file_seed.is_cooperate? && # 判断是否是协作文件
+                      target_seed.is_cooperate? # 　判断是否是文件夹
+
     end
 
     ApplicationRecord.transaction do # 出错将回滚

@@ -42,7 +42,7 @@ class Index::Workspace::CenterController < IndexController
 
   def withdraw # 退出协同写作
     @code = if @user.can_edit?(:all, @resource)
-              @resource.file_seed.destroy ? :Success : :Fail
+              @resource.delete_files(@user) ? :Success : :Fail
             else
               @user.remove_edit_role(@resource) ? :Success : :Fail
             end

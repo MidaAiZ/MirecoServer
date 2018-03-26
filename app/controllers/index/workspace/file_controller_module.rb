@@ -60,9 +60,13 @@ module FileController
 
     def add_editor
       role = params[:role]
-      if @user.can_edit?(:add_role, @file) && Index::Role::Edit.allow_roles.include?(role)
-        editor = Index::User.find_by_id params[:user_id]
-        @code = editor.add_edit_role(role, @file) ? :Success : :Fail if editor
+      if @user.can_edit?(:add_role, @file)
+        unless Index::Role::Edit.allow_roles.include?(role)
+          @code ||= :WrongRoleName
+        else
+          editor = Index::User.find_by_id params[:user_id]
+          @code = editor.add_edit_role(role, @file) ? :Success : :Fail if editor
+        end
       else
         @code ||= :NoPermission
       end
@@ -126,7 +130,7 @@ module FileController
 
     def do_update_response
       respond_to do |format|
-        format.json { render :show }
+        format.json { render json: { code: @code, errors: @error } }
       end
     end
 end
