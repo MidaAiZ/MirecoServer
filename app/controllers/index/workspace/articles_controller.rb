@@ -29,17 +29,17 @@ class Index::Workspace::ArticlesController < IndexController
     @article = Index::Workspace::Article.new(article_params)
 
     # 判断新建文章的路径
-    folder_id = params[:article][:folder_id] if params[:article]
-    corpus_id = params[:article][:corpus_id] if params[:article]
+    folder_id = params[:article][:folder_id]
+    corpus_id = params[:article][:corpus_id]
     if (folder_id || corpus_id) && (folder_id != 0 && corpus_id != 0) # 将文章新建在某个文集或者文件夹内
       dir = folder_id.blank? ? Index::Workspace::Corpus.find_by_id(corpus_id) : Index::Workspace::Folder.find_by_id(folder_id)
       @code = if dir && @user.can_edit?(:create, dir) # 验证权限
-                @article.create(dir, @user) ? :Success : :Fail
+                @article.create(dir, @user, {text: params[:article][:content]}) ? :Success : :Fail
               else
                 :NoPermission # 没有权限
               end
     else
-      @code = @article.create(0, @user) ? :Success : :Fail
+      @code = @article.create(0, @user, {text: params[:article][:content]}) ? :Success : :Fail
     end
 
     @code ||= :Fail

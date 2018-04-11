@@ -35,8 +35,8 @@ module FileModel
     end
 
     # ----------------------创建并设置目录----------------------- #
-    def create(target_dir, user)
-      Index::Workspace::FileSeed.create(self, target_dir, user)
+    def create(target_dir, user, attrs = {})
+      Index::Workspace::FileSeed.create(self, target_dir, user, attrs)
     end
 
     # -------------------------移动文件------------------------- #

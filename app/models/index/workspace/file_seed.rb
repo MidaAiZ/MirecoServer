@@ -73,7 +73,7 @@ class Index::Workspace::FileSeed < ApplicationRecord
   end
 
   # -----------------------创建并设置目录----------------------- #
-  def self.create(_self, dir, user)
+  def self.create(_self, dir, user, attrs)
     return false if _self.id
     ApplicationRecord.transaction do
       if dir == 0 # 在根目录内创建文件
@@ -90,7 +90,7 @@ class Index::Workspace::FileSeed < ApplicationRecord
         _self.save!
         set_file_info _self, dir # 设置文件目录信息
       end
-      _self.create_content! if _self.file_type == :articles # 当文件类型为文章时创建文章内容
+      _self.create_content! attrs if _self.file_type == :articles # 当文件类型为文章时创建文章内容
 
       return true
     end
