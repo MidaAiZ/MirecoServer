@@ -6,7 +6,7 @@
 
 # server 'example.com', user: 'deploy', roles: %w{app db web}, my_property: :my_value
 # server 'example.com', user: 'deploy', roles: %w{app web}, other_property: :other_value
-server 'mxjyu.com', user: 'ubuntu', roles: %w{app db web}
+server 'mxjyu.cn', user: 'ubuntu', roles: %w{app db web}
 set :rails_env, "production"
 set :stage, :pro
 
@@ -45,7 +45,7 @@ set :stage, :pro
 set :ssh_options, {
   keys: %w(/home/ubuntu/.ssh/id_rsa),
   forward_agent: false,
-  password: '1124520.'
+  password: 'mida1124'
 }
 #
 # The server-based syntax can be used to override options:
