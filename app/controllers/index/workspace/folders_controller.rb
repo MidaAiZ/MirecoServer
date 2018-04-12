@@ -13,12 +13,8 @@ class Index::Workspace::FoldersController < IndexController
     count = params[:count] || 15
     page = params[:page] || 1
 
-    @res = Rails.cache.fetch("#{cache_key}/#{@user.id}/#{page}/#{count}", expires_in: 5.minutes) do
-      @nonpaged_folders = @user.folders
-      res = @nonpaged_folders.page(page).per(count)
-      { record: res.records, counts: count_cache(cache_key, res) }
-    end
-    @folders = @res[:record]; @counts = @res[:counts]
+    @nonpaged_folders = @user.folders
+    @folders = @nonpaged_folders.page(page).per(count)
   end
 
   # POST /index/folders

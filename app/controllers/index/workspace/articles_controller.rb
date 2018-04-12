@@ -11,16 +11,8 @@ class Index::Workspace::ArticlesController < IndexController
   def index
     count = params[:count] || 15
     page = params[:page] || 1
-    @res = if @user
-             Rails.cache.fetch("#{cache_key}/#{@user.id}/#{page}/#{count}", expires_in: 5.minutes) do
-               @nonpaged_articles = @user.articles
-               res = @nonpaged_articles.page(page).per(count)
-               { record: res.records, counts: count_cache(cache_key, res) }
-             end
-           else
-             { record: Index::Workspace::Article.none, counts: 0 }
-           end
-    @articles = @res[:record]; @counts = @res[:counts]
+    @nonpaged_articles = @user.articles
+    @articles = @nonpaged_articles.page(page).per(count)
   end
 
   # POST /index/articles

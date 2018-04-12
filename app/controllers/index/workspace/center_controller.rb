@@ -14,22 +14,14 @@ class Index::Workspace::CenterController < IndexController
 
   def published_articles
     init
-    @res = Rails.cache.fetch("#{cache_key}/#{@user.id}/#{@page}/#{@count}", expires_in: 3.minutes) do
-      @nonpaged_articles = @user.all_articles.shown
-      res = @nonpaged_articles.page(@page).per(@count)
-      { record: res.records, counts: count_cache(cache_key, res) }
-    end
-    @articles = @res[:record]; @counts = @res[:counts]
+    @nonpaged_articles = @user.all_articles.shown
+    @articles = @nonpaged_articles.page(@page).per(@count)
   end
 
   def published_corpuses
     init
-    @res = Rails.cache.fetch("#{cache_key}/#{@user.id}/#{@page}/#{@count}", expires_in: 3.minutes) do
-      @nonpaged_corpuses = @user.all_corpuses.shown
-      res = @nonpaged_corpuses.page(@page).per(@count)
-      { record: res.records, counts: count_cache(cache_key, res) }
-    end
-    @corpuses = @res[:record]; @counts = @res[:counts]
+    @nonpaged_corpuses = @user.all_corpuses.shown
+    @corpuses = @nonpaged_corpuses.page(@page).per(@count)
   end
 
   def get_editors

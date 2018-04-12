@@ -98,7 +98,7 @@ class Index::Workspace::FileSeed < ApplicationRecord
     #   return false
   end
 
-  # ----------------------查询所有文件---------------------- #
+  # ----------------------所有子孙后代节点文件---------------------- #
   def files
     f_hash = {}
     articles = articles_with_del || Index::Workspace::Article.none
@@ -111,23 +111,66 @@ class Index::Workspace::FileSeed < ApplicationRecord
     f_hash
   end
 
-  # ------------------------移动文件------------------------ #
+  # ----------------------------移动文件--------------------------- #
+  # ------------------------逻辑判断天昏地暗------------------------ #
+
+  # 文件移动判定表 前提：对原文件/目标文件具有移出/移入权限
+  # 根文件：Root | 子文件：SON | 原创: OWN | 协作：CO | 桌面: TB
+  # T表示在具有移动权限的前提下可以实施移动操作，F表示任何情况下不可以执行移动操作
+
+  #                       目       标       路       径
+  #     -------------------------------------------------------------
+  #        |     条件     |   OWN   |  OWN CO  |   CO    |   TB   |
+  # 源  -------------------------------------------------------------
+  #        |   OWN ROOT  |    T    |     T    |    T    |    T   |
+  #     -------------------------------------------------------------
+  #        |   OWN SON   |    T    |     T    |    T    |    T   |
+  #     -------------------------------------------------------------
+  # 文     | OWN CO ROOT |    T    |     F    |    F    |    T   |
+  #     -------------------------------------------------------------
+  #        | OWN CO SON  |    T    |    T     |    T    |    T   |
+  #     -------------------------------------------------------------
+  #        |   CO ROOT   |    T    |    T     |    F    |    T   |
+  # 件  -------------------------------------------------------------
+  #        |   CO SON    |    F    |    F     |    F    |    F   |
+  #     -------------------------------------------------------------
+
+  def self.can_move? file, dir, user
+    _TFTable = {
+      OR_O:  true,  OR_OC:  true,   OR_C:  true,  OR_OR: true,
+      OS_O:  true,  OS_OC:  true,   OS_C:  true,  OS_OR: true,
+      OCR_O: true,  OCR_OC: false,  OCR_C: false, OCR_OR: true,
+      OCS_O: true,  OCS_OC: true,   OCS_C: true,  OCS_OR: true,
+      CR_O:  true,  CR_OC:  true,   CR_C:  false, CR_OR: true,
+      CS_O:  false, CS_OC:  false,  CS_C:  false, CS_OR: true
+    }
+
+    f_own = user.has_edit_role?(:own, file) ? "O" : ""
+    f_coo = file.is_cooperate? ? "C" : ""
+    f_pos = file.is_root? ? "R" : "S"
+
+    d_own = dir == 0 || user.has_edit_role?(:own, dir) ? "O" : ""
+    d_coo = dir == 0 || !dir.is_cooperate? ? "" : "C"
+    d_pos = dir == 0 || dir.is_root? ? "R" : "S"
+
+    key = f_own + f_coo + f_pos + "_" + d_own + d_coo + d_pos
+    _TFTable[key.to_sym]
+  end
+
   def self.move_dir(_self, target_dir, user) # target_dir = 0 时表示将文件移到根目录
     t1 = Time.now
+
     file_type = target_dir == 0 ? 0 : target_dir.file_type
     return false if _self.allow_dir_types.exclude? file_type # 检查目标目录是否合法
+
+    return false unless can_move? _self, target_dir, user
     # begin
 
     file_seed = _self.file_seed # 获取当前文件的file_seed
+
     if target_dir != 0 # 非移入根目录
       return false if target_dir == _self # 防止自循环嵌套
       target_seed = target_dir.file_seed
-
-      # 不允许将外部协作文件移入新的协作文件, 会造成意外的嵌套　条件：1．属于不同协作域  2．原文件协作　3．目标文件协作　
-      return false if file_seed != target_seed && # 判断是否是外部文件
-                      file_seed.is_cooperate? && # 判断是否是协作文件
-                      target_seed.is_cooperate? # 　判断是否是文件夹
-
     end
 
     ApplicationRecord.transaction do # 出错将回滚
@@ -154,6 +197,7 @@ class Index::Workspace::FileSeed < ApplicationRecord
   private
 
   def self.change_edit_dir(_self, target_dir, user)
+    return false if target_dir != 0 && _self.file_seed_id == target_dir.file_seed_id # 要求属于不同的file_seed, 防止子文件嵌套父文件
     file_seed = _self.file_seed
     role = user.all_edit_roles.find_by file_seed_id: file_seed.id # 从缓存中读取
     return false unless role
@@ -162,19 +206,19 @@ class Index::Workspace::FileSeed < ApplicationRecord
       return true if role.is_root # 原本就已经位于根目录
       _self.dir = nil
       set_roles_info origin_dir, role, 'delete'
-      role.update is_root: true, dir_id: nil, dir_type: nil
+      role.update dir_id: nil, dir_type: nil
     else
       return true if _self.dir == target_dir # 原本就已经位于该目录
-      return false unless user.has_edit_role?(:own, target_dir)
-      if !file_seed.is_cooperate? # 非协作文件移动文件时修改seed
-        files = _self.files
-        return false if files.include? target_dir # 防止文件夹嵌套
-        reset_seed _self, target_dir, files
-      else
+      return false unless user.has_edit_role?(:own, target_dir) # 要求目标文件一定属于操作用户
+      if file_seed.is_cooperate?
         role.dir = target_dir # 仅修改协作用户个人的显示目录, 所以修改的是role的dir属性
         role.save!
         set_roles_info target_dir, role
-        _self.dir = target_dir if role.name == 'own' # 如果操作者是拥有者,直接修改dir,以便相关操作
+      else # 非协作文件移动文件时修改seed
+        files = _self.files
+        return false if files[target_dir.file_type].include? target_dir # 防止文件夹嵌套
+        _self.dir = target_dir # 如果操作者是拥有者,直接修改dir,以便相关操作
+        reset_seed _self, target_dir, files
       end
     end
     target_dir = nil if target_dir == 0
@@ -219,6 +263,7 @@ class Index::Workspace::FileSeed < ApplicationRecord
 
   def self.move_to_same_seed(_self, target_dir) # 移动目标文件到同一个fileseed下的目录内
     return true if _self.dir == target_dir
+
     if _self.files[target_dir.file_type].exclude?(target_dir) # 防止文件夹嵌套
       origin_dir = _self.dir
       _self.dir = target_dir
@@ -229,7 +274,7 @@ class Index::Workspace::FileSeed < ApplicationRecord
 
   def self.move_to_other_seed(_self, target_dir, user) # 移动文件到另一个fileseed内的目录内
     return false unless user.has_edit_role?(:own, _self) # TODO 降低权限耦合
-    return false unless user.has_edit_role?(:own, target_dir)
+
     files = _self.files
     if files[target_dir.file_type].exclude?(target_dir) # 防止文件夹嵌套
       origin_dir = _self.dir
@@ -260,6 +305,8 @@ class Index::Workspace::FileSeed < ApplicationRecord
   end
 
   def self.set_file_info(_self, target_dir, origin_dir = nil) # 设置文件的信息
+    return true if origin_dir == target_dir 
+
     if target_dir
       info = target_dir.info
       key = _self.file_type.to_s

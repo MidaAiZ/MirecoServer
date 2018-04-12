@@ -104,11 +104,11 @@ class IndexController < ApplicationController
   end
 
   def cache_key
-    "#{params[:controller]}/#{params[:action]}}"
+    "#{params[:controller]}_#{params[:action]}"
   end
 
   def self.cache_key
-    "#{params[:controller]}/#{params[:action]}}"
+    "#{params[:controller]}_#{params[:action]}"
   end
 
   def count_cache(key, res, expire = 10.minutes) # res是分页通过插件封装后的类对象

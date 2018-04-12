@@ -13,12 +13,8 @@ class Index::Workspace::CorpusController < IndexController
     count = params[:count] || 15
     page = params[:page] || 1
 
-    @res = Rails.cache.fetch("#{cache_key}/#{@user.id}/#{page}/#{count}", expires_in: 5.minutes) do
-      @nonpaged_corpuses = @user.corpuses
-      res = @nonpaged_corpuses.page(page).per(count)
-      { record: res.records, counts: count_cache(cache_key, res) }
-    end
-    @corpuses = @res[:record]; @counts = @res[:counts]
+    @nonpaged_corpuses = @user.corpuses
+    @corpuses = @nonpaged_corpuses.page(page).per(count)
   end
 
   # POST /index/corpuss
@@ -43,7 +39,7 @@ class Index::Workspace::CorpusController < IndexController
   end
 
   def show_profile
-    @son_articles = @user.all_articles.where id: @corpus.info['articles'] || Index::Workspace::Corpus.none # 子文章
+    @son_articles = @user.all_articles.where(id: @corpus.info['articles']).includes(:file_seed) || Index::Workspace::Corpus.none # 子文章
     #   @son_articles = @corpus.son_articles # 子文章
   end
 
