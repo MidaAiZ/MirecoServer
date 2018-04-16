@@ -1,4 +1,4 @@
-class AddDefaultsToIndexArticles < ActiveRecord::Migration[4.2]
+class AddDefaultsToIndexArticles < ActiveRecord::Migration
   def change
     change_column_default :index_articles, :is_deleted, false
   end

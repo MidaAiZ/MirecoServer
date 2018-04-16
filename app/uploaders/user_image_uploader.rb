@@ -1,5 +1,5 @@
 # encoding: utf-8
-class EditorImageUploader < CarrierWave::Uploader::Base
+class UserImageUploader < CarrierWave::Uploader::Base
   # Include RMagick or ImageScience support:
   # include CarrierWave::RMagick
   include CarrierWave::MiniMagick
@@ -10,7 +10,7 @@ class EditorImageUploader < CarrierWave::Uploader::Base
   # Override the directory where uploaded files will be stored.
   # This is a sensible default for uploaders that are meant to be mounted:
   def store_dir
-    "uploads/articles/images/#{model.id}"
+    "uploads/#{model.class.to_s.underscore}/#{model.id}"
   end
 
   # Provide a default URL as a default if there hasn't been a file uploaded:
@@ -25,12 +25,13 @@ class EditorImageUploader < CarrierWave::Uploader::Base
   #   # do something
   # end
 
-  process resize_to_fit: [600, 1000]
+
+  process resize_to_fit: [1000, 2000]
   # Create different versions of your uploaded files:
   version :thumb do
-    process resize_to_fit: [180, 300]
+    process resize_to_fit: [300, 600]
   end
-  #
+
   # version :content do
   #   process :resize_to_limit => [800, 800]
   # end

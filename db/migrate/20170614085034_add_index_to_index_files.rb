@@ -1,4 +1,4 @@
-class AddIndexToIndexFiles < ActiveRecord::Migration[4.2]
+class AddIndexToIndexFiles < ActiveRecord::Migration
   def change
     add_index :index_articles, :name, name: :index_articles_on_name
     add_index :index_corpus, :name, name: :index_corpus_on_name

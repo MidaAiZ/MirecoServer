@@ -1,4 +1,4 @@
-class CreateIndexComments < ActiveRecord::Migration[4.2]
+class CreateIndexComments < ActiveRecord::Migration
   def change
     create_table :index_comments do |t|
       t.string :content

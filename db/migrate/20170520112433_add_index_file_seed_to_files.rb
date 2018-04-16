@@ -1,4 +1,4 @@
-class AddIndexFileSeedToFiles < ActiveRecord::Migration[4.2]
+class AddIndexFileSeedToFiles < ActiveRecord::Migration
   def change
     change_table :index_articles do |t|
       t.references :index_file_seed

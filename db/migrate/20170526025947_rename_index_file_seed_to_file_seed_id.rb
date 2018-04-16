@@ -1,4 +1,4 @@
-class RenameIndexFileSeedToFileSeedId < ActiveRecord::Migration[4.2]
+class RenameIndexFileSeedToFileSeedId < ActiveRecord::Migration
   def change
     rename_column :index_articles, :index_file_seed_id, :file_seed_id
     rename_column :index_corpus, :index_file_seed_id, :file_seed_id

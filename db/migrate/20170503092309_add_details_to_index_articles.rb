@@ -1,4 +1,4 @@
-class AddDetailsToIndexArticles < ActiveRecord::Migration[4.2]
+class AddDetailsToIndexArticles < ActiveRecord::Migration
   def change
     change_table :index_articles do |t|
       t.boolean :is_shown

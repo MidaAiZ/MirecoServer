@@ -1,4 +1,4 @@
-class AddIntroToIndexUsers < ActiveRecord::Migration[4.2]
+class AddIntroToIndexUsers < ActiveRecord::Migration
   def change
     add_column :index_users, :intro, :string
   end

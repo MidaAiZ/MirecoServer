@@ -1,4 +1,4 @@
-class AddFileNameToIndexTrashes < ActiveRecord::Migration[4.2]
+class AddFileNameToIndexTrashes < ActiveRecord::Migration
   def change
     add_column :index_trashes, :file_name, :string
   end

@@ -1,4 +1,4 @@
-class RenameFilesToInfo < ActiveRecord::Migration[4.2]
+class RenameFilesToInfo < ActiveRecord::Migration
   def change
     change_table :index_folders do |t|
       t.rename :files, :info

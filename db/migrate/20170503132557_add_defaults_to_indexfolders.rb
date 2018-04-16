@@ -1,4 +1,4 @@
-class AddDefaultsToIndexfolders < ActiveRecord::Migration[4.2]
+class AddDefaultsToIndexfolders < ActiveRecord::Migration
   def change
     change_column_default :index_folders, :is_deleted, false
   end

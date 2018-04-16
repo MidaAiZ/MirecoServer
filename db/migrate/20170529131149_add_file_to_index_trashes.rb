@@ -1,4 +1,4 @@
-class AddFileToIndexTrashes < ActiveRecord::Migration[4.2]
+class AddFileToIndexTrashes < ActiveRecord::Migration
   def change
     change_table :index_trashes do |t|
       t.references :file, :polymorphic => true

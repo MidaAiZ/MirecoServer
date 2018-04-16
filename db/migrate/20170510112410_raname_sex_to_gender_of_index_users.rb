@@ -1,4 +1,4 @@
-class RanameSexToGenderOfIndexUsers < ActiveRecord::Migration[4.2]
+class RanameSexToGenderOfIndexUsers < ActiveRecord::Migration
   def change
     rename_column :index_users, :sex, :gender
   end

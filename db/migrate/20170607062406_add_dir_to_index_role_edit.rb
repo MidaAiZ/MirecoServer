@@ -1,4 +1,4 @@
-class AddDirToIndexRoleEdit < ActiveRecord::Migration[4.2]
+class AddDirToIndexRoleEdit < ActiveRecord::Migration
   def change
     change_table :index_role_edits do |t|
       t.references :dir, polymorphic: true

@@ -1,4 +1,4 @@
-class ChangeFilesAndRolesOnIsInner < ActiveRecord::Migration[4.2]
+class ChangeFilesAndRolesOnIsInner < ActiveRecord::Migration
   def change
     change_table :index_role_edits do |t|
       t.boolean :is_inner, default: false

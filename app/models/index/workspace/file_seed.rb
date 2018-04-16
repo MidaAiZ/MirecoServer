@@ -137,12 +137,12 @@ class Index::Workspace::FileSeed < ApplicationRecord
 
   def self.can_move? file, dir, user
     _TFTable = {
-      OR_O:  true,  OR_OC:  true,   OR_C:  true,  OR_OR: true,
-      OS_O:  true,  OS_OC:  true,   OS_C:  true,  OS_OR: true,
-      OCR_O: true,  OCR_OC: false,  OCR_C: false, OCR_OR: true,
-      OCS_O: true,  OCS_OC: true,   OCS_C: true,  OCS_OR: true,
-      CR_O:  true,  CR_OC:  true,   CR_C:  false, CR_OR: true,
-      CS_O:  false, CS_OC:  false,  CS_C:  false, CS_OR: true
+      OR_O:  true,  OR_OC:  true,   OR_C:  true,
+      OS_O:  true,  OS_OC:  true,   OS_C:  true,
+      OCR_O: true,  OCR_OC: false,  OCR_C: false,
+      OCS_O: true,  OCS_OC: true,   OCS_C: true,
+      CR_O:  true,  CR_OC:  true,   CR_C:  false,
+      CS_O:  false, CS_OC:  false,  CS_C:  false, 
     }
 
     f_own = user.has_edit_role?(:own, file) ? "O" : ""
@@ -151,9 +151,8 @@ class Index::Workspace::FileSeed < ApplicationRecord
 
     d_own = dir == 0 || user.has_edit_role?(:own, dir) ? "O" : ""
     d_coo = dir == 0 || !dir.is_cooperate? ? "" : "C"
-    d_pos = dir == 0 || dir.is_root? ? "R" : "S"
 
-    key = f_own + f_coo + f_pos + "_" + d_own + d_coo + d_pos
+    key = f_own + f_coo + f_pos + "_" + d_own + d_coo
     _TFTable[key.to_sym]
   end
 
@@ -305,7 +304,7 @@ class Index::Workspace::FileSeed < ApplicationRecord
   end
 
   def self.set_file_info(_self, target_dir, origin_dir = nil) # 设置文件的信息
-    return true if origin_dir == target_dir 
+    return true if origin_dir == target_dir
 
     if target_dir
       info = target_dir.info

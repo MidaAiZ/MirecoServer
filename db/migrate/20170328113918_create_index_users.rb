@@ -1,4 +1,4 @@
-class CreateIndexUsers < ActiveRecord::Migration[4.2]
+class CreateIndexUsers < ActiveRecord::Migration
   def change
     create_table :index_users do |t|
       t.string :number

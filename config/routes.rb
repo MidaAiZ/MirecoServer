@@ -132,6 +132,9 @@ Rails.application.routes.draw do
     post 'send_msg' => 'verify#send_msg_code'
     post 'verify_msg' => 'verify#check_msg_code'
     get 'verify_email' => 'verify#check_email'
+
+    # 前台用户文章等图片上传
+    post 'upload_image' => 'image_uploader#create'
   end
 
   root 'index/main#index'

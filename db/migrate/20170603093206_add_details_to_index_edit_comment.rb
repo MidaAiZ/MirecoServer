@@ -1,4 +1,4 @@
-class AddDetailsToIndexEditComment < ActiveRecord::Migration[4.2]
+class AddDetailsToIndexEditComment < ActiveRecord::Migration
   def change
     change_table :index_edit_comments do |t|
       t.integer :user_id

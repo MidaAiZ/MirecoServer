@@ -1,4 +1,4 @@
-class AddIndexToIndexFileSeedSources < ActiveRecord::Migration[4.2]
+class AddIndexToIndexFileSeedSources < ActiveRecord::Migration
   def change
       add_index :index_articles, :index_file_seed_id
       add_index :index_corpus, :index_file_seed_id

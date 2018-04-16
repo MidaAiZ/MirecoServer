@@ -1,4 +1,4 @@
-class CreateIndexFileSeed < ActiveRecord::Migration[4.2]
+class CreateIndexFileSeed < ActiveRecord::Migration
   def change
     create_table :index_file_seeds do |t|
       t.integer :file_count

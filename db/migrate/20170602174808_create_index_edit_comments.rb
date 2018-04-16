@@ -1,4 +1,4 @@
-class CreateIndexEditComments < ActiveRecord::Migration[4.2]
+class CreateIndexEditComments < ActiveRecord::Migration
   def change
     create_table :index_edit_comments do |t|
       t.references :resource,  :polymorphic => true

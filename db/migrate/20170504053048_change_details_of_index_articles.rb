@@ -1,4 +1,4 @@
-class ChangeDetailsOfIndexArticles < ActiveRecord::Migration[4.2]
+class ChangeDetailsOfIndexArticles < ActiveRecord::Migration
   def change
     change_table :index_articles do |t|
       t.rename :title, :name

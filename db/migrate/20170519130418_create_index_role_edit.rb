@@ -1,4 +1,4 @@
-class CreateIndexRoleEdit < ActiveRecord::Migration[4.2]
+class CreateIndexRoleEdit < ActiveRecord::Migration
   def change
     create_table :index_role_edits do |t|
         t.string :name
