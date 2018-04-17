@@ -142,7 +142,7 @@ class Index::Workspace::FileSeed < ApplicationRecord
       OCR_O: true,  OCR_OC: false,  OCR_C: false,
       OCS_O: true,  OCS_OC: true,   OCS_C: true,
       CR_O:  true,  CR_OC:  true,   CR_C:  false,
-      CS_O:  false, CS_OC:  false,  CS_C:  false, 
+      CS_O:  false, CS_OC:  false,  CS_C:  false,
     }
 
     f_own = user.has_edit_role?(:own, file) ? "O" : ""

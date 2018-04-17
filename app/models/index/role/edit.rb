@@ -30,6 +30,10 @@ class Index::Role::Edit < ApplicationRecord
     %w(admin editor readonly)
   end
 
+  def is_root
+    !dir_id
+  end
+
   private
 
   # 定义权限
