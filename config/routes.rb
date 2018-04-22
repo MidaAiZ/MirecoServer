@@ -45,8 +45,10 @@ Rails.application.routes.draw do
           post '/:id/move_dir' => 'articles#move_dir'
           post '/:id/add_editor' => 'articles#add_editor'
           post '/:id/remove_editor' => 'articles#remove_editor'
+          post '/:id/copy' => 'articles#copy'
 
-          get '/:id/profile' => 'articles#show_profile'
+          get '/:id/release' => 'articles#release'
+          get '/:id/profile' => 'articles#profile'
         end
         resources :history_articles, as: :history
       end
@@ -62,8 +64,10 @@ Rails.application.routes.draw do
           post '/:id/move_dir' => 'corpus#move_dir'
           post '/:id/add_editor' => 'corpus#add_editor'
           post '/:id/remove_editor' => 'corpus#remove_editor'
+          post '/:id/copy' => 'corpus#copy'
 
-          get '/:id/profile' => 'corpus#show_profile'
+          get '/:id/release' => 'corpus#release'
+          get '/:id/profile' => 'corpus#profile'
         end
       end
 
@@ -76,8 +80,9 @@ Rails.application.routes.draw do
           post '/:id/move_dir' => 'folders#move_dir'
           post '/:id/add_editor' => 'folders#add_editor'
           post '/:id/remove_editor' => 'folders#remove_editor'
+          post '/:id/copy' => 'folders#copy'
 
-          get '/:id/profile' => 'folders#show_profile'
+          get '/:id/profile' => 'folders#profile'
         end
       end
 
@@ -108,8 +113,8 @@ Rails.application.routes.draw do
     get 'hot_corpuses' => 'main#hot_corpuses'
 
     # 点赞
-    post '/:resource_type/:resource_id/thumb_ups' => 'thumb_ups#create'
-    delete '/:resource_type/:resource_id/thumb_ups' => 'thumb_ups#destroy'
+    post '/:resource_type/:resource_id/thumb_up' => 'thumb_ups#create'
+    delete '/:resource_type/:resource_id/thumb_up' => 'thumb_ups#destroy'
 
     # 评论
     post '/:resource_type/:resource_id/comments' => 'comments#create'
@@ -135,6 +140,7 @@ Rails.application.routes.draw do
 
     # 前台用户文章等图片上传
     post 'upload_image' => 'image_uploader#create'
+    post 'upload_tocken' => 'image_uploader#get_upload_tocken'
   end
 
   root 'index/main#index'

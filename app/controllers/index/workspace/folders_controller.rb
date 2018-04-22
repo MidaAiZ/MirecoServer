@@ -5,7 +5,7 @@ class Index::Workspace::FoldersController < IndexController
 
   before_action :require_login
   before_action :set_folder, except: [:index, :new, :create]
-  before_action :set_file, except: [:index, :create, :show_profile]
+  before_action :set_file, except: [:index, :create, :profile]
 
   # GET /index/folders
   # GET /index/folders.json
@@ -38,9 +38,21 @@ class Index::Workspace::FoldersController < IndexController
     render :show, status: @folder.id.nil? ? :unprocessable_entity : :created
   end
 
-  def show_profile
+  def profile
     # 检索到该文件夹
     @files = @folder.profiles @user
+  end
+
+  # 创建副本
+  def copy
+    if @user.can_edit? :copy, @folder
+      @folder = @folder.copy
+    else
+      :NoPermission
+    end
+    @code ||= @folder.id ? :Success : :Fail
+
+    render :show
   end
 
   private

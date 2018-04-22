@@ -9,7 +9,7 @@ class Index::CommentsController < IndexController
     count = params[:count] || 15
     count = 100 if count.to_i > 100  # 限制返回的评论条数
     @nonpaged_comments = @resource ? @resource.comments : Index::Comment.none
-    @comments = @nonpaged_comments.page(page).per(count).includes(:limit_3_replies)
+    @comments = @nonpaged_comments.page(page).per(count).includes(:user)
   end
 
   # GET /index/comments/1
@@ -20,12 +20,10 @@ class Index::CommentsController < IndexController
 
   # POST /:resource_type/:resource_id/comments
   def create
-    @comment = Index::Comment.new(comment_params)
-    unless @code
-      @code = @comment.create(@resource, @user) ? :Success : :Fail
-    end
+    @comment = @resource.comment(@user, comment_params[:content])
+    @code ||= @comment.id ? :Success : :Fail
     respond_to do |format|
-      format.json { render :show, status: @comment.id.nil? ? :unprocessable_entity : :created }
+      format.json { render :show, status: @comment.id ? :unprocessable_entity : :created }
     end
   end
 
@@ -34,7 +32,7 @@ class Index::CommentsController < IndexController
   def destroy
     unless @code
       if @user = @comment.user || @user.can_edit?(:comment, @resource)  # 判断用户是否有权限删除评论
-        @code = @comment.drop(@resource) ? :Success : :Fail
+        @code = @resource.delete_comment(@comment) ? :Success : :Fail
       else
         @code = :NoPermission
       end

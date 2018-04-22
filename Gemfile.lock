@@ -154,6 +154,9 @@ GEM
       mini_portile2 (~> 2.2.0)
     pg (0.21.0)
     public_suffix (2.0.5)
+    qiniu (6.9.0)
+      mime-types (~> 3.1)
+      rest-client (~> 2.0)
     rack (2.0.3)
     rack-cache (1.6.1)
       rack (>= 0.4)
@@ -308,6 +311,7 @@ DEPENDENCIES
   mime-types
   mini_magick
   pg
+  qiniu
   rack-cors
   rails (= 5.1.2)
   redis
@@ -330,4 +334,4 @@ DEPENDENCIES
   web-console (>= 3.3.0)
 
 BUNDLED WITH
-   1.15.1
+   1.16.1

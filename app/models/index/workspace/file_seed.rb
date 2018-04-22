@@ -26,17 +26,17 @@ class Index::Workspace::FileSeed < ApplicationRecord
   has_many :articles_with_del, -> { with_del },
            class_name: 'Index::Workspace::Article',
            foreign_key: 'file_seed_id',
-           dependent: :delete_all
+           dependent: :destroy
 
   has_many :folders_with_del, -> { with_del },
            class_name: 'Index::Workspace::Folder',
            foreign_key: 'file_seed_id',
-           dependent: :delete_all
+           dependent: :destroy
 
   has_many :corpuses_with_del, -> { with_del },
            class_name: 'Index::Workspace::Corpus',
            foreign_key: 'file_seed_id',
-           dependent: :delete_all
+           dependent: :destroy
 
   # ---------------------作者角色和作者---------------------- #
   has_many :editor_roles, -> { all_with_del },
@@ -63,7 +63,7 @@ class Index::Workspace::FileSeed < ApplicationRecord
            dependent: :destroy
 
   #--------------------------作用域--------------------------- #
-  scope :deleted, -> { rewhere(is_deleted: true) }
+  # scope :deleted, -> { rewhere(is_deleted: true) }
   # 默认域
   default_scope { order('index_file_seeds.id DESC') }
 
@@ -75,6 +75,7 @@ class Index::Workspace::FileSeed < ApplicationRecord
   # -----------------------创建并设置目录----------------------- #
   def self.create(_self, dir, user, attrs)
     return false if _self.id
+    dir ||= 0
     ApplicationRecord.transaction do
       if dir == 0 # 在根目录内创建文件
         file_seed = _self.create_file_seed!(editors_count: 0)
@@ -86,7 +87,7 @@ class Index::Workspace::FileSeed < ApplicationRecord
       else # 在父目录内创建文件
         return false if _self.allow_dir_types.exclude? dir.file_type # 检查文件类型合法性
         _self.dir = dir
-        _self.file_seed = _self.dir.file_seed
+        _self.file_seed = dir.file_seed
         _self.save!
         set_file_info _self, dir # 设置文件目录信息
       end

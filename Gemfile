@@ -39,6 +39,9 @@ gem 'kaminari'
 # memcache插件，用于缓存
 gem 'dalli'
 
+# 七牛云存储
+gem 'qiniu'
+
 # 后端处理文件上传的插件
 gem 'carrierwave' #github: 'carrierwaveuploader/carrierwave'
 

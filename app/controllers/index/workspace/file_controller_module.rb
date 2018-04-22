@@ -105,21 +105,17 @@ module FileController
     # 发布
     # 文章或文集具有发布功能
     def publish
-      publish = params[:is_shown]
-      if [true, false].include? publish
-        @code = if @user.can_edit? :publish, @file
-                  @file.update(is_shown: publish) ? :Success : :Fail
-                else
-                  :NoPermission
-                end
-      end
-      @code ||= :Fail
+      @code = if @user.can_edit? :publish, @file
+                @file.publish ? :Success : :Fail
+              else
+                :NoPermission
+              end
       do_update_response
     end
 
     def destroy
       @code = if @user.can_edit? :delete, @file
-                @file.delete_files ? :Success : :Fail
+                @file.delete_files(@user) ? :Success : :Fail
               else
                 :NoPermission
               end
@@ -130,7 +126,7 @@ module FileController
 
     def do_update_response
       respond_to do |format|
-        format.json { render json: { code: @code, errors: @error } }
+        format.json { render json: { code: @code, errors: @error || @file.errors } }
       end
     end
 end

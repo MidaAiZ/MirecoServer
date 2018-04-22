@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20180413101413) do
+ActiveRecord::Schema.define(version: 20180418153531) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -33,12 +33,28 @@ ActiveRecord::Schema.define(version: 20180413101413) do
     t.string "text", default: ""
   end
 
+  create_table "index_article_read_records", force: :cascade do |t|
+    t.bigint "article_id"
+    t.bigint "user_id"
+    t.datetime "read_time"
+    t.string "ip"
+    t.index ["article_id"], name: "index_art_read_records_on_art_id"
+    t.index ["user_id"], name: "index_art_read_records_on_uid"
+  end
+
+  create_table "index_article_thumb_ups", force: :cascade do |t|
+    t.bigint "article_id"
+    t.bigint "user_id"
+    t.datetime "thumb_time"
+    t.index ["article_id"], name: "index_art_thumb_ups_on_art_id"
+    t.index ["user_id"], name: "index_art_thumb_ups_on_uid"
+  end
+
   create_table "index_articles", id: :serial, force: :cascade do |t|
     t.string "name"
     t.string "tag"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.boolean "is_shown"
     t.boolean "is_deleted", default: false
     t.integer "file_seed_id"
     t.integer "dir_id"
@@ -46,6 +62,8 @@ ActiveRecord::Schema.define(version: 20180413101413) do
     t.jsonb "info", default: {}
     t.integer "marked_u_ids", array: true
     t.string "cover"
+    t.bigint "release_id"
+    t.boolean "is_shown", default: false
     t.index ["dir_type", "dir_id"], name: "index_article_on_dir_type_id"
     t.index ["file_seed_id"], name: "index_articles_on_file_seed_id"
     t.index ["info"], name: "index_corpus_on_info", using: :gin
@@ -162,6 +180,57 @@ ActiveRecord::Schema.define(version: 20180413101413) do
     t.index ["file_id", "file_type"], name: "index_mark_records_on_file_id_type"
     t.index ["file_seed_id"], name: "index_mark_records_on_file_seed_id"
     t.index ["user_id"], name: "index_mark_records_on_user_id"
+  end
+
+  create_table "index_published_articles", force: :cascade do |t|
+    t.string "name"
+    t.string "tag"
+    t.string "cover"
+    t.integer "state", default: 1
+    t.bigint "user_id"
+    t.bigint "corpus_id"
+    t.bigint "origin_id"
+    t.bigint "content_id"
+    t.integer "read_times_cache", default: 0
+    t.integer "thumbs_count_cache", default: 0
+    t.integer "comments_count_cache", default: 0
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["corpus_id"], name: "index_publish_article_on_copus_id"
+    t.index ["origin_id"], name: "index_publish_article_on_origin_id"
+    t.index ["user_id"], name: "index_publish_article_on_uid"
+  end
+
+  create_table "index_published_corpurses", force: :cascade do |t|
+    t.string "name"
+    t.string "tag"
+    t.string "cover"
+    t.integer "state", default: 1
+    t.bigint "user_id"
+    t.bigint "origin_id"
+    t.integer "read_times_cache", default: 0
+    t.integer "thumbs_count_cache", default: 0
+    t.integer "comments_count_cache", default: 0
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["origin_id"], name: "index_published_corpurs_origin_id"
+    t.index ["user_id"], name: "index_published_corpurs_on_uid"
+  end
+
+  create_table "index_published_corpus", force: :cascade do |t|
+    t.string "name"
+    t.string "tag"
+    t.string "cover"
+    t.integer "state", default: 1
+    t.bigint "user_id"
+    t.bigint "origin_id"
+    t.integer "read_times_cache", default: 0
+    t.integer "thumbs_count_cache", default: 0
+    t.integer "comments_count_cache", default: 0
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["origin_id"], name: "index_published_corpus_origin_id"
+    t.index ["user_id"], name: "index_published_corpus_on_uid"
   end
 
   create_table "index_role_edits", id: :serial, force: :cascade do |t|

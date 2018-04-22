@@ -78,10 +78,15 @@ class Index::User < ApplicationRecord
 
   # -----------------------标星文件----------------------- #
 
-
   has_many :mark_records, ->(id) { where(user_id: id) },
            through: :file_seeds,
            source: :mark_records
+
+  # -----------------------发表文章----------------------- #
+
+  has_many :published_articles,
+            class_name: 'Index::PublishedArticles',
+            foreign_key: :user_id
 
   #--------------------------回收站--------------------------- #
 

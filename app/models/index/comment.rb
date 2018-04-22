@@ -30,31 +30,39 @@ class Index::Comment < ApplicationRecord
 
   validates :user_id, presence: true
   validates :resource_id, presence: true
-  validates :resource_type, presence: true, inclusion: { in: ['Index::Workspace::Article', 'Index::Workspace::Corpus'] }
-  validates :content, presence: true, length: { minimum: 1, maximum: 255 }
+  validates :resource_type, presence: true, inclusion: { in: ['Index::PublishedArticle', 'Index::PublishedCorpus'] }
+  validates :content, presence: true, length: { minimum: 1, maximum: 255 }, allow_blank: false
 
   #----------------------------域------------------------------
-  default_scope { order('index_comments.id DESC') }
+  default_scope { order(id: :DESC) }
 
   # ------------------------文件类型------------------------- #
   def file_type
     :comments
   end
 
-  def create rsc, user
-    ApplicationRecord.transaction do
-      self.resource = rsc
-      self.user = user
-      self.save!
-      rsc.update! cmt_counts: (rsc.cmt_counts || 0) + 1
-    end
+  def create rsc, u, text
+    return false if self.id
+
+    self.resource = rsc
+    self.user = u
+    self.content = text
+
+    save
   end
 
-  def drop rsc
-    ApplicationRecord.transaction do
-      self.destroy!
-      rsc.update! cmt_counts: (rsc.cmt_counts || 0) - 1
-    end
+  def remove rsc
+    return destroy
+  end
+
+  # -------------------------点赞-------------------------- #
+  def thumb_up user
+    Index::ThumbUp.add self, user
+  end
+
+  # ------------------------取消赞------------------------- #
+  def thumb_cancel user
+    Index::ThumbUp.cancel self, user
   end
 
   # --------------------------赞--------------------------- #

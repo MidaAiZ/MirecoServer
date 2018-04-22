@@ -29,6 +29,8 @@ class Index::CommentReply < ApplicationRecord
   default_scope { order('index_comment_replies.id DESC') }
 
   def create cmt, user
+    return false if self.id
+
     ApplicationRecord.transaction do
       self.comment = cmt
       self.user = user
@@ -47,6 +49,16 @@ class Index::CommentReply < ApplicationRecord
   # ------------------------文件类型------------------------- #
   def file_type
     :replies
+  end
+
+  # -------------------------点赞-------------------------- #
+  def thumb_up user
+    Index::ThumbUp.add self, user
+  end
+
+  # ------------------------取消赞------------------------- #
+  def thumb_cancel user
+    Index::ThumbUp.cancel self, user
   end
 
   # --------------------------赞--------------------------- #

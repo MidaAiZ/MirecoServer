@@ -4,7 +4,7 @@ class Index::Workspace::ArticlesController < IndexController
 
   before_action :require_login
   before_action :set_article, except: [:index, :new, :create]
-  before_action :set_file, except: [:index, :create, :update_content]
+  before_action :set_file, except: [:index, :create]
 
   # GET /index/articles
   # GET /index/articles.json
@@ -41,13 +41,31 @@ class Index::Workspace::ArticlesController < IndexController
   def update_content
     if @user.can_edit?(:edit, @article)
         if params[:content]
-          @code = @article.content.update(text: params[:content]) ? :Success : :Fail
+          @code = @article.update_content(params[:content]) ? :Success : :Fail
         end
     else
         @code = :NoPermission
     end
     @code ||= :Fail
     do_update_response
+  end
+
+  def release
+    @release = @article.release
+    @editor_roles = @release.editor_roles.includes(:editor) if @release
+    @code ||= :NotReleaseYet unless @release
+  end
+
+  # 创建副本
+  def copy
+    if @user.can_edit? :copy, @article
+      @article = @article.copy
+    else
+      :NoPermission
+    end
+    @code ||= @article.id ? :Success : :Fail
+
+    render :show
   end
 
   private

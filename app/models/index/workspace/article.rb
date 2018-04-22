@@ -3,11 +3,9 @@ require_relative 'file_model_module'
 class Index::Workspace::Article < ApplicationRecord
   include FileModel
 
-  mount_uploader :cover, FileCoverUploader # 封面上传
-
   after_update :update_cache
-  after_destroy :delete_thumb_up, :clear_cache
-  store_accessor :info, :tbp_counts, :cmt_counts, :rd_times # 点赞数/评论数/阅读次数
+  after_destroy :clear_cache, :delete_release
+  # store_accessor :info, :tbp_counts, :cmt_counts, :rd_times # 点赞数/评论数/阅读次数
 
   belongs_to :file_seed,
              class_name: 'Index::Workspace::FileSeed',
@@ -17,6 +15,11 @@ class Index::Workspace::Article < ApplicationRecord
   has_one :content,
           class_name: 'Index::Workspace::ArticleContent',
           foreign_key: :article_id
+
+  # -----------------------发表副本------------------------ #
+  has_one :release, -> { all_state },
+          class_name: 'Index::PublishedArticle',
+          foreign_key: :origin_id
 
   # ---------------------作者和作者角色---------------------- #
   has_many :editor_roles, -> { all_with_del },
@@ -40,24 +43,10 @@ class Index::Workspace::Article < ApplicationRecord
              polymorphic: true,
              optional: true
 
-  # -----------------------读者评论------------------------ #
-  has_many :comments, as: :resource,
-                      class_name: 'Index::Comment',
-                      dependent: :destroy
-
   # -----------------------编辑评论------------------------ #
   has_many :edit_comments, as: :resource,
                            class_name: 'Index::Workspace::EditComment',
                            dependent: :destroy
-
-  # -------------------------赞--------------------------- #
-  has_one :thumb_up, as: :resource,
-                     class_name: 'Index::ThumbUp',
-                     dependent: :destroy
-
-  has_one :thumb_ct, -> { t_counts },
-          as: :resource,
-          class_name: 'Index::ThumbUp'
 
   # ------------------------历史-------------------------- #
   has_many :history,
@@ -75,6 +64,7 @@ class Index::Workspace::Article < ApplicationRecord
   validates :tag, length: { maximum: 25 }
   validates :name, presence: { message: '文件名不能为空' }, length: { maximum: 255 }
   validates :dir_type, inclusion: { in: ['Index::Workspace::Corpus', 'Index::Workspace::Folder'] }, allow_blank: true
+  validate :check_state, on: [:update]
 
   #----------------------------域------------------------------
 
@@ -84,12 +74,46 @@ class Index::Workspace::Article < ApplicationRecord
   scope :deleted, -> { rewhere(is_deleted: true) }
   scope :undeleted, -> { where(is_deleted: false) }
   scope :with_del, -> { unscope(where: :is_deleted) }
-  scope :sort, ->(tag) { where('index_articles.tag LIKE ?', "%#{tag}") }
   # 默认作用域, 不包含content字段, id降序, 未删除的文章
   default_scope { undeleted.order('index_articles.id DESC') }
 
-  def html_content
-    self.content.content.safe_html
+  def update_content text
+    if (!is_shown)
+      return content.update(text: text)
+    else
+      errors.add("文章已发表，不能再修改")
+    end
+    false
+  end
+
+  def publish # 发表文章
+    art = release || build_release(name: name)
+    art.content = content
+    art.author = own_editor
+    begin
+      ApplicationRecord.transaction do
+        update! is_shown: true
+
+        # 将发表文章的corpus_id指向正确文集
+        if dir && dir.class == Index::Workspace::Corpus && dir.is_shown
+          art.corpus = dir.release
+        end
+
+        art.save!
+      end
+    rescue
+      false
+    end
+    true
+  end
+
+  # ------------------------创建副本------------------------- #
+  def copy target_dir = nil
+    _self = self.class.new
+    _self.dir = target_dir || dir
+    _self.name = name + (target_dir ? "" : "副本")
+    _self.create(_self.dir, own_editor, {text: content.text})
+    _self
   end
 
   # ------------------------文件类型------------------------- #
@@ -107,31 +131,43 @@ class Index::Workspace::Article < ApplicationRecord
     { files_count: 0, articles: [], corpuses: [], folders: [] }
   end
 
-  # -------------------------阅读次数------------------------- #
-  def add_read_times mark
-    prefix = read_prefix
-    puts ReadWorker.perform_at(3.hours.from_now, self.id, prefix) if $redis.EXISTS(prefix) == 0
-    $redis.SADD(read_prefix, mark)
+  private
+
+  def check_state
+    if is_shown
+      errors.add(:base, "文章已经发表，不能再修改") if name_changed?
+      release.toggle_delete(is_deleted) if is_deleted_changed?
+    end
   end
 
-  def read_times
-    (self.rd_times || 0) + $redis.SCARD(read_prefix)
+  # 确保已发表的文章所属文集和所关联的编辑文章一致
+  def after_move_dir dir
+    if is_shown
+      if dir_id_changed? || dir_type_changed?
+        if dir.class == Index::Workspace::Corpus
+          release.corpus = dir.release
+          release.save
+        elsif dir == nil || dir.class == Index::Workspace::Folder
+          release.corpus = nil
+          release.save
+        end
+      end
+    end
+  end
+
+  def delete_release
+    if is_shown
+      release.delete
+    else
+      content.destroy
+    end
   end
 
   def update_cache
     Cache.new["edit_article_#{self.id}"] = self
-    Cache.new["article_#{self.id}"] = self
   end
 
   def clear_cache
     Cache.new["edit_article_#{self.id}"] = nil
-    Cache.new["article_#{self.id}"] = nil
-  end
-
-  private
-
-  def read_prefix
-    $redis.select 3
-    "index_#{self.id}_article_readtimes"
   end
 end

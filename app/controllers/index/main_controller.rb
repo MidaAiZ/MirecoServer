@@ -5,9 +5,9 @@ class Index::MainController < IndexController
   def index; end
 
   def articles
-    @res = Rails.cache.fetch("#{cache_key}/#{@page}/#{@count}", expires_in: 3.minutes) do
-      @nonpaged_articles = Index::Workspace::Article.shown # .sort(@tag)
-      res = @nonpaged_articles.page(@page).per(@count).includes(:own_editor)
+    @res = Rails.cache.fetch("#{cache_key}/#{@page}/#{@count}", expires_in: 10.minutes) do
+      @nonpaged_articles = Index::PublishedArticle.recommend # .sort(@tag)
+      res = @nonpaged_articles.page(@page).per(@count).includes(:author)
       { record: res.records, counts: count_cache(cache_key, res) }
     end
     @articles = @res[:record]; @counts = @res[:counts]
@@ -16,16 +16,17 @@ class Index::MainController < IndexController
   def show_article
     shown_article_cache params[:id]
     if @article
-        @article.add_read_times mark
-        @editors = @article.editor_roles.includes(:editor)
+      @editor_roles = @article.editor_roles.includes(:editor)
+      @article.read request.remote_ip, @user
+    else
+      @code ||= :ResourceNotExist
     end
-    # @comments = @article.comments.limit(10).includes(:user) if @article
   end
 
   def corpuses
-    @res = Rails.cache.fetch("#{cache_key}/#{@page}/#{@count}", expires_in: 3.minutes) do
-      @nonpaged_corpus = Index::Workspace::Corpus.shown # .sort(@tag)
-      res = @nonpaged_corpus.page(@page).per(@count).includes(:own_editor)
+    @res = Rails.cache.fetch("#{cache_key}/#{@page}/#{@count}", expires_in: 10.minutes) do
+      @nonpaged_corpus = Index::PublishedCorpus.recommend # .sort(@tag)
+      res = @nonpaged_corpus.page(@page).per(@count).includes(:author)
       { record: res.records, counts: count_cache(cache_key, res) }
     end
     @corpuses = @res[:record]; @counts = @res[:counts]
@@ -34,17 +35,29 @@ class Index::MainController < IndexController
   def show_corpus
     shown_corpus_cache params[:id]
     if @corpus
-        @editors = @corpus.editor_roles.includes(:editor)
+      @editor_roles = @corpus.editor_roles.includes(:editor)
+    else
+      @code = :ResourceNotExist
     end
   end
 
   def hot_articles
-    articles
+    @res = Rails.cache.fetch("#{cache_key}/#{@page}/#{@count}", expires_in: 10.minutes) do
+      @nonpaged_articles = Index::PublishedArticle.hot # .sort(@tag)
+      res = @nonpaged_articles.page(@page).per(@count).includes(:author)
+      { record: res.records, counts: count_cache(cache_key, res) }
+    end
+    @articles = @res[:record]; @counts = @res[:counts]
     render :articles
   end
 
   def hot_corpuses
-    corpuses
+    @res = Rails.cache.fetch("#{cache_key}/#{@page}/#{@count}", expires_in: 10.minutes) do
+      @nonpaged_articles = Index::PublishedCorpus.hot # .sort(@tag)
+      res = @nonpaged_articles.page(@page).per(@count).includes(:author)
+      { record: res.records, counts: count_cache(cache_key, res) }
+    end
+    @articles = @res[:record]; @counts = @res[:counts]
     render :corpuses
   end
 
@@ -56,9 +69,5 @@ class Index::MainController < IndexController
     @page = params[:page] || 1
 
     @count = 100 if @count.to_i > 100 # 限制返回的条数
-  end
-
-  def mark
-    session[:user_id] || request.remote_ip
   end
 end

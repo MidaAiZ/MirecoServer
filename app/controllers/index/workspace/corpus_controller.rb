@@ -5,7 +5,7 @@ class Index::Workspace::CorpusController < IndexController
 
   before_action :require_login
   before_action :set_corpus, except: [:index, :new, :create]
-  before_action :set_file, except: [:index, :create, :show_profile]
+  before_action :set_file, except: [:index, :create, :profile]
 
   # GET /index/corpuss
   # GET /index/corpuss.json
@@ -38,11 +38,28 @@ class Index::Workspace::CorpusController < IndexController
     render :show, status: @corpus.id.nil? ? :unprocessable_entity : :created
   end
 
-  def show_profile
+  def profile
     @son_articles = @user.all_articles.where(id: @corpus.info['articles']).includes(:file_seed) || Index::Workspace::Corpus.none # 子文章
     #   @son_articles = @corpus.son_articles # 子文章
   end
 
+  def release
+    @release = @corpus.release
+    @editor_roles = @release.editor_roles.includes(:editor) if @release
+    @code ||= :NotReleaseYet unless @release
+  end
+
+  # 创建副本
+  def copy
+    if @user.can_edit? :copy, @corpus
+      @corpus = @corpus.copy
+    else
+      :NoPermission
+    end
+    @code ||= @corpus.id ? :Success : :Fail
+
+    render :show
+  end
 
   private
 

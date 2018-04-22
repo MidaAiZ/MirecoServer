@@ -27,7 +27,7 @@ class Index::Workspace::TrashesController < IndexController
   # POST /index/trashes.json
   def create
     @code = if @user.can_edit? :delete, @file
-              @trash = Index::Workspace::Trash.delete_files(@file)
+              @trash = Index::Workspace::Trash.delete_files(@file, @user)
               @trash ? :Success : :Fail
             else
               :NoPermission

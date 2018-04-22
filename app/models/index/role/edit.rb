@@ -34,11 +34,15 @@ class Index::Role::Edit < ApplicationRecord
     !dir_id
   end
 
+  def is_author?
+    name == 'own'
+  end
+
   private
 
   # 定义权限
   ROLES = {
-    'own' => [:all, :read, :create, :edit, :update, :delete, :destroy, :comment, :delete_comment, :move_dir, :add_history, :add_role, :remove_role, :publish], # 拥有者, 具有所有权限
+    'own' => [:all, :read, :create, :edit, :update, :delete, :destroy, :comment, :delete_comment, :move_dir, :add_history, :add_role, :remove_role, :publish, :copy], # 拥有者, 具有所有权限
     'admin' => [:read, :create, :edit, :update, :delete, :comment, :delete_comment, :move_dir, :add_history, :add_role, :remove_role],
     'editor' => [:read, :edit, :comment, :add_history],
     'readonly' => [:read]

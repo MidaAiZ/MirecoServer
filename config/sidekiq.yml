@@ -7,6 +7,9 @@
   - [thumb, 1]
   - [autothumb, 1]
   - [read_times, 1]
+  - [thumb_count, 1]
+  - [comment_count, 1]
+
 #
 development:
   :concurrency: 5

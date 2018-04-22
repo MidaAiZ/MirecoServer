@@ -42,7 +42,7 @@ class IndexController < ApplicationController
   def shown_article_cache(id)
     @article = init_cache :article, id
     unless @article
-      @article = Index::Workspace::Article.shown.find_by_id id
+      @article = Index::PublishedArticle.find_by_id id
       @cache[@prefix] = @article if @article
     end
     @article
@@ -60,7 +60,7 @@ class IndexController < ApplicationController
   def shown_corpus_cache(id)
     @corpus = init_cache :corpus, id
     unless @corpus
-      @corpus = Index::Workspace::Corpus.shown.find_by_id id
+      @corpus = Index::PublishedCorpus.find_by_id id
       @cache[@prefix] = @corpus if @corpus
     end
     @corpus

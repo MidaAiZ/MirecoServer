@@ -14,13 +14,13 @@ class Index::Workspace::CenterController < IndexController
 
   def published_articles
     init
-    @nonpaged_articles = @user.all_articles.shown
+    @nonpaged_articles = @user.all_articles.shown.includes(:file_seed)
     @articles = @nonpaged_articles.page(@page).per(@count)
   end
 
   def published_corpuses
     init
-    @nonpaged_corpuses = @user.all_corpuses.shown
+    @nonpaged_corpuses = @user.all_corpuses.shown.includes(:file_seed)
     @corpuses = @nonpaged_corpuses.page(@page).per(@count)
   end
 

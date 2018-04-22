@@ -1,7 +1,7 @@
 class Index::ThumbUp < ApplicationRecord
   belongs_to :resource, polymorphic: true
 
-  validates :resource_type, inclusion: { in: ['Index::Workspace::Article', 'Index::Workspace::Corpus', 'Index::Comment', 'Index::CommentReply'] }
+  validates :resource_type, inclusion: { in: ['Index::Comment', 'Index::CommentReply'] }
   validates :resource_id, presence: true
 
   #----------------------------域------------------------------

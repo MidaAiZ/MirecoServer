@@ -5,14 +5,10 @@ json.comments do
     tf = c.thumb_up_info(@user)
     json.thumb_counts tf[:counts]
     json.has_thumb tf[:has]
-
-    json.replies do
-      json.array! c.limit_3_replies do |r|
-        json.call(r, :id, :user_id, :content, :created_at)
-        # tf = r.thumb_up_info(@user)
-        # json.thumb_counts tf[:counts]
-        # json.has_thumb tf[:has]
-      end
+    json.user do
+      u = c.user
+      json.number u.number
+      json.avatar u.avatar
     end
   end
 end

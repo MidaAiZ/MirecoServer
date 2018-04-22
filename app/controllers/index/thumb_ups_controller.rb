@@ -4,16 +4,16 @@ class Index::ThumbUpsController < IndexController
 
   def create
     if @resource
-      @code = :Success if Index::ThumbUp.add(@resource, @user)
+      @code = @resource.thumb_up(@user) ? :Success : :Fail
     end
-    render json: { code: @code || :Fail }
+    render json: { code: @code }
   end
 
   def destroy
     if @resource
-      @code = :Success if Index::ThumbUp.cancel(@resource, @user)
+      @code =  @resource.thumb_cancel(@user) ? :Success : :Fail
     end
-    render json: { code: @code || :Fail }
+    render json: { code: @code  }
   end
 
   private
@@ -24,8 +24,6 @@ class Index::ThumbUpsController < IndexController
     @resource = case resource_type
                 when 'articles'
                   shown_article_cache resource_id
-                when 'corpuses'
-                  shown_corpus_cache resource_id
                 when 'comments'
                   comment_cache resource_id
                 when 'replies'

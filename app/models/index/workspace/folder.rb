@@ -40,18 +40,18 @@ class Index::Workspace::Folder < ApplicationRecord
 
   has_many :son_articles_with_del, -> { with_del },
            as: :dir,
-           class_name: 'Index::Workspace::Article',
-           dependent: :destroy
+           class_name: 'Index::Workspace::Article'
+           # dependent: :destroy
 
   has_many :son_corpuses_with_del, -> { with_del },
            as: :dir,
-           class_name: 'Index::Workspace::Corpus',
-           dependent: :destroy
+           class_name: 'Index::Workspace::Corpus'
+           # dependent: :destroy
 
   has_many :son_folders_with_del, -> { with_del },
            as: :dir,
-           class_name: 'Index::Workspace::Folder',
-           dependent: :destroy
+           class_name: 'Index::Workspace::Folder'
+           # dependent: :destroy
 
   # ------------------------标星-------------------------- #
   has_many :mark_records, as: :file,
@@ -77,6 +77,27 @@ class Index::Workspace::Folder < ApplicationRecord
   default_scope { undeleted.order('index_folders.id DESC') }
   # 简略的文件信息可以提高查询和加载速度
   scope :brief, -> { unscope(:select).select(:id, :name, :created_at, :updated_at) }
+
+
+  # ------------------------创建副本------------------------- #
+  def copy target_dir = nil
+    _self = self.class.new
+    _self.dir = target_dir || dir
+    _self.name = name + (target_dir ? "" : "副本")
+
+    if _self.create(_self.dir, own_editor)
+      self.son_articles.each do |a|
+        a.copy _self
+      end
+      self.son_corpuses.each do |c|
+        c.copy _self
+      end
+      self.son_folders.each do |f|
+        f.copy _self
+      end
+    end
+    _self
+  end
 
   # ------------------------文件类型------------------------- #
   def file_type
@@ -140,13 +161,15 @@ class Index::Workspace::Folder < ApplicationRecord
     files_hash
   end
 
+  private
+
   def auto_delete_son_roles
     role_ids = info['son_roles']
     unless role_ids.blank?
       roles = Index::Role::Edit.where(id: role_ids)
       if roles
         roles.each do |role|
-          if role.name == 'own'
+          if role.is_author
             role.file_seed.destroy
           else
             role.destroy
@@ -154,6 +177,10 @@ class Index::Workspace::Folder < ApplicationRecord
         end
       end
     end
+  end
+
+  def after_move_dir dir
+
   end
 
   def update_cache

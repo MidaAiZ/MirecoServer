@@ -1,32 +1,12 @@
 module FileModel
     # ----------------------判断是否是协作文件--------------------- #
     def is_cooperate?
-        file_seed.editors_count > 1
-    end
-
-    # ----------------------------赞---------------------------- #
-    def thumb_ups
-      Index::ThumbUp.get(self)
-    end
-
-    # ---------------------------赞数--------------------------- #
-    def thumb_up_counts
-      Index::ThumbUp.counts(self)
-    end
-
-    # --------------------------判断赞-------------------------- #
-    def has_thumb_up?(user)
-      Index::ThumbUp.has?(self, user)
-    end
-
-    # -------------------------点赞信息------------------------- #
-    def thumb_up_info(user)
-      Index::ThumbUp.counts_and_has?(self, user)
+      file_seed.editors_count > 1
     end
 
     #---------------------------标星--------------------------- #
     def is_marked id
-        (marked_u_ids || []).include? id
+      (marked_u_ids || []).include? id
     end
 
     # ----------------------判断是否为根文件--------------------- #
@@ -41,21 +21,61 @@ module FileModel
 
     # -------------------------移动文件------------------------- #
     def move_dir(target_file, user)
-      Index::Workspace::FileSeed.move_dir self, target_file, user
+      res = Index::Workspace::FileSeed.move_dir self, target_file, user
+      afetr_move_dir target_file
+      res
     end
 
     # -------------------------删除文件------------------------- #
-    def delete_files(user = nil)
+    def delete_files(user)
       Index::Workspace::Trash.delete_files(self, user)
     end
 
     # --------------------------回收站-------------------------- #
     def trash
-      Index::Workspace::Trash.find_by file_id: id, file_type: self.class.name
+      Index::Workspace::Trash.find_by(file_id: id, file_type: self.class.name)
     end
 
-    def delete_thumb_up
-      # Index::ThumbUp.destroy self
+    def delete! user
+      update! is_deleted: true
+
+      files = []
+      files_count = 1
+      files.concat son_articles if info['articles']
+      files.concat son_corpuses if info['corpuses']
+      files.concat son_folders if info['folders']
+      files.each do |f| # 遍历删除
+        files_count += f.delete! user
+      end
+      if info['son_roles']
+        roles = user.editor_roles.where(id: info['son_roles']).includes(:root_file)
+        roles.each do |r|
+          if role.is_author?
+            files_count += r.root_file.delete! user
+          end
+        end
+      end
+      clear_cache
+      return files_count
+    end
+
+    def recover! user
+      update! is_deleted: false
+      files = []
+      files.concat son_articles_with_del if info['articles']
+      files.concat son_corpuses_with_del if info['corpuses']
+      files.concat son_folders_with_del if info['folders']
+      files.each do |f| # 遍历删除
+        f.recover! user
+      end
+      if info['son_roles']
+        roles = user.editor_roles.where(id: info['son_roles']).includes(:root_file)
+        roles.each do |r|
+          if role.is_author?
+            r.root_file.recover! user
+          end
+        end
+      end
     end
 
     #---------------------------搜索---------------------------- #

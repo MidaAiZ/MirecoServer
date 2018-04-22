@@ -6,13 +6,18 @@ class Index::Workspace::Corpus < ApplicationRecord
   mount_uploader :cover, FileCoverUploader # 封面上传
 
   after_update :update_cache
-  after_destroy :auto_delete_son_roles, :delete_thumb_up, :clear_cache
-  store_accessor :info, :tbp_counts, :cmt_counts, :read_times # 点赞数/评论数/阅读次数
+  after_destroy :auto_delete_son_roles, :clear_cache, :delete_release
+  # store_accessor :info, :tbp_counts, :cmt_counts, :read_times # 点赞数/评论数/阅读次数
 
   belongs_to :file_seed,
              class_name: 'Index::Workspace::FileSeed',
              foreign_key: :file_seed_id
             #  optional: true
+
+  # -----------------------发表副本------------------------ #
+  has_one :release, -> { all_state },
+          class_name: 'Index::PublishedCorpus',
+          foreign_key: :origin_id
 
   # ---------------------作者和作者角色---------------------- #
   has_many :editor_roles, -> { all_with_del },
@@ -39,26 +44,12 @@ class Index::Workspace::Corpus < ApplicationRecord
 
   has_many :son_articles_with_del, -> { with_del },
            as: :dir,
-           class_name: 'Index::Workspace::Article',
-           dependent: :destroy
+           class_name: 'Index::Workspace::Article'
+           # dependent: :destroy
 
   # ---------------------包含协同子文件--------------------- #
   has_many :son_roles, as: :dir,
                        class_name: 'Index::Role::Edit'
-
-  # -------------------------评论------------------------- #
-  has_many :comments, as: :resource,
-                      class_name: 'Index::Comment',
-                      dependent: :destroy
-
-  # -------------------------赞--------------------------- #
-  has_one :thumb_up, as: :resource,
-                     class_name: 'Index::ThumbUp',
-                     dependent: :destroy
-
-  has_one :thumb_ct, -> { t_counts },
-          as: :resource,
-          class_name: 'Index::ThumbUp'
 
   # ------------------------标星-------------------------- #
   has_many :mark_records, as: :file,
@@ -69,6 +60,7 @@ class Index::Workspace::Corpus < ApplicationRecord
   validates :tag, length: { maximum: 25 }
   validates :name, presence: { message: '文件名不能为空' }, length: { maximum: 255 }
   validates :dir_type, inclusion: { in: ['Index::Workspace::Folder'] }, allow_blank: true
+  validate :check_state, on: [:update]
 
   #--------------------------域--------------------------- #
   scope :shown, -> { where(is_shown: true) }
@@ -79,9 +71,38 @@ class Index::Workspace::Corpus < ApplicationRecord
   scope :with_del, -> { unscope(where: :is_deleted) }
   # 简略的文件信息可以提高查询和加载速度
   scope :brief, -> { unscope(:select).select(:id, :name, :tag, :is_shown, :created_at, :updated_at) }
-  scope :sort, ->(tag) { where('index_corpus.tag LIKE ?', "%#{tag}") }
   # 默认域
   default_scope { undeleted.order('index_corpus.id DESC') }
+
+  def publish # 发表文章
+    cor = release || build_release(name: name)
+    cor.author = own_editor
+    begin
+      ApplicationRecord.transaction do
+        cor.save!
+        update! is_shown: true
+
+        # 将该文集下所有已发表文章的corpus_id指向该文集
+        son_articles.where(is_shown: true).update(corpus_id: cor.id)
+      end
+    rescue
+      false
+    end
+    true
+  end
+
+  def copy target_dir = nil # 创建副本
+    _self = self.class.new
+    _self.dir = target_dir || dir
+    _self.name = name + (target_dir ? "" : "副本")
+
+    if _self.create(_self.dir, own_editor)
+      self.son_articles.each do |a|
+        a.copy _self
+      end
+    end
+    _self
+  end
 
   # ------------------------文件类型------------------------ #
   def file_type
@@ -97,6 +118,15 @@ class Index::Workspace::Corpus < ApplicationRecord
   def files
     articles = (son_articles_with_del if info['articles']) || []
     { files_count: articles.to_ary.size, articles: articles, corpuses: [], folders: [] }
+  end
+
+  private
+
+  def check_state
+    if is_shown
+      errors.add(:base, "文集已经发表，不能再修改") if name_changed?
+      release.toggle_delete(is_deleted) if is_deleted_changed?
+    end
   end
 
   def auto_delete_son_roles
@@ -115,17 +145,21 @@ class Index::Workspace::Corpus < ApplicationRecord
     end
   end
 
-  def delete_thumb_up
-    # Index::ThumbUp.destroy self
+  def after_move_dir dir
+
+  end
+
+  def delete_release
+    if is_shown
+      release.delete
+    end
   end
 
   def update_cache
     Cache.new["edit_corpus_#{self.id}"] = self
-    Cache.new["corpus_#{self.id}"] = self
   end
 
   def clear_cache
     Cache.new["edit_corpus_#{self.id}"] = nil
-    Cache.new["corpus_#{self.id}"] = nil
   end
 end
