@@ -10,7 +10,8 @@ class Index::PublishedArticle < ApplicationRecord
 
   belongs_to :origin,
              class_name: 'Index::Workspace::Article',
-             foreign_key: :origin_id
+             foreign_key: :origin_id,
+             optional: true
 
   belongs_to :corpus, -> { with_del },
              class_name: 'Index::PublishedCorpus',
@@ -51,6 +52,7 @@ class Index::PublishedArticle < ApplicationRecord
 
   # 数据验证
   validates :tag, length: { maximum: 25 }
+  validate :check_origin, on: [:create]
 
   #--------------------------状态模型---------------------------
   enum state: [:deleted, :released, :reviewing, :forbidden]
@@ -62,7 +64,7 @@ class Index::PublishedArticle < ApplicationRecord
   scope :deleted, -> { unscope(where: :state).where(state: states[:deleted]) }
   scope :forbidden, -> { unscope(where: :state).where(state: states[:forbidden]) }
   scope :released, -> { unscope(where: :state).where(state: states[:released]) }
-  scope :in_review, -> { unscope(where: :state).where(state: states[:deleted]) }
+  scope :reviewing, -> { unscope(where: :state).where(state: states[:deleted]) }
   scope :hot, -> { reorder('(read_times_cache + 0.1) / (CURRENT_DATE - date(created_at) + 1) DESC').order(id: :DESC) }
   scope :recommend, -> { reorder('(|/id + 0.01 * read_times_cache) DESC').order(id: :DESC) }
   # 默认作用域, 不包含content字段, id降序, 未删除的文章
@@ -88,22 +90,22 @@ class Index::PublishedArticle < ApplicationRecord
   # set state
   def review
     return false if deleted?
-    update state: self.class.states[:reviewing]
+    update state: :reviewing
   end
 
   def release
     return false if forbidden? || released?
-    update state: self.class.states[:released]
+    update state: :released
   end
 
   def delete
     return false if forbidden? || deleted?
-    update state: self.class.states[:deleted]
+    update state: :deleted
   end
 
   def forbid
     return false if deleted? || forbidden?
-    update state: self.class.states[:forbidden]
+    update state: :forbidden
   end
 
   def toggle_delete bool
@@ -236,5 +238,9 @@ class Index::PublishedArticle < ApplicationRecord
     prefix = read_prefix
     puts ArtReadWorker.perform_at(3.hours.from_now, self.id, prefix) if $redis.EXISTS(prefix) == 0
     $redis.SADD(prefix, key)
+  end
+
+  def check_origin
+    errors.add(:origin, '源文章必须存在') if !origin
   end
 end

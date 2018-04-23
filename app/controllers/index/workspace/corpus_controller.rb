@@ -39,7 +39,7 @@ class Index::Workspace::CorpusController < IndexController
   end
 
   def profile
-    @son_articles = @user.all_articles.where(id: @corpus.info['articles']).includes(:file_seed) || Index::Workspace::Corpus.none # 子文章
+    @son_articles = @user.all_articles.where(id: @corpus.article_nodes).includes(:file_seed) || Index::Workspace::Corpus.none # 子文章
     #   @son_articles = @corpus.son_articles # 子文章
   end
 

@@ -5,9 +5,8 @@ else
     json.array! @mark_records do |record|
       file = record.file
       next unless file
-      seed = record.file_seed
       json.file_type file.file_type
-      json.editors_count seed.editors_count
+      json.editors_count file.file_seed.editors_count
       json.file do
         case file.file_type
         when :folders

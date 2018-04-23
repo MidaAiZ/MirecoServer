@@ -39,7 +39,7 @@ class Index::Workspace::Article < ApplicationRecord
           source: :own_editor
 
   # -----------------------文件目录------------------------ #
-  belongs_to :dir,
+  belongs_to :dir, -> { with_del },
              polymorphic: true,
              optional: true
 
@@ -59,6 +59,10 @@ class Index::Workspace::Article < ApplicationRecord
                           class_name: 'Index::Workspace::MarkRecord',
                           dependent: :destroy
 
+  # ------------------------删除记录-------------------------- #
+  has_one :trash, as: :file,
+           class_name: 'Index::Workspace::Trash',
+           dependent: :destroy
 
   # 数据验证
   validates :tag, length: { maximum: 25 }
@@ -126,17 +130,12 @@ class Index::Workspace::Article < ApplicationRecord
     [:corpuses, :folders, 0] # 目标目录文件仅允许文件夹或者空, 0代表空,即移动到根目录
   end
 
-  # ------------------------子文件数目------------------------ #
-  def files
-    { files_count: 0, articles: [], corpuses: [], folders: [] }
-  end
-
   private
 
   def check_state
     if is_shown
       errors.add(:base, "文章已经发表，不能再修改") if name_changed?
-      release.toggle_delete(is_deleted) if is_deleted_changed?
+      release && release.toggle_delete(is_deleted) if is_deleted_changed?
     end
   end
 
@@ -155,12 +154,21 @@ class Index::Workspace::Article < ApplicationRecord
     end
   end
 
+  # after move to trash, not really deleted
+  def after_delete
+    clear_cache
+  end
+
   def delete_release
     if is_shown
       release.delete
     else
       content.destroy
     end
+  end
+
+  def after_recover
+
   end
 
   def update_cache

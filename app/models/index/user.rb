@@ -78,9 +78,9 @@ class Index::User < ApplicationRecord
 
   # -----------------------标星文件----------------------- #
 
-  has_many :mark_records, ->(id) { where(user_id: id) },
-           through: :file_seeds,
-           source: :mark_records
+  has_many :mark_records,
+            class_name: 'Index::Workspace::MarkRecord',
+            foreign_key: :user_id
 
   # -----------------------发表文章----------------------- #
 
@@ -192,8 +192,7 @@ class Index::User < ApplicationRecord
   def has_edit_role?(name, resource)
     return false if resource.nil?
     return false unless file_seed = get_file_seed(resource)
-    role = all_edit_roles_with_del.find_by(file_seed_id: file_seed.id, name: name)
-    role ? true : false
+    all_edit_roles_with_del.find_by(file_seed_id: file_seed.id, name: name) ? true : false
   end
 
   # 查询权限
@@ -201,15 +200,13 @@ class Index::User < ApplicationRecord
     return nil if resource.nil?
     return nil unless file_seed = get_file_seed(resource)
     role = all_edit_roles_with_del.find_by(file_seed_id: file_seed.id)
-    role ? role.name : nil
   end
 
   # 定义编辑权限, 传入动作和文件, 判断是否允许操作, 返回boolean
   def can_edit?(action, resource)
     return false if action.nil? || resource.nil?
     role = find_edit_role resource # 获取权限
-    allow_actions = role.nil? ? nil : Index::Role::Edit.allow_actions(role)
-    allow_actions.nil? ? false : allow_actions.include?(action)
+    (role && (Index::Role::Edit.allow_actions(role.name) || []).include?(action)) ? true : false
   end
 
   # ------------------------判断赞------------------------- #
@@ -235,5 +232,13 @@ class Index::User < ApplicationRecord
 
   def get_file_seed(resource)
     resource.itself.class.name == 'Index::Workspace::FileSeed' ? resource : resource.file_seed
+  end
+
+  def delete
+    return false
+  end
+
+  def destroy
+    return false
   end
 end

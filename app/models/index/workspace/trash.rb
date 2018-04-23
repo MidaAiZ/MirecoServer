@@ -1,37 +1,44 @@
 class Index::Workspace::Trash < ApplicationRecord
-  belongs_to :file_seed,
-             class_name: 'Index::Workspace::FileSeed',
-             foreign_key: 'file_seed_id'
+  store_accessor :info, :article_nodes, :corpus_nodes, :folder_nodes
 
   belongs_to :editor,
              class_name: 'Index::User',
              foreign_key: 'user_id'
 
   belongs_to :file, -> { with_del },
-             polymorphic: true,
-             dependent: :destroy
+             polymorphic: true
 
   default_scope { order(id: :DESC) }
 
   #--------------------------删除文件--------------------------- #
-  def self.delete_files(file, user) # 加入回收站
+  def self.delete_files file # 加入回收站
     return false if file.is_deleted
+    _files = file.files
+    _files[file.file_type].push file # add file itself
+    files = _files[:articles] + _files[:corpuses] + _files[:folders]
+    files_count = 0
     ApplicationRecord.transaction do
-      files_count = file.delete! user
+      files.each do |f|
+        files_count += f.delete!
+      end
       delete_edit_role(file) if file.is_root? # 根文件
-      return self.create!(file, user, files_count)
+      return self.create!(file, _files, files_count)
     end
     # rescue
     #   return false
   end
 
   #--------------------------恢复文件--------------------------- #
-  def recover_files(editor)
+  def recover_files
+    return false if file.dir && file.dir.is_deleted
+
+    files = self.files
     ApplicationRecord.transaction do
-       file = self.file
-       file.recover! editor
-       recover_edit_role(file) if file.is_root? # 根文件
-       return self.delete
+      files.each do |f|
+        f.recover!
+      end
+      recover_edit_role(file) if file.is_root? # 根文件
+      return self.delete
     end
     # rescue
     #   return false
@@ -39,28 +46,40 @@ class Index::Workspace::Trash < ApplicationRecord
 
   #--------------------------彻底删除--------------------------- #
   def destroy_files
-    file = self.file
-    file_seed = file.file_seed
-    ApplicationRecord.transaction do # 出错将回滚
-      if file.is_root? # 根文件
-        file_seed.destroy! # 执行回调, 会删除所有子文件及角色
-      else
-        self.destroy!
+    if file.is_root?
+      file.file_seed.destroy!
+    else
+      files = self.files
+      ApplicationRecord.transaction do
+        files.each do |f|
+          f.destroy!
+        end
       end
     end
-  rescue
-    return false
+    true
+  # rescue
+  #   return false
+  end
+
+  def files
+    del_articles = Index::Workspace::Article.with_del.where(id: article_nodes) || []
+    del_corpuses = Index::Workspace::Corpus.with_del.where(id: corpus_nodes) || []
+    del_folders = Index::Workspace::Folder.with_del.where(id: folder_nodes) || []
+    del_articles + del_corpuses + del_folders
   end
 
   private
 
-  def self.create! file, editor, files_count
+  def self.create! file, files, files_count
     trash = self.new
     trash.file = file
-    trash.editor = editor
     trash.file_name = file.name
-    trash.file_seed = file.file_seed
+    trash.editor = file.own_editor
     trash.files_count = files_count
+    trash.article_nodes = files[:articles].map {|a| a.id}
+    trash.corpus_nodes = files[:corpuses].map {|c| c.id}
+    trash.folder_nodes = files[:folders].map {|f| f.id}
+
     trash.save!
     trash
   end

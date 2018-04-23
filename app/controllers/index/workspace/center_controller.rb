@@ -9,7 +9,7 @@ class Index::Workspace::CenterController < IndexController
   end
 
   def marked_files
-    @mark_records = @user.mark_records.includes(:file, :file_seed)
+    @mark_records = @user.mark_records.includes(file: :file_seed)
   end
 
   def published_articles
@@ -34,7 +34,7 @@ class Index::Workspace::CenterController < IndexController
 
   def withdraw # 退出协同写作
     @code = if @user.can_edit?(:all, @resource)
-              @resource.delete_files(@user) ? :Success : :Fail
+              @resource.delete_files ? :Success : :Fail
             else
               @user.remove_edit_role(@resource) ? :Success : :Fail
             end

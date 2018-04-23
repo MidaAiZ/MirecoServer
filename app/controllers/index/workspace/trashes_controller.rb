@@ -38,8 +38,8 @@ class Index::Workspace::TrashesController < IndexController
   end
 
   def recover
-    if @user.can_edit? :delete, @trash.file_seed
-      @code = @trash.recover_files(@user) ? :Success : :Fail
+    if @user.can_edit? :delete, @trash.file
+      @code = @trash.recover_files ? :Success : :Fail
     else
       @code ||= :NoPermission
     end

@@ -6,7 +6,7 @@ class Index::Workspace::Corpus < ApplicationRecord
   mount_uploader :cover, FileCoverUploader # 封面上传
 
   after_update :update_cache
-  after_destroy :auto_delete_son_roles, :clear_cache, :delete_release
+  after_destroy :auto_delete_son_roles, :clear_cache
   # store_accessor :info, :tbp_counts, :cmt_counts, :read_times # 点赞数/评论数/阅读次数
 
   belongs_to :file_seed,
@@ -33,7 +33,7 @@ class Index::Workspace::Corpus < ApplicationRecord
           source: :own_editor
 
   # -----------------------文件目录------------------------ #
-  belongs_to :dir,
+  belongs_to :dir, -> { with_del },
              polymorphic: true,
              optional: true
 
@@ -55,6 +55,11 @@ class Index::Workspace::Corpus < ApplicationRecord
   has_many :mark_records, as: :file,
                           class_name: 'Index::Workspace::MarkRecord',
                           dependent: :destroy
+
+  # ------------------------删除记录-------------------------- #
+  has_one :trash, as: :file,
+           class_name: 'Index::Workspace::Trash',
+           dependent: :destroy
 
   # -----------------------数据验证------------------------ #
   validates :tag, length: { maximum: 25 }
@@ -114,18 +119,12 @@ class Index::Workspace::Corpus < ApplicationRecord
     [:folders, 0] # 目标目录文件仅允许文件夹或者空, 0代表空,即移动到根目录
   end
 
-  # ------------------------文件数目------------------------ #
-  def files
-    articles = (son_articles_with_del if info['articles']) || []
-    { files_count: articles.to_ary.size, articles: articles, corpuses: [], folders: [] }
-  end
-
   private
 
   def check_state
     if is_shown
       errors.add(:base, "文集已经发表，不能再修改") if name_changed?
-      release.toggle_delete(is_deleted) if is_deleted_changed?
+      release && release.toggle_delete(is_deleted) if is_deleted_changed?
     end
   end
 
@@ -149,10 +148,13 @@ class Index::Workspace::Corpus < ApplicationRecord
 
   end
 
-  def delete_release
-    if is_shown
-      release.delete
-    end
+  # after move to trash, not really deleted
+  def after_delete
+    clear_cache
+  end
+
+  def after_recover
+
   end
 
   def update_cache

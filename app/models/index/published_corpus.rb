@@ -43,6 +43,7 @@ class Index::PublishedCorpus < ApplicationRecord
 
   # 数据验证
   validates :tag, length: { maximum: 25 }
+  validate :check_origin, on: [:create]
 
   #--------------------------状态模型---------------------------
   enum state: [:deleted, :released, :reviewing, :forbidden]
@@ -80,41 +81,41 @@ class Index::PublishedCorpus < ApplicationRecord
   # set state
   def review
     return false if deleted?
-    ApplicationRecord.transaction do
-      update state: self.class.states[:reviewing]
-      articles.each do |a|
-        a.review
-      end
+    # ApplicationRecord.transaction do
+      update state: :reviewing
+      # articles.each do |a|
+      #   a.review
+      # end
     end
   end
 
   def release
     return false if forbidden? || released?
-    ApplicationRecord.transaction do
-      update state: self.class.states[:released]
-      articles.each do |a|
-        a.release
-      end
+    # ApplicationRecord.transaction do
+      update state: :released
+      # articles.each do |a|
+      #   a.release
+      # end
     end
   end
 
   def delete
     return false if forbidden? || deleted?
-    ApplicationRecord.transaction do
-      update state: self.class.states[:deleted]
-      articles.each do |a|
-        a.delete
-      end
+    # ApplicationRecord.transaction do
+      update state: :deleted
+      # articles.each do |a|
+      #   a.delete
+      # end
     end
   end
 
   def forbid
     return false if deleted? || forbidden?
-    ApplicationRecord.transaction do
-      update state: self.class.states[:forbidden]
-      articles.each do |a|
-        a.forbid
-      end
+    # ApplicationRecord.transaction do
+      update state: :forbidden
+      # articles.each do |a|
+      #   a.forbid
+      # end
     end
   end
 
@@ -179,5 +180,9 @@ class Index::PublishedCorpus < ApplicationRecord
 
   def thumb_prefix
     cache_prefix + "_thumb"
+  end
+
+  def check_origin
+    errors.add(:origin, '源文集必须存在') if !origin
   end
 end

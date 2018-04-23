@@ -115,7 +115,7 @@ module FileController
 
     def destroy
       @code = if @user.can_edit? :delete, @file
-                @file.delete_files(@user) ? :Success : :Fail
+                @file.delete_files ? :Success : :Fail
               else
                 :NoPermission
               end

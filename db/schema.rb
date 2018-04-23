@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20180418153531) do
+ActiveRecord::Schema.define(version: 20180423082310) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -264,7 +264,6 @@ ActiveRecord::Schema.define(version: 20180418153531) do
   end
 
   create_table "index_trashes", id: :serial, force: :cascade do |t|
-    t.integer "file_seed_id"
     t.integer "user_id"
     t.integer "files_count"
     t.datetime "created_at", null: false
@@ -272,8 +271,8 @@ ActiveRecord::Schema.define(version: 20180418153531) do
     t.integer "file_id"
     t.string "file_type"
     t.string "file_name"
+    t.jsonb "info", default: {}
     t.index ["file_id", "file_type"], name: "index_trashes_on_file_type_id"
-    t.index ["file_seed_id"], name: "index_index_trashes_on_file_seed_id"
     t.index ["user_id"], name: "index_index_trashes_on_user_id"
   end
 
