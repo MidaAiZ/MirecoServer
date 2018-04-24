@@ -86,7 +86,7 @@ class Index::PublishedCorpus < ApplicationRecord
       # articles.each do |a|
       #   a.review
       # end
-    end
+    # end
   end
 
   def release
@@ -96,7 +96,7 @@ class Index::PublishedCorpus < ApplicationRecord
       # articles.each do |a|
       #   a.release
       # end
-    end
+    # end
   end
 
   def delete
@@ -106,7 +106,7 @@ class Index::PublishedCorpus < ApplicationRecord
       # articles.each do |a|
       #   a.delete
       # end
-    end
+    # end
   end
 
   def forbid
@@ -116,7 +116,7 @@ class Index::PublishedCorpus < ApplicationRecord
       # articles.each do |a|
       #   a.forbid
       # end
-    end
+    # end
   end
 
   def toggle_delete bool
