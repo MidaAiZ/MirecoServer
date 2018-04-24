@@ -123,10 +123,6 @@ class Index::PublishedCorpus < ApplicationRecord
     # end
   end
 
-  def toggle_delete bool
-    bool ? self.delete : self.release
-  end
-
   # -------------------------信息统计------------------------- #
   # 阅读次数
   def read_times

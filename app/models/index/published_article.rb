@@ -108,10 +108,6 @@ class Index::PublishedArticle < ApplicationRecord
     update state: :forbidden
   end
 
-  def toggle_delete bool
-    bool ? self.delete : self.release
-  end
-
   # -------------------------文章内容------------------------- #
   def content
     Index::Workspace::ArticleContent.fetch(content_id)

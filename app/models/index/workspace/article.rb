@@ -101,18 +101,17 @@ class Index::Workspace::Article < ApplicationRecord
     begin
       ApplicationRecord.transaction do
         update! is_shown: true
-
         # 将发表文章的corpus_id指向正确文集
         if dir && dir.class == Index::Workspace::Corpus && dir.is_shown
           art.corpus = dir.release
         end
-
         art.save!
       end
+      update_cache # 非常重要！防止因为缓存导致的重复发表
+      true
     rescue
       false
     end
-    true
   end
 
   # ------------------------创建副本------------------------- #
@@ -148,14 +147,13 @@ class Index::Workspace::Article < ApplicationRecord
   def check_state
     if is_shown
       errors.add(:base, "文章已经发表，不能再修改") if name_changed?
-      release && release.toggle_delete(is_deleted) if is_deleted_changed?
     end
   end
 
   # 确保已发表的文章所属文集和所关联的编辑文章一致
   def after_move_dir dir
     if is_shown
-      if dir_id_changed? || dir_type_changed?
+      if saved_change_to_dir_id? || saved_change_to_dir_type?
         if dir.class == Index::Workspace::Corpus
           release.corpus = dir.release
           release.save
@@ -170,6 +168,10 @@ class Index::Workspace::Article < ApplicationRecord
   # after move to trash, not really deleted
   def after_delete
     clear_cache
+    if is_shown
+      release.delete
+      release.clear_cache
+    end
   end
 
   def delete_release
@@ -181,6 +183,8 @@ class Index::Workspace::Article < ApplicationRecord
   end
 
   def after_recover
-
+    if is_shown
+      release.release
+    end
   end
 end

@@ -86,14 +86,14 @@ class Index::Workspace::Corpus < ApplicationRecord
       ApplicationRecord.transaction do
         cor.save!
         update! is_shown: true
-
         # 将该文集下所有已发表文章的corpus_id指向该文集
         son_articles.where(is_shown: true).update(corpus_id: cor.id)
       end
+      update_cache # 非常重要！防止因为缓存导致的重复发表
+      true
     rescue
       false
     end
-    true
   end
 
   def copy target_dir = nil # 创建副本
@@ -124,7 +124,6 @@ class Index::Workspace::Corpus < ApplicationRecord
   def check_state
     if is_shown
       errors.add(:base, "文集已经发表，不能再修改") if name_changed?
-      release && release.toggle_delete(is_deleted) if is_deleted_changed?
     end
   end
 
@@ -151,9 +150,15 @@ class Index::Workspace::Corpus < ApplicationRecord
   # after move to trash, not really deleted
   def after_delete
     clear_cache
+    if is_shown
+      release.delete
+      release.clear_cache
+    end
   end
 
   def after_recover
-
+    if is_shown
+      release.release
+    end
   end
 end
