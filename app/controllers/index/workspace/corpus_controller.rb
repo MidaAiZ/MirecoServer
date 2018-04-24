@@ -65,7 +65,7 @@ class Index::Workspace::CorpusController < IndexController
 
   # Use callbacks to share common setup or constraints between actions.
   def set_corpus
-    edit_corpus_cache(params[:id])
+    @corpus = Index::Workspace::Corpus.fetch(params[:id])
     render(json: { code: :ResourceNotExist }) && return unless @corpus
   end
 

@@ -3,6 +3,7 @@ require_relative 'file_model_module'
 class Index::Workspace::Article < ApplicationRecord
   include FileModel
 
+  attr_accessor :content_id # 用来快速访问内容记录
   after_update :update_cache
   after_destroy :clear_cache, :delete_release
   # store_accessor :info, :tbp_counts, :cmt_counts, :rd_times # 点赞数/评论数/阅读次数
@@ -12,7 +13,7 @@ class Index::Workspace::Article < ApplicationRecord
              foreign_key: :file_seed_id
 
   # -----------------------文章内容------------------------ #
-  has_one :content,
+  has_one :inner_content,
           class_name: 'Index::Workspace::ArticleContent',
           foreign_key: :article_id
 
@@ -82,17 +83,20 @@ class Index::Workspace::Article < ApplicationRecord
   default_scope { undeleted.order('index_articles.id DESC') }
 
   def update_content text
-    if (!is_shown)
-      return content.update(text: text)
+    if is_shown
+      errors.add("文章已发表，不能再修改") and return false
     else
-      errors.add("文章已发表，不能再修改")
+      content.update_text(text) and return true
     end
-    false
+  end
+
+  def content
+    Index::Workspace::ArticleContent.fetch content_id || inner_content.id
   end
 
   def publish # 发表文章
     art = release || build_release(name: name)
-    art.content = content
+    art.inner_content = inner_content
     art.author = own_editor
     begin
       ApplicationRecord.transaction do
@@ -130,6 +134,15 @@ class Index::Workspace::Article < ApplicationRecord
     [:corpuses, :folders, 0] # 目标目录文件仅允许文件夹或者空, 0代表空,即移动到根目录
   end
 
+  @override
+  def self.fetch id
+    Cache.new.fetch(cache_key(id)) {
+      article = self.find_by_id(id)
+      article.content_id = article.inner_content.id if article
+      article
+    }
+  end
+
   private
 
   def check_state
@@ -163,19 +176,11 @@ class Index::Workspace::Article < ApplicationRecord
     if is_shown
       release.delete
     else
-      content.destroy
+      inner_content.destroy
     end
   end
 
   def after_recover
 
-  end
-
-  def update_cache
-    Cache.new["edit_article_#{self.id}"] = self
-  end
-
-  def clear_cache
-    Cache.new["edit_article_#{self.id}"] = nil
   end
 end

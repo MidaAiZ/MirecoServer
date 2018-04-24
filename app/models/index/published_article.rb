@@ -4,16 +4,16 @@ class Index::PublishedArticle < ApplicationRecord
   # store_accessor :info, :tbp_counts, :cmt_counts, :rd_times # 点赞数/评论数/阅读次数
 
   # -----------------------文章内容------------------------ #
-  belongs_to :content,
+  belongs_to :inner_content,
           class_name: 'Index::Workspace::ArticleContent',
           foreign_key: :content_id
 
-  belongs_to :origin,
+  belongs_to :origin, -> { with_del },
              class_name: 'Index::Workspace::Article',
              foreign_key: :origin_id,
              optional: true
 
-  belongs_to :corpus, -> { with_del },
+  belongs_to :corpus, -> { all_state },
              class_name: 'Index::PublishedCorpus',
              foreign_key: :corpus_id,
              optional: true
@@ -110,6 +110,11 @@ class Index::PublishedArticle < ApplicationRecord
 
   def toggle_delete bool
     bool ? self.delete : self.release
+  end
+
+  # -------------------------文章内容------------------------- #
+  def content
+    Index::ArticleContent.fetch(content_id).text
   end
 
   # -------------------------信息统计------------------------- #

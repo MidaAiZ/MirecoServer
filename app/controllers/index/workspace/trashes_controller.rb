@@ -1,82 +1,53 @@
 class Index::Workspace::TrashesController < IndexController
   before_action :require_login
   before_action :set_file, only: [:create]
-  before_action :set_trash, only: [:show, :recover]
+  before_action :set_trash, only: [:show, :recover, :destroy]
 
   # GET /index/trashes
   # GET /index/trashes.json
   def index
-    file_seed_id = params[:file_seed_id]
     count = params[:count] || 15
     page = params[:page] || 1
 
-    if file_seed_id
-      @file_seed = @user.file_seeds.find_by_id(file_seed_id)
-      @nonpaged_trashes = @file_seed.nil? ? Index::Workspace::Trash.none : @file_seed.trashes
-    else
-      @nonpaged_trashes = @user.trashes
-    end
+    @nonpaged_trashes = @user.trashes
     @trashes = @nonpaged_trashes.page(page).per(count)
   end
 
   # GET /index/trashes/1
   # GET /index/trashes/1.json
-  def show; end
+  def show
+
+  end
 
   # POST /index/trashes
   # POST /index/trashes.json
   def create
     @code = if @user.can_edit? :delete, @file
               @trash = Index::Workspace::Trash.delete_files(@file, @user)
-              @trash ? :Success : :Fail
+              @trash && @trash.id ? :Success : :Fail
             else
               :NoPermission
             end
 
-    @code ||= :Fail
     render :show
   end
 
   def recover
-    if @user.can_edit? :delete, @trash.file
-      @code = @trash.recover_files ? :Success : :Fail
-    else
-      @code ||= :NoPermission
-    end
-    @code ||= :Fail
-
+    @code = @trash.recover_files ? :Success : :Fail
     render json: { code: @code }
   end
 
   # DELETE /index/trashes/1
   # DELETE /index/trashes/1.json
   def destroy # 仅文件拥有者才允许彻底删除文件
-    @trash = @user.trashes.find_by_id(params[:id]) if @user
-    @code = if @trash
-              @trash.destroy_files ? :Success : :Fail
-            else
-              :ResourceNotExist
-            end
-
-    @code ||= :Fail
+    @code = @trash.destroy_files ? :Success : :Fail
     render json: { code: @code }
   end
 
   private
 
   def set_trash
-    file_seed_id = params[:file_seed_id]
-
-    if file_seed_id
-      @file_seed = @user.file_seeds.find_by_id(file_seed_id)
-      if @file_seed
-        @trash = @file_seed.trashes.find_by_id params[:id]
-      else
-        @code ||= :ResourceNotExist
-      end
-    else
-      @trash = @user.trashes.find_by_id params[:id]
-    end
+    @trash = @user.trashes.find_by_id params[:id]
     render(json: { code: :ResourceNotExist }) && return unless @trash
   end
 

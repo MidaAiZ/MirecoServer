@@ -12,6 +12,10 @@ class Index::PublishedCorpus < ApplicationRecord
 
   has_many :articles,
            class_name: 'Index::PublishedArticle',
+           foreign_key: :corpus_id
+
+  has_many :all_articles, -> { all_state },
+           class_name: 'Index::PublishedArticle',
            foreign_key: :corpus_id,
            dependent: :destroy
 

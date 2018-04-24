@@ -26,7 +26,7 @@ class Index::Workspace::CenterController < IndexController
 
   def get_editors
     if @user.find_edit_role @resource
-        @edit_roles = @resource.editor_roles.includes(:editor)
+      @edit_roles = @resource.editor_roles.includes(:editor)
     end
     @edit_roles ||= []
     render :editors
@@ -54,11 +54,11 @@ class Index::Workspace::CenterController < IndexController
     resource_id = params[:resource_id]
     @resource = case resource_type
                 when 'articles'
-                  edit_article_cache resource_id
+                  Index::Workspace::Article.fetch resource_id
                 when 'corpuses'
-                  edit_corpus_cache resource_id
+                  Index::Workspace::Corpus.fetch resource_id
                 when 'folders'
-                  edit_folder_cache resource_id
+                  Index::Workspace::Folder.fetch resource_id
                 end
     render(json: { code: :ResourceNotExist }) && return unless @resource
   end

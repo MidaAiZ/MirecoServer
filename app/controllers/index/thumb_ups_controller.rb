@@ -23,11 +23,11 @@ class Index::ThumbUpsController < IndexController
     resource_id = params[:resource_id]
     @resource = case resource_type
                 when 'articles'
-                  shown_article_cache resource_id
+                  Index::PublishedArticle.fetch resource_id
                 when 'comments'
-                  comment_cache resource_id
+                  Index::Comment.fetch resource_id
                 when 'replies'
-                  reply_cache resource_id
+                  Index::CommentReply.fetch resource_id
                 end
     @code ||= :ResourceNotExist unless @resource
   end

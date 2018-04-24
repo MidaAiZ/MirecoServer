@@ -13,7 +13,7 @@ class Index::Workspace::Trash < ApplicationRecord
   #--------------------------删除文件--------------------------- #
   def self.delete_files file # 加入回收站
     return false if file.is_deleted
-    _files = file.files
+    _files = file.files(false)
     _files[file.file_type].push file # add file itself
     files = _files[:articles] + _files[:corpuses] + _files[:folders]
     files_count = 0

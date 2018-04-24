@@ -59,7 +59,7 @@ class Index::Workspace::FoldersController < IndexController
 
   # Use callbacks to share common setup or constraints between actions.
   def set_folder
-    edit_folder_cache(params[:id])
+    @folder = Index::Workspace::Folder.fetch params[:id]
     render(json: { code: :ResourceNotExist }) && return unless @folder
   end
 

@@ -41,12 +41,12 @@ class Index::CommentRepliesController < IndexController
 
   # Use callbacks to share common setup or constraints between actions.
   def set_comment_reply
-    reply_cache params[:id] if @comment
+    @reply = @comment.replies.find_by_id params[:id]
     @code ||= :ResourceNotExist unless @reply
   end
 
   def set_comment
-    comment_cache params[:comment_id]
+    @comment = Index::Comment.fetch params[:comment_id]
     @code ||= :ResourceNotExist unless @comment
   end
 

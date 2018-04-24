@@ -14,7 +14,7 @@ class Index::MainController < IndexController
   end
 
   def show_article
-    shown_article_cache params[:id]
+    @article = Index::PublishedArticle.fetch params[:id]
     if @article
       @editor_roles = @article.editor_roles.includes(:editor)
       @article.read request.remote_ip, @user
@@ -33,7 +33,7 @@ class Index::MainController < IndexController
   end
 
   def show_corpus
-    shown_corpus_cache params[:id]
+    @corpus = Index::PublishedCorpus.fetch(params[:id])
     if @corpus
       @editor_roles = @corpus.editor_roles.includes(:editor)
     else

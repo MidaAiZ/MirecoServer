@@ -38,7 +38,7 @@ class Index::Workspace::FileMover
     _TFTable = {
       OR_O:  true,  OR_OC:  true,   OR_C:  true,
       OS_O:  true,  OS_OC:  true,   OS_C:  true,
-      OCR_O: true,  OCR_OC: false,  OCR_C: false,
+      OCR_O: true,  OCR_OC: true,   OCR_C: true,
       OCS_O: true,  OCS_OC: true,   OCS_C: true,
       CR_O:  true,  CR_OC:  false,  CR_C:  false,
       CS_O:  false, CS_OC:  false,  CS_C:  false,
@@ -77,6 +77,14 @@ class Index::Workspace::FileMover
   end
 
   def mv_OCR_to_O
+    change_edit_dir # 移动一整个协同的文件,仅更改文件在其个人文件系统中的目录
+  end
+
+  def mv_OCR_to_OC
+    change_edit_dir # 移动一整个协同的文件,仅更改文件在其个人文件系统中的目录
+  end
+
+  def mv_OCR_to_C
     change_edit_dir # 移动一整个协同的文件,仅更改文件在其个人文件系统中的目录
   end
 

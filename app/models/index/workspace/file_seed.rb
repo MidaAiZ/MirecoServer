@@ -80,7 +80,7 @@ class Index::Workspace::FileSeed < ApplicationRecord
         _self.save!
         set_file_info _self, dir # 设置文件目录信息
       end
-      _self.create_content! attrs if _self.file_type == :articles # 当文件类型为文章时创建文章内容
+      _self.create_inner_content! attrs if _self.file_type == :articles # 当文件类型为文章时创建文章内容
 
       return true
     end

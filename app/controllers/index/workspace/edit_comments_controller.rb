@@ -86,7 +86,9 @@ class Index::Workspace::EditCommentsController < IndexController
 
   # Use callbacks to share common setup or constraints between actions.
   def set_edit_comment
-    edit_comment_cache params[:id] if @resource
+    if @resource
+      @edit_comment = @resource.edit_comments.find_by_id(params[:id])
+    end
     render(json: { code: :ResourceNotExist }) && return unless @edit_comment
   end
 
@@ -100,7 +102,7 @@ class Index::Workspace::EditCommentsController < IndexController
     resource_id = params[:resource_id]
     @resource = case resource_type
                 when 'articles'
-                  edit_article_cache resource_id
+                  Index::Workspace::Article.fetch(resource_id)
                 end
     render(json: { code: :ResourceNotExist }) && return unless @resource
   end

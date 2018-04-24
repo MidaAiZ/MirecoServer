@@ -44,7 +44,7 @@ class Index::CommentsController < IndexController
 
   # Use callbacks to share common setup or constraints between actions.
   def set_comment
-    comment_cache params[:id] if @resource
+    @comment = @resource.comments.find_by_id(params[:id]) if @resource
     @code ||= :ResourceNotExist unless @comment
   end
 
@@ -58,9 +58,9 @@ class Index::CommentsController < IndexController
       resource_id = params[:resource_id]
       case resource_type
       when 'articles'
-        @resource = shown_article_cache resource_id
+        @resource = Index::PublishedArticle.fetch resource_id
       when 'corpuses'
-        @resource = shown_corpus_cache resource_id
+        @resource = Index::PublishedCorpus.fetch resource_id
       end
       @code = :ResourceNotExist unless @resource
   end

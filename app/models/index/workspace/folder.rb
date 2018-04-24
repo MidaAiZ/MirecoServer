@@ -157,12 +157,4 @@ class Index::Workspace::Folder < ApplicationRecord
   def after_recover
 
   end
-
-  def update_cache
-    Cache.new["edit_folder_#{self.id}"] = self
-  end
-
-  def clear_cache
-    Cache.new["edit_folder_#{self.id}"] = nil
-  end
 end
