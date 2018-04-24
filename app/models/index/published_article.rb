@@ -114,7 +114,7 @@ class Index::PublishedArticle < ApplicationRecord
 
   # -------------------------文章内容------------------------- #
   def content
-    Index::ArticleContent.fetch(content_id).text
+    Index::Workspace::ArticleContent.fetch(content_id)
   end
 
   # -------------------------信息统计------------------------- #
