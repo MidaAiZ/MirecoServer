@@ -17,7 +17,7 @@ class Index::MainController < IndexController
     @article = Index::PublishedArticle.fetch params[:id]
     if @article
       @editor_roles = @article.editor_roles.includes(:editor)
-      @article.read request.remote_ip, @user
+      @article.read(request.remote_ip, @user) if @user
     else
       @code ||= :ResourceNotExist
     end

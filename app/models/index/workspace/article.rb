@@ -100,15 +100,13 @@ class Index::Workspace::Article < ApplicationRecord
     art.author = own_editor
     begin
       ApplicationRecord.transaction do
-        update! is_shown: true
         # 将发表文章的corpus_id指向正确文集
         if dir && dir.class == Index::Workspace::Corpus && dir.is_shown
           art.corpus = dir.release
         end
         art.save!
+        update! is_shown: true
       end
-      update_cache # 非常重要！防止因为缓存导致的重复发表
-      true
     rescue
       false
     end

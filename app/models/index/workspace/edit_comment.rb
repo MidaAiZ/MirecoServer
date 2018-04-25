@@ -19,11 +19,4 @@ class Index::Workspace::EditComment < ApplicationRecord
   validates :hash_key, presence: true, length: { maximum: 32 }
   validates :content, presence: true, length: { minimum: 1, maximum: 255 }
 
-  def update_cache
-    Cache.new["edit_comment_#{self.id}"] = self
-  end
-
-  def clear_cache
-    Cache.new["edit_comment_#{self.id}"] = nil
-  end
 end

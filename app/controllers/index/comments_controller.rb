@@ -23,7 +23,7 @@ class Index::CommentsController < IndexController
     @comment = @resource.comment(@user, comment_params[:content])
     @code ||= @comment.id ? :Success : :Fail
     respond_to do |format|
-      format.json { render :show, status: @comment.id ? :unprocessable_entity : :created }
+      format.json { render :show, status: @comment.id ? :created : :unprocessable_entity }
     end
   end
 

@@ -167,19 +167,19 @@ class Index::PublishedCorpus < ApplicationRecord
   #
   def cache_prefix
     $redis.select 3
-    "#{self.id}_corp_release"
+    self.cache_key
   end
 
   def read_prefix
-    cache_prefix + "_read"
+    "read_times_#{cache_prefix}"
   end
 
   def comment_prefix
-    cache_prefix + "_cmt"
+    "cmts_count_#{cache_prefix}"
   end
 
   def thumb_prefix
-    cache_prefix + "_thumb"
+    "thumbs_count_#{cache_prefix}"
   end
 
   def check_origin

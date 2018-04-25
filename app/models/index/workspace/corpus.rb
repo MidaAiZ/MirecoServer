@@ -85,12 +85,10 @@ class Index::Workspace::Corpus < ApplicationRecord
     begin
       ApplicationRecord.transaction do
         cor.save!
-        update! is_shown: true
         # 将该文集下所有已发表文章的corpus_id指向该文集
         son_articles.where(is_shown: true).update(corpus_id: cor.id)
       end
-      update_cache # 非常重要！防止因为缓存导致的重复发表
-      true
+      update! is_shown: true
     rescue
       false
     end
