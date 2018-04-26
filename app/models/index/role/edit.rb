@@ -10,10 +10,15 @@ class Index::Role::Edit < ApplicationRecord
   belongs_to :dir, polymorphic: true,
              optional: true
 
+  has_one :root_file,
+           through: :file_seed,
+           source: :root_file
+
   validates :file_seed_id, presence: true
   validates :name, inclusion: { in: %w(own admin editor readonly) }
 
   #----------------------------域------------------------------
+  scope :own, -> { where(name: :own).first }
   scope :root, -> { where(dir_id: nil) }
   scope :all_dir, -> { unscope(where: :dir_id) }
   scope :deleted, -> { rewhere(is_deleted: true) }

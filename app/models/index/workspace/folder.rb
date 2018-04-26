@@ -84,27 +84,6 @@ class Index::Workspace::Folder < ApplicationRecord
   # 简略的文件信息可以提高查询和加载速度
   scope :brief, -> { unscope(:select).select(:id, :name, :created_at, :updated_at) }
 
-
-  # ------------------------创建副本------------------------- #
-  def copy target_dir = nil
-    _self = self.class.new
-    _self.dir = target_dir || dir
-    _self.name = name + (target_dir ? "" : "副本")
-
-    if _self.create(_self.dir, own_editor)
-      self.son_articles.each do |a|
-        a.copy _self
-      end
-      self.son_corpuses.each do |c|
-        c.copy _self
-      end
-      self.son_folders.each do |f|
-        f.copy _self
-      end
-    end
-    _self
-  end
-
   # ------------------------文件类型------------------------- #
   def file_type
     :folders

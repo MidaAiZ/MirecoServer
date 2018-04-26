@@ -157,6 +157,8 @@ class Index::User < ApplicationRecord
         role.save!
       end
     else # 更新权限
+      # 禁止修改所有者角色
+      return false if role.is_author?
       role.update! name: name
     end
     role && role.id ? role : false
@@ -168,8 +170,9 @@ class Index::User < ApplicationRecord
     return false if attrs.blank? || resource.nil?
     return false unless file_seed = get_file_seed(resource)
     role = all_edit_roles_with_del.find_by(file_seed_id: file_seed.id)
-    result = role ? role.update!(attrs) : false
-    result
+    # 禁止修改所有者角色
+    return false if role.is_author? && (attrs[:name] || attrs['name'])
+    role ? role.update!(attrs) : false
   end
 
   # 移除编辑权限

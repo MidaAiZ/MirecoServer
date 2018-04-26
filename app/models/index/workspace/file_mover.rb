@@ -114,7 +114,7 @@ class Index::Workspace::FileMover
     f_coo = @file.is_cooperate? ? "C" : ""
     f_pos = @file.is_root? ? "R" : "S"
 
-    d_own = @target_dir == 0 || @user.has_edit_role?(:own, @target_dir) ? "O" : ""
+    d_own = @target_dir == 0 || @user.find_edit_role(@target_dir).is_author? ? "O" : ""
     d_coo = @target_dir == 0 || !@target_dir.is_cooperate? ? "" : "C"
 
     [f_own + f_coo + f_pos, d_own + d_coo]
@@ -144,7 +144,7 @@ class Index::Workspace::FileMover
 
   def after_move
     @target_dir = nil if @target_dir == 0
-    if @file.dir != @origin_dir || @role.dir != @origin_id
+    if @file.dir != @origin_dir || @role.dir != @origin_dir
       @origin_dir && @origin_dir.remove_file_node(@file)
       @target_dir && @target_dir.set_file_node(@file)
 

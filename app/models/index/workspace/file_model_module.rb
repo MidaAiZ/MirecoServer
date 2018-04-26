@@ -95,6 +95,47 @@ module FileModel
       files_hash
     end
 
+    # ------------------------创建副本------------------------- #
+    def copy target_dir = nil
+      _self = self.class.new
+      _self.dir = target_dir || self.dir
+      _self.created_at = self.created_at + 1
+      _self.name = self.name + (target_dir ? "" : "副本")
+
+      if _self.create(_self.dir, self.own_editor)
+        if self.article_nodes.any?
+          self.son_articles.each do |a|
+            a.copy _self
+          end
+        end
+        if self.corpus_nodes.any?
+          self.son_corpuses.each do |c|
+            c.copy _self
+          end
+        end
+        if self.folder_nodes.any?
+          self.son_folders.each do |f|
+            f.copy _self
+          end
+        end
+        # # 千万不能有文件夹嵌套啊 不然就GG了 （还是先不实现这个功能了，怕爆炸）
+        # if self.role_nodes.any?
+        #   Index::Role::Edit.undeleted.where(id: self.role_nodes).each do |r|
+        #     if r.is_author?
+        #       r.root_file.copy _self
+        #     end
+        #   end
+        # end
+        # 设置root文件role dir
+        if !_self.dir
+          role = _self.editor_roles.own
+          role.dir = self.editor_roles.own.dir
+          role.save!
+        end
+      end
+      _self
+    end
+
     #---------------------------搜索---------------------------- #
     def self.filter(cdt = {}, offset = 0, limit = 100)
       allow_hash = { 'name' => 'LIKE', 'tag' => 'LIKE' } # 允许查询的字段集
@@ -189,7 +230,7 @@ module FileModel
   end
 
   def role_nodes= value = []
-    info['son_roles'] = value.uniq
-    info.delete 'son_roles' if role_nodes.blank?
+    info['role_nodes'] = value.uniq
+    info.delete 'role_nodes' if role_nodes.blank?
   end
 end

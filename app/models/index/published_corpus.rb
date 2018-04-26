@@ -47,6 +47,7 @@ class Index::PublishedCorpus < ApplicationRecord
 
   # 数据验证
   validates :tag, length: { maximum: 25 }
+  validates :origin_id, uniqueness: true
   validate :check_origin, on: [:create]
 
   #--------------------------状态模型---------------------------

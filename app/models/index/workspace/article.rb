@@ -112,15 +112,6 @@ class Index::Workspace::Article < ApplicationRecord
     end
   end
 
-  # ------------------------创建副本------------------------- #
-  def copy target_dir = nil
-    _self = self.class.new
-    _self.dir = target_dir || dir
-    _self.name = name + (target_dir ? "" : "副本")
-    _self.create(_self.dir, own_editor, {text: content.text})
-    _self
-  end
-
   # ------------------------文件类型------------------------- #
   def file_type
     :articles

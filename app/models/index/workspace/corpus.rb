@@ -94,19 +94,6 @@ class Index::Workspace::Corpus < ApplicationRecord
     end
   end
 
-  def copy target_dir = nil # 创建副本
-    _self = self.class.new
-    _self.dir = target_dir || dir
-    _self.name = name + (target_dir ? "" : "副本")
-
-    if _self.create(_self.dir, own_editor)
-      self.son_articles.each do |a|
-        a.copy _self
-      end
-    end
-    _self
-  end
-
   # ------------------------文件类型------------------------ #
   def file_type
     :corpuses
