@@ -23,7 +23,7 @@ class Index::Workspace::Article < ApplicationRecord
           foreign_key: :origin_id
 
   # ---------------------作者和作者角色---------------------- #
-  has_many :editor_roles, -> { all_with_del },
+  has_many :editor_roles, -> { all_with_del.reorder(id: :ASC) },
            through: :file_seed,
            source: :editor_roles
 

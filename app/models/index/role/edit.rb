@@ -25,7 +25,7 @@ class Index::Role::Edit < ApplicationRecord
   scope :undeleted, -> { rewhere(is_deleted: false) }
   scope :all_with_del, -> { all_dir.unscope(where: :is_deleted) }
 
-  default_scope -> { root.undeleted }
+  default_scope -> { root.undeleted.order(id: :DESC) }
 
   def self.allow_actions(role)
     ROLES[role]

@@ -10,7 +10,7 @@ class Index::Workspace::Folder < ApplicationRecord
              class_name: 'Index::Workspace::FileSeed',
              foreign_key: :file_seed_id
 
-  has_many :editor_roles, -> { all_with_del },
+  has_many :editor_roles, -> { all_with_del.reorder(id: :ASC) },
            through: :file_seed,
            source: :editor_roles
 

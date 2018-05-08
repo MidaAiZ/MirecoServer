@@ -34,7 +34,7 @@ class Index::Workspace::FileSeed < ApplicationRecord
            dependent: :destroy
 
   # ---------------------作者角色和作者---------------------- #
-  has_many :editor_roles, -> { all_with_del },
+  has_many :editor_roles, -> { all_with_del.reorder(id: :ASC) },
            class_name: 'Index::Role::Edit',
            foreign_key: 'file_seed_id',
            dependent: :destroy
