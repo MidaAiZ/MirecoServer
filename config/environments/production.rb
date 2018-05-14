@@ -37,11 +37,12 @@ Rails.application.configure do
   config.action_mailer.raise_delivery_errors = true
   config.action_mailer.perform_caching = false
   config.action_mailer.delivery_method = :smtp
-  host = 'localhost'
+  host = 'mxjyu.cn'
   config.action_mailer.default_url_options = { host: host }
   config.action_mailer.smtp_settings = {
   address:              'smtp.163.com',
-  port:                 25,
+  port:                 465,
+  tls:                  true,
   domain:               '163.com',
   user_name:            ENV["email_username"],
   password:             ENV["email_password"],
