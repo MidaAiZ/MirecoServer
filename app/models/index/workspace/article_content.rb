@@ -3,7 +3,7 @@ class Index::Workspace::ArticleContent < ApplicationRecord
 
   after_destroy :clear_cache
 
-	belongs_to :article,
+	belongs_to :article, -> { with_del },
 				class_name: 'Index::Workspace::Article',
 				foreign_key: :article_id
 
