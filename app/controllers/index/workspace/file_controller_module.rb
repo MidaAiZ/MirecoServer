@@ -64,20 +64,23 @@ module FileController
         unless Index::Role::Edit.allow_roles.include?(role)
           @code ||= :WrongRoleName
         else
-          editor = Index::User.find_by_id params[:user_id]
-          @code = editor.add_edit_role(role, @file) ? :Success : :Fail if editor
+          @editor = Index::User.find_by_id params[:user_id]
+          @code = @editor.add_edit_role(role, @file) ? :Success : :Fail if @editor
         end
       else
         @code ||= :NoPermission
       end
       @code ||= :Fail
       do_update_response
+
+      # 发送通知邮件
+      send_coedit_info_email if @code == :Success
     end
 
     def remove_editor
       if @user.can_edit?(:remove_role, @file)
         editor = Index::User.find_by_id params[:user_id]
-        @code = editor.remove_edit_role(file) ? :Success : :Fail if editor
+        @code = editor.remove_edit_role(@file) ? :Success : :Fail if editor
       else
         @code ||= :NoPermission
       end
@@ -128,5 +131,9 @@ module FileController
       respond_to do |format|
         format.json { render json: { code: @code, errors: @error || @file.errors } }
       end
+    end
+
+    def send_coedit_info_email
+      Emailer.coedit_info_email(@editor, @file, @user).deliver_later
     end
 end

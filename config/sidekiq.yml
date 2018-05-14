@@ -9,8 +9,9 @@
   - [read_times, 1]
   - [thumb_count, 1]
   - [comment_count, 1]
+  - [art_content, 2]
+  - [mailers, 2]
 
-#
 development:
   :concurrency: 5
 staging:

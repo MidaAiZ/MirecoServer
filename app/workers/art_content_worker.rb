@@ -3,13 +3,14 @@ class ArtContentWorker
   sidekiq_options queue: 'art_content'
 
   def perform(id, key)
-    origin = Index::Workspace::ArticleContent.find_by_id(id)
-    if (origin) # 防止用户已经将内容删除
-       cache = Index::Workspace::ArticleContent.fetch(id)
-       cache.save!
+    cache = Index::Workspace::ArticleContent.fetch(id)
+    if (cache) # 防止用户已经将内容删除
+      cache.save!
+      cache.clear_cache
+    else
+      $redis.DEL key
     end
 
-    $redis.DEL key
   # rescue => e
   #   $redis.del prefix
   #   puts e

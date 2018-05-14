@@ -1,7 +1,6 @@
 class Index::Workspace::ArticleContent < ApplicationRecord
 	attr_accessor :in_update_queue # 更新时用来检查是否已经添加进更新队列
 
-	after_update :update_cache
   after_destroy :clear_cache
 
 	belongs_to :article,
@@ -32,7 +31,7 @@ class Index::Workspace::ArticleContent < ApplicationRecord
   @override
 	def update_cache
 		if (!self.in_update_queue)
-			self.in_update_queue = true
+			join_update_queue
 			puts ArtContentWorker.perform_at(2.hours.from_now, self.id, self.cache_key)
 		end
 		content = Marshal.dump(self)
@@ -42,5 +41,15 @@ class Index::Workspace::ArticleContent < ApplicationRecord
 	@override
 	def clear_cache
 		$redis.DEL self.cache_key
+	end
+
+	private
+
+	def join_update_queue
+		self.in_update_queue = true
+	end
+
+	def leave_update_queue
+		self.in_update_queue = false
 	end
 end

@@ -47,7 +47,7 @@ class Index::UsersController < IndexController
   # PATCH/PUT /index/users/1
   # PATCH/PUT /index/users/1.json
   def update
-      @code = :Success if @user.update(index_user_params_update)
+    @code = :Success if @user.update(index_user_params_update)
 
     respond_to do |format|
       if @code == :Success
@@ -127,7 +127,7 @@ class Index::UsersController < IndexController
           @code = :Success
           # 清空缓存记录
           @cache[new_msg_cache_key] = nil
-          @cache[new_msg_cache_key] = nil
+          @cache[old_msg_cache_key] = nil
         end
       elsif !@code # 验证码错误且存在
         # 重新设置缓存, 记录验证失败次数, 失败5次时, 验证码失效
