@@ -3,7 +3,6 @@ class ArtCommentWorker
   sidekiq_options queue: 'art_comment'
 
   def perform(id, prefix)
-    $redis.select 3
     article = Index::PublishedArticle.all_state.find(id)
     times = (article.comments_count_cache) + $redis.SCARD(prefix)
     ApplicationRecord.transaction do

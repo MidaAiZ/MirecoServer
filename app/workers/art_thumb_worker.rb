@@ -3,7 +3,6 @@ class ArtThumbWorker
   sidekiq_options queue: 'art_thumb'
 
   def perform(id, prefix)
-    $redis.select 3
     article = Index::PublishedArticle.all_state.find(id)
     times = (article.thumbs_count_cache) + $redis.SCARD(prefix)
     ApplicationRecord.transaction do

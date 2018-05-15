@@ -3,7 +3,6 @@ class ArtReadWorker
   sidekiq_options queue: 'art_read'
 
   def perform(id, prefix)
-    $redis.select 3
     article = Index::PublishedArticle.all_state.find(id)
     times = (article.read_times_cache) + $redis.SCARD(prefix)
     ApplicationRecord.transaction do

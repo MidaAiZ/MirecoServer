@@ -2,6 +2,7 @@ class ApplicationRecord < ActiveRecord::Base
   self.abstract_class = true
 
   def self.cache_key id
+    $redis.select 2
     "#{id}_#{self.name}"
   end
 

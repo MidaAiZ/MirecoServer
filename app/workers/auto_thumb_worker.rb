@@ -24,7 +24,6 @@ class AutoThumbWorker
 
   def init(id, prefix)
     @id = id; @prefix = prefix
-    $redis.select 2 # 选择database
     @thumb = Index::ThumbUp.find @id
   end
 

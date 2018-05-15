@@ -7,9 +7,8 @@ class ArtContentWorker
     if (cache) # 防止用户已经将内容删除
       cache.save!
       cache.clear_cache
-    else
-      $redis.DEL key
     end
+    $redis.DEL key
 
   # rescue => e
   #   $redis.del prefix

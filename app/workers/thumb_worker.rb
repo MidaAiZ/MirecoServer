@@ -20,7 +20,6 @@ class ThumbWorker
 
   def init(type, id, prefix, temp_prefix)
     @type = type; @id = id; @prefix = prefix; @temp_prefix = temp_prefix
-    $redis.select 2 # 设置database
     @resource = set_resource
     @thumb_up = @resource.thumb_up || @resource.create_thumb_up
   end

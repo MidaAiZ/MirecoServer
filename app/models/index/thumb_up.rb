@@ -74,7 +74,6 @@ class Index::ThumbUp < ApplicationRecord
   private
 
   def self.prefix resource
-    $redis.select 2 # 设置database
     @prefix = "index_#{resource.id}_#{resource.file_type}_thumbs"
     @tmp_prefix = nil
     $redis.EXISTS(@prefix)

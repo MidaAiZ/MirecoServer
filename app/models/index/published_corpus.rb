@@ -167,7 +167,6 @@ class Index::PublishedCorpus < ApplicationRecord
   private
   #
   def cache_prefix
-    $redis.select 3
     self.cache_key
   end
 
