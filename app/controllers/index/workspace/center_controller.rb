@@ -1,6 +1,6 @@
 class Index::Workspace::CenterController < IndexController
   before_action :require_login
-  before_action :set_resource, only: [:get_editors, :withdraw]
+  before_action :set_resource, only: [:get_editors, :withdraw, :ws_token]
 
   def index
     init
@@ -40,6 +40,23 @@ class Index::Workspace::CenterController < IndexController
             end
     @code ||= :Fail
     render json: { code: @code }
+  end
+
+  def ws_token # 获取socket io连接token
+    @code = if @user.find_edit_role(@resource)
+              $redis.select 4
+              cache_key = "ws_token_#{@user.id.to_s}_#{ @resource.id.to_s}"
+              @token = $redis.GET cache_key
+              if !@token
+                @token = (@user.id.to_s + '_' + @resource.id.to_s + rand.to_s).hash
+                $redis.SET cache_key, @token
+                # 1小时过期时间
+                $redis.EXPIRE cache_key, 1 * 60 * 60
+              end
+              @code = :Success
+            end
+    @code ||= :Fail
+    render json: { code: @code, token: @token }
   end
 
   private

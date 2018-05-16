@@ -32,6 +32,8 @@ Rails.application.routes.draw do
       get 'marked_files' => 'center#marked_files'
       post '/:resource_type/:resource_id/withdraw' => 'center#withdraw'
       get '/:resource_type/:resource_id/editors' => 'center#get_editors'
+      # ws token
+      get '/:resource_type/:resource_id/ws_token' => 'center#ws_token'
 
       resources :articles do
         collection do
