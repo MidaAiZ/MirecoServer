@@ -8,9 +8,11 @@
   - [autothumb, 1]
   - [art_read, 1]
   - [art_thumb, 1]
-  - [art_comment, 1]
+  - [socket_art_content, 1]
   - [art_content, 2]
   - [mailers, 2]
+  - [mailers, 2]
+
 
 development:
   :concurrency: 5

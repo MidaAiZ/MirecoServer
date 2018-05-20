@@ -8,7 +8,6 @@ class ArtContentWorker
       cache.save!
       cache.clear_cache
     end
-    $redis.DEL key
 
   # rescue => e
   #   $redis.del prefix

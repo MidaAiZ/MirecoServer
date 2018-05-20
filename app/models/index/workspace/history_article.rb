@@ -3,8 +3,12 @@ class Index::Workspace::HistoryArticle < ApplicationRecord
               class_name: 'Index::Workspace::Article',
               foreign_key: 'article_id'
 
+  belongs_to :editor,
+              class_name: 'Index::User',
+              foreign_key: 'user_id'
+
   # 实现文章搜索功能
-  default_scope { order('index_history_articles.id DESC') }
+  default_scope { order(id: :DESC) }
   scope :his_art_include, ->(title, tag) { where('index_history_articles.title LIKE ? OR index_history_articles.tag LIKE ?', "%#{name}%", "%#{tag}%") }
 
   def self.filter(condition = {})

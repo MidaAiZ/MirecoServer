@@ -43,9 +43,10 @@ class Index::Workspace::CenterController < IndexController
   end
 
   def ws_token # 获取socket io连接token
-    @code = if @user.find_edit_role(@resource)
+    role = @user.find_edit_role(@resource)
+    @code = if role
               $redis.select 4
-              cache_key = "ws_token_#{@user.id.to_s}_#{ @resource.id.to_s}"
+              cache_key = "ws_token_#{@user.id.to_s}_#{ @resource.id.to_s}_#{role.name}"
               @token = $redis.GET cache_key
               if !@token
                 @token = (@user.id.to_s + '_' + @resource.id.to_s + rand.to_s).hash

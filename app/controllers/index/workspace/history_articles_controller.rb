@@ -12,7 +12,7 @@ class Index::Workspace::HistoryArticlesController < IndexController
 
     # 用户已登录且检索得到源文章时返回其历史文章
     @article = @user.all_articles.find_by_id(art_id)
-    @history_articles = @article ? @article.history : []
+    @history_articles = @article ? @article.historys.includes(:editor) : []
   end
 
   # GET /index/history_articles/1
@@ -25,15 +25,11 @@ class Index::Workspace::HistoryArticlesController < IndexController
     @history_article = Index::Workspace::HistoryArticle.new
 
     art_id = params[:article_id]
-    @article = @user.all_articles.find_by_id(art_id)
+    @article = Index::Workspace::Article.fetch art_id
 
     if @article && @user.can_edit?(:add_history, @article)
-      # 如果检索到该文章则将各值赋给历史文章
-      @history_article.origin = @article
-      @history_article.name = @article.name
-      @history_article.tag = @article.tag
-      @history_article.content = @article.content
-      @code = :Success if @history_article.save
+      # 如果检索到该文章则将创建历史文章
+      @code = :Success if @article.add_history(@user.id, nil, @article.content.text)
     else # 检索不到目标文章
       @code = :NoPermission
       @history_article.errors.add(:base, '找不到文章或没有权限')
@@ -51,7 +47,7 @@ class Index::Workspace::HistoryArticlesController < IndexController
       @code = :NoPermission
     end
 
-    render json { render json: { code: @code } }
+    render json: { code: @code }
   end
 
   private
@@ -63,7 +59,7 @@ class Index::Workspace::HistoryArticlesController < IndexController
     # 2.检索到该历史文章
     # 3.该历史文章的源文章属于登录用户
     @article = @user.all_articles.find_by_id(params[:article_id])
-    @history_article = @article.history.find_by_id(params[:id]) if @article
+    @history_article = @article.historys.find_by_id(params[:id]) if @article
     render(json: { code: :ResourceNotExist }) && return unless @history_article
   end
 end

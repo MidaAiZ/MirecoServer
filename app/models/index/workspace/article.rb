@@ -50,7 +50,7 @@ class Index::Workspace::Article < ApplicationRecord
                            dependent: :destroy
 
   # ------------------------历史-------------------------- #
-  has_many :history,
+  has_many :historys,
            class_name: 'Index::Workspace::HistoryArticle',
            foreign_key: :article_id,
            dependent: :destroy
@@ -94,6 +94,17 @@ class Index::Workspace::Article < ApplicationRecord
     Index::Workspace::ArticleContent.fetch content_id || inner_content.id
   end
 
+  # 添加历时记录
+  def add_history uid, diff, content
+    history = historys.build
+    history.user_id = uid
+    history.diff = diff
+    history.content = content
+    history.origin = self
+    history.save
+    historys << history
+  end
+
   def publish # 发表文章
     art = release || build_release(name: name)
     art.inner_content = inner_content
@@ -125,10 +136,18 @@ class Index::Workspace::Article < ApplicationRecord
   @override
   def self.fetch id
     Cache.new.fetch(cache_key(id)) {
-      article = self.find_by_id(id)
+      article = self.with_del.find_by_id(id)
       article.content_id = article.inner_content.id if article
       article
     }
+  end
+
+  def self.fetch_text id
+    $redis.GET(text_cache_key(id))
+  end
+
+  def self.text_cache_key id
+    "#{self.cache_key(id)}_Text"
   end
 
   private

@@ -73,6 +73,7 @@ class Index::Workspace::ArticlesController < IndexController
   # Use callbacks to share common setup or constraints between actions.
   def set_article
     @article = Index::Workspace::Article.fetch(params[:id])
+    @article = nil if @article && @article.is_deleted
     render(json: { code: :ResourceNotExist }) && return unless @article
   end
 
