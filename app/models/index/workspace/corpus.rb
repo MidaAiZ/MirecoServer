@@ -3,7 +3,7 @@ require_relative 'file_model_module'
 class Index::Workspace::Corpus < ApplicationRecord
   include FileModel
 
-  mount_uploader :cover, FileCoverUploader # 封面上传
+  #mount_uploader :cover, FileCoverUploader # 封面上传
 
   after_update :update_cache
   after_destroy :auto_delete_son_roles, :delete_thumb_up, :clear_cache
