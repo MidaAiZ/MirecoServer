@@ -1,6 +1,5 @@
 class CreateManageOperationRecord < ActiveRecord::Migration[5.1]
   def change
-    drop_table :manage_opretion_records
     create_table :manage_operation_records do |t|
       t.string :type
       t.string :message

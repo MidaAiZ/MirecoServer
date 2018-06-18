@@ -51,12 +51,10 @@ class Index::UsersController < IndexController
 
     respond_to do |format|
       if @code == :Success
-        format.json { render :show, status: :ok, location: @user }
-        format.html { redirect_to @user, notice: 'User was successfully updated.' }
+        format.json { render :show, status: :ok }
       else
         @code ||= :Fail
         format.json { render :show, status: :unprocessable_entity }
-        format.html { render :edit }
       end
     end
   end
