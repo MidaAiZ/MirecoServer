@@ -18,7 +18,7 @@ class Index::Workspace::CenterController < IndexController
 
   def co_releases
     @files = @user.co_published_files
-    render :published_files
+    render :releases
   end
 
   def released_articles
