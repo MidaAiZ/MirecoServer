@@ -27,13 +27,14 @@ Rails.application.routes.draw do
 
     namespace :workspace do # 工作台
       get 'files' => 'center#index'
-      get 'publish' => 'center#published_files'
-      get 'co_publish' => 'center#co_published_files'
-      get 'articles/published' => 'center#published_articles'
-      get 'corpuses/published' => 'center#published_corpuses'
+      get 'releases' => 'center#releases'
+      get 'co_releases' => 'center#co_releases'
+      get 'released_articles' => 'center#released_articles'
+      get 'released_corpuses' => 'center#released_corpuses'
       get 'marked_files' => 'center#marked_files'
-      post '/:resource_type/:resource_id/withdraw' => 'center#withdraw'
+      post '/:resource_type/:resource_id/quit' => 'center#quit'
       get '/:resource_type/:resource_id/editors' => 'center#get_editors'
+      delete '/:type/:id/release' => 'center#delete_release'
       # ws token
       get '/:resource_type/:resource_id/ws_token' => 'center#ws_token'
 
@@ -45,14 +46,14 @@ Rails.application.routes.draw do
           put '/:id/content' => 'articles#update_content'
           post '/:id/mark' => 'articles#mark'
           post '/:id/unmark' => 'articles#unmark'
-          post '/:id/publish' => 'articles#publish'
+          post '/:id/release' => 'articles#publish'
           post '/:id/move_dir' => 'articles#move_dir'
           post '/:id/add_editor' => 'articles#add_editor'
           post '/:id/remove_editor' => 'articles#remove_editor'
           post '/:id/copy' => 'articles#copy'
           post '/:id/config' => 'articles#set_config'
 
-          get '/:id/release' => 'articles#release'
+          get '/:id/release' => 'articles#get_release'
           get '/:id/profile' => 'articles#profile'
         end
         resources :history_articles, as: :history
@@ -65,14 +66,14 @@ Rails.application.routes.draw do
           put '/:id/cover' => 'corpus#update_cover'
           post '/:id/mark' => 'corpus#mark'
           post '/:id/unmark' => 'corpus#unmark'
-          post '/:id/publish' => 'corpus#publish'
+          post '/:id/release' => 'corpus#publish'
           post '/:id/move_dir' => 'corpus#move_dir'
           post '/:id/add_editor' => 'corpus#add_editor'
           post '/:id/remove_editor' => 'corpus#remove_editor'
           post '/:id/copy' => 'corpus#copy'
           post '/:id/config' => 'corpus#set_config'
 
-          get '/:id/release' => 'corpus#release'
+          get '/:id/release' => 'corpus#get_release'
           get '/:id/profile' => 'corpus#profile'
         end
       end

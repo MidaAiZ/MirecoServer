@@ -1,7 +1,5 @@
 class Index::PublishedCorpus < ApplicationRecord
-  # mount_uploader :cover, FileCoverUploader # 封面上传
-  after_update :update_cache
-  after_destroy :clear_cache, :delete_release
+  mount_uploader :cover, FileCoverUploader # 封面上传
 
   belongs_to :origin, -> { with_del },
              class_name: 'Index::Workspace::Corpus',
@@ -13,10 +11,6 @@ class Index::PublishedCorpus < ApplicationRecord
              foreign_key: :user_id
 
   has_many :articles,
-           class_name: 'Index::PublishedArticle',
-           foreign_key: :corpus_id
-
-  has_many :all_articles, -> { all_state },
            class_name: 'Index::PublishedArticle',
            foreign_key: :corpus_id,
            dependent: :destroy
@@ -49,8 +43,6 @@ class Index::PublishedCorpus < ApplicationRecord
 
   # 数据验证
   validates :tag, length: { maximum: 25 }
-  validates :origin_id, uniqueness: true
-  validate :check_origin, on: [:create]
 
   #--------------------------状态模型---------------------------
   enum state: [:deleted, :released, :reviewing, :forbidden]
@@ -67,10 +59,6 @@ class Index::PublishedCorpus < ApplicationRecord
   scope :recommend, -> { reorder('(|/id + 0.01 * read_times_cache) DESC').order(id: :DESC) }
   # 默认作用域, 不包含content字段, id降序, 未删除的文章
   default_scope { released.order(id: :DESC) }
-
-  def file_type
-    :corpuses
-  end
 
   #  query state
   def deleted?
@@ -92,42 +80,46 @@ class Index::PublishedCorpus < ApplicationRecord
   # set state
   def review
     return false if deleted?
-    # ApplicationRecord.transaction do
-      update state: :reviewing
-      # articles.each do |a|
-      #   a.review
-      # end
-    # end
+    ApplicationRecord.transaction do
+      update state: self.class.states[:reviewing]
+      articles.each do |a|
+        a.review
+      end
+    end
   end
 
   def release
     return false if forbidden? || released?
-    # ApplicationRecord.transaction do
-      update state: :released
-      # articles.each do |a|
-      #   a.release
-      # end
-    # end
+    ApplicationRecord.transaction do
+      update state: self.class.states[:released]
+      articles.each do |a|
+        a.release
+      end
+    end
   end
 
   def delete
     return false if forbidden? || deleted?
-    # ApplicationRecord.transaction do
-      update state: :deleted
-      # articles.each do |a|
-      #   a.delete
-      # end
-    # end
+    ApplicationRecord.transaction do
+      update state: self.class.states[:deleted]
+      articles.each do |a|
+        a.delete
+      end
+    end
   end
 
   def forbid
     return false if deleted? || forbidden?
-    # ApplicationRecord.transaction do
-      update state: :forbidden
-      # articles.each do |a|
-      #   a.forbid
-      # end
-    # end
+    ApplicationRecord.transaction do
+      update state: self.class.states[:forbidden]
+      articles.each do |a|
+        a.forbid
+      end
+    end
+  end
+
+  def toggle_delete bool
+    bool ? self.delete : self.release
   end
 
   # -------------------------信息统计------------------------- #
@@ -166,29 +158,26 @@ class Index::PublishedCorpus < ApplicationRecord
   end
 
   # 禁止删除
-  def destroy
-    return false
-  end
+  # def destroy
+  #   return false
+  # end
 
   private
   #
   def cache_prefix
-    self.cache_key
+    $redis.select 3
+    "#{self.id}_corp_release"
   end
 
   def read_prefix
-    "read_times_#{cache_prefix}"
+    cache_prefix + "_read"
   end
 
   def comment_prefix
-    "cmts_count_#{cache_prefix}"
+    cache_prefix + "_cmt"
   end
 
   def thumb_prefix
-    "thumbs_count_#{cache_prefix}"
-  end
-
-  def check_origin
-    errors.add(:origin, '源文集必须存在') if !origin
+    cache_prefix + "_thumb"
   end
 end

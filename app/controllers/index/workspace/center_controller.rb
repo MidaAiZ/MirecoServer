@@ -12,25 +12,47 @@ class Index::Workspace::CenterController < IndexController
     @mark_records = @user.mark_records.includes(file: :file_seed)
   end
 
-  def published_files
+  def releases
     @files = @user.published_files
   end
 
-  def co_published_files
+  def co_releases
     @files = @user.co_published_files
     render :published_files
   end
 
-  def published_articles
+  def released_articles
     init
     @nonpaged_articles = @user.published_articles.includes(:origin)
     @articles = @nonpaged_articles.page(@page).per(@count)
   end
 
-  def published_corpuses
+  def released_corpuses
     init
     @nonpaged_corpuses = @user.published_corpuses.includes(:origin)
     @corpuses = @nonpaged_corpuses.page(@page).per(@count)
+  end
+
+  def delete_release # 删除已发表文章
+    case params[:type]
+    when "articles"
+      @file = Index::PublishedArticle.fetch params[:id]
+    when "corpuses"
+      @file = Index::PublishedCorpus.fetch params[:id]
+    end
+
+    @code = if @file
+              if @user.can_edit?(:all, @file.origin)
+                @file.origin.delete_files ? :Success : :Fail
+              elsif @file.origin
+                @user.remove_edit_role(@file.origin) ? :Success : :NoPermission
+              elsif @file.user_id == @user.id # 源文件不存在的情况
+                @file.destroy ? :Success : :Fail
+              end
+            end
+
+    @code ||= :ResourceNotExist
+    render json: { code: @code }
   end
 
   def get_editors
@@ -41,7 +63,7 @@ class Index::Workspace::CenterController < IndexController
     render :editors
   end
 
-  def withdraw # 退出协同写作
+  def quit # 退出协同写作
     @code = if @user.can_edit?(:all, @resource)
               @resource.delete_files ? :Success : :Fail
             else
