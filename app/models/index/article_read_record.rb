@@ -12,10 +12,11 @@ class Index::ArticleReadRecord < ApplicationRecord
   validates :ip, presence: true, allow_blank: false
 
   default_scope { order(id: :DESC) }
+  scope :new_today, -> { where(read_time: Time.now.midnight..Time.now) }
 
   def create ip, u
     return false if self.id
-    
+
     self.ip = ip
     self.user = u
     self.read_time = Time.now

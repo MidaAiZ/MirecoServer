@@ -12,7 +12,7 @@ else
         when :folders
           json.extract! file, :id, :name, :created_at, :updated_at
         else
-          json.extract! file, :id, :name, :tag, :is_shown, :created_at, :updated_at, :cover
+          json.extract! file, :id, :name, :tag, :is_shown, :created_at, :updated_at
         end
         json.is_marked true
       end

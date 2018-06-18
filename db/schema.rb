@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20180516113200) do
+ActiveRecord::Schema.define(version: 20180611060353) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -61,14 +61,9 @@ ActiveRecord::Schema.define(version: 20180516113200) do
     t.string "dir_type"
     t.jsonb "info", default: {}
     t.integer "marked_u_ids", array: true
-    t.string "cover"
     t.bigint "release_id"
-    t.boolean "is_shown", default: false
     t.index ["dir_type", "dir_id"], name: "index_article_on_dir_type_id"
     t.index ["file_seed_id"], name: "index_articles_on_file_seed_id"
-    t.index ["info"], name: "index_corpus_on_info", using: :gin
-    t.index ["name"], name: "index_articles_on_name"
-    t.index ["tag"], name: "index_articles_on_tag"
   end
 
   create_table "index_comment_replies", id: :serial, force: :cascade do |t|
@@ -101,19 +96,15 @@ ActiveRecord::Schema.define(version: 20180516113200) do
     t.string "tag"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.boolean "is_shown"
     t.boolean "is_deleted", default: false
     t.integer "file_seed_id"
     t.integer "dir_id"
     t.string "dir_type"
     t.jsonb "info", default: {}
     t.integer "marked_u_ids", array: true
-    t.string "cover"
+    t.bigint "release_id"
     t.index ["dir_type", "dir_id"], name: "index_corpus_on_dir_type_id"
     t.index ["file_seed_id"], name: "index_corpus_on_file_seed_id"
-    t.index ["info"], name: "index_corpus_on_files", using: :gin
-    t.index ["name"], name: "index_corpus_on_name"
-    t.index ["tag"], name: "index_corpus_on_tag"
   end
 
   create_table "index_edit_comment_replies", force: :cascade do |t|
@@ -147,8 +138,6 @@ ActiveRecord::Schema.define(version: 20180516113200) do
 
   create_table "index_folders", id: :serial, force: :cascade do |t|
     t.string "name"
-    t.string "tag"
-    t.boolean "is_shown"
     t.boolean "is_deleted", default: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
@@ -159,8 +148,6 @@ ActiveRecord::Schema.define(version: 20180516113200) do
     t.integer "marked_u_ids", array: true
     t.index ["dir_type", "dir_id"], name: "index_folder_on_dir_type_id"
     t.index ["file_seed_id"], name: "index_folders_on_file_seed_id"
-    t.index ["info"], name: "index_folder_on_files", using: :gin
-    t.index ["name"], name: "index_folders_on_name"
   end
 
   create_table "index_history_articles", id: :serial, force: :cascade do |t|
@@ -172,6 +159,13 @@ ActiveRecord::Schema.define(version: 20180516113200) do
     t.datetime "updated_at", null: false
     t.string "diff"
     t.bigint "user_id"
+  end
+
+  create_table "index_login_records", force: :cascade do |t|
+    t.string "ip"
+    t.datetime "time"
+    t.bigint "user_id"
+    t.index ["user_id"], name: "index_index_login_records_on_user_id"
   end
 
   create_table "index_mark_records", force: :cascade do |t|
@@ -300,6 +294,35 @@ ActiveRecord::Schema.define(version: 20180516113200) do
     t.index ["email"], name: "index_users_on_email"
     t.index ["number"], name: "index_users_on_number"
     t.index ["phone"], name: "index_users_on_phone"
+  end
+
+  create_table "manage_admins", force: :cascade do |t|
+    t.string "number"
+    t.string "password_digest"
+    t.string "name"
+    t.string "tel"
+    t.string "mail"
+    t.string "role"
+    t.string "avatar"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
+
+  create_table "manage_login_records", force: :cascade do |t|
+    t.string "ip"
+    t.datetime "time"
+    t.bigint "admin_id"
+    t.index ["admin_id"], name: "idx_mng_login_records_on_admin_id"
+  end
+
+  create_table "manage_operation_records", force: :cascade do |t|
+    t.string "type"
+    t.string "message"
+    t.datetime "time"
+    t.bigint "admin_id"
+    t.string "resources_type"
+    t.bigint "resources_id"
+    t.index ["admin_id"], name: "idx_mng_opt_rcds_on_adm_id"
   end
 
 end

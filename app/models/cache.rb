@@ -31,7 +31,7 @@ class Cache
     @store.delete(full_key(name))
   end
 
-  # 在get函数后跟上一个block，那么函数将会缓存block的返回值，以供以后的调用。
+  # 在fetch函数后跟上一个block，那么函数将会缓存block的返回值，以供以后的调用。
   # 但是请注意，不要直接把数据库的请求语句放进来，因为这会保存其引用而不是值，这样每次调用缓存时仍然会请求数据库
   def fetch(name, expire = nil, force_refresh = false)
     if !force_refresh && Rails.cache.exist?(full_key(name))

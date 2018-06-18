@@ -19,6 +19,7 @@ class Index::Role::Edit < ApplicationRecord
 
   #----------------------------域------------------------------
   scope :own, -> { where(name: :own).first }
+  scope :co_edit, -> { where.not(name: :own) }
   scope :root, -> { where(dir_id: nil) }
   scope :all_dir, -> { unscope(where: :dir_id) }
   scope :deleted, -> { rewhere(is_deleted: true) }

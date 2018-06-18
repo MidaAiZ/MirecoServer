@@ -5,6 +5,7 @@ class Index::Workspace::Folder < ApplicationRecord
 
   after_update :update_cache
   after_destroy :auto_delete_son_roles, :clear_cache
+  store_accessor :info, :config # 文件设置
 
   belongs_to :file_seed,
              class_name: 'Index::Workspace::FileSeed',

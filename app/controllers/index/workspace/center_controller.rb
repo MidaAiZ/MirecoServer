@@ -12,15 +12,24 @@ class Index::Workspace::CenterController < IndexController
     @mark_records = @user.mark_records.includes(file: :file_seed)
   end
 
+  def published_files
+    @files = @user.published_files
+  end
+
+  def co_published_files
+    @files = @user.co_published_files
+    render :published_files
+  end
+
   def published_articles
     init
-    @nonpaged_articles = @user.all_articles.shown.includes(:file_seed)
+    @nonpaged_articles = @user.published_articles.includes(:origin)
     @articles = @nonpaged_articles.page(@page).per(@count)
   end
 
   def published_corpuses
     init
-    @nonpaged_corpuses = @user.all_corpuses.shown.includes(:file_seed)
+    @nonpaged_corpuses = @user.published_corpuses.includes(:origin)
     @corpuses = @nonpaged_corpuses.page(@page).per(@count)
   end
 
@@ -56,7 +65,7 @@ class Index::Workspace::CenterController < IndexController
               end
               @code = :Success
             end
-    @code ||= :Fail
+    @code ||= :NoPermission
     render json: { code: @code, token: @token }
   end
 

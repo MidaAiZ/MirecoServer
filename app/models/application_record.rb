@@ -8,7 +8,7 @@ class ApplicationRecord < ActiveRecord::Base
 
   def self.fetch id
     Cache.new.fetch(cache_key(id)) {
-      self.find_by_id(id)
+      self.unscope(:where).find_by_id(id)
     }
   end
 

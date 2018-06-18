@@ -27,6 +27,8 @@ Rails.application.routes.draw do
 
     namespace :workspace do # 工作台
       get 'files' => 'center#index'
+      get 'publish' => 'center#published_files'
+      get 'co_publish' => 'center#co_published_files'
       get 'articles/published' => 'center#published_articles'
       get 'corpuses/published' => 'center#published_corpuses'
       get 'marked_files' => 'center#marked_files'
@@ -48,6 +50,7 @@ Rails.application.routes.draw do
           post '/:id/add_editor' => 'articles#add_editor'
           post '/:id/remove_editor' => 'articles#remove_editor'
           post '/:id/copy' => 'articles#copy'
+          post '/:id/config' => 'articles#set_config'
 
           get '/:id/release' => 'articles#release'
           get '/:id/profile' => 'articles#profile'
@@ -67,6 +70,7 @@ Rails.application.routes.draw do
           post '/:id/add_editor' => 'corpus#add_editor'
           post '/:id/remove_editor' => 'corpus#remove_editor'
           post '/:id/copy' => 'corpus#copy'
+          post '/:id/config' => 'corpus#set_config'
 
           get '/:id/release' => 'corpus#release'
           get '/:id/profile' => 'corpus#profile'
@@ -83,6 +87,7 @@ Rails.application.routes.draw do
           post '/:id/add_editor' => 'folders#add_editor'
           post '/:id/remove_editor' => 'folders#remove_editor'
           post '/:id/copy' => 'folders#copy'
+          post '/:id/config' => 'folders#set_config'
 
           get '/:id/profile' => 'folders#profile'
         end
@@ -143,6 +148,53 @@ Rails.application.routes.draw do
     # 前台用户文章等图片上传
     post 'upload_image' => 'image_uploader#create'
     post 'upload_tocken' => 'image_uploader#get_upload_tocken'
+  end
+
+  # 后台服务
+  namespace :manage do
+    resources :admins do
+      collection do
+        get 'profile' => 'admins#show'
+        put 'update' => 'admins#update'
+        put 'update_phone' => 'admins#update_phone'
+        put 'update_password' => 'admins#update_password'
+        post 'check_uniq' => 'admins#check_uniq'
+      end
+    end
+
+    resources :users do
+      collection do
+        post 'forbid' => 'users#forbid'
+        post 'recover' => 'users#recover'
+      end
+    end
+
+    # 文件操纵功能
+    get 'files/:type' => 'files#index'
+    get 'files/:type/:id' => 'files#show'
+    post 'files/:type/:id' => 'files#update'
+    post 'files/:type/:id/forbid' => 'files#forbid'
+    post 'files/:type/:id/release' => 'files#release'
+    post 'files/:type/:id/review' => 'files#review'
+    delete 'files/:type/:id' => 'files#destroy'
+
+    # 统计功能
+    get 'main/user_count' => 'main#user_count'
+    get 'main/file_count' => 'main#file_count'
+    get 'main/view_count' => 'main#view_count'
+    get 'main/alive_count' => 'main#alive_count'
+
+    # session模块
+    get 'login' => 'session#index'
+    post 'login' => 'session#login'
+    delete 'logout' => 'session#logout'
+    post 'logout' => 'session#logout'
+
+    # 验证相关模块
+    post 'verify_code' => 'verify#check_code'
+    post 'send_msg' => 'verify#send_msg_code'
+    post 'verify_msg' => 'verify#check_msg_code'
+    get 'verify_email' => 'verify#check_email'
   end
 
   root 'index/main#index'

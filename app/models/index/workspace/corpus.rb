@@ -3,11 +3,11 @@ require_relative 'file_model_module'
 class Index::Workspace::Corpus < ApplicationRecord
   include FileModel
 
-  mount_uploader :cover, FileCoverUploader # 封面上传
+  # mount_uploader :cover, fileCoverUploader # 封面上传
 
   after_update :update_cache
   after_destroy :auto_delete_son_roles, :clear_cache
-  # store_accessor :info, :tbp_counts, :cmt_counts, :read_times # 点赞数/评论数/阅读次数
+  store_accessor :info, :config # 文件设置
 
   belongs_to :file_seed,
              class_name: 'Index::Workspace::FileSeed',
@@ -68,7 +68,7 @@ class Index::Workspace::Corpus < ApplicationRecord
   validate :check_state, on: [:update]
 
   #--------------------------域--------------------------- #
-  scope :shown, -> { where(is_shown: true) }
+  scope :shown, -> { where.not(release_id: nil) }
   scope :root, -> { where(is_inner: false) }
   scope :unroot, -> { where(is_inner: true) }
   scope :deleted, -> { rewhere(is_deleted: true) }
@@ -79,16 +79,21 @@ class Index::Workspace::Corpus < ApplicationRecord
   # 默认域
   default_scope { undeleted.order('index_corpus.id DESC') }
 
-  def publish # 发表文章
+  def is_shown
+    !!release_id
+  end
+
+  def publish cover # 发表文章
     cor = release || build_release(name: name)
     cor.author = own_editor
+    cor.cover = cover
     begin
       ApplicationRecord.transaction do
         cor.save!
+        update! release_id: cor.id
         # 将该文集下所有已发表文章的corpus_id指向该文集
         son_articles.where(is_shown: true).update(corpus_id: cor.id)
       end
-      update! is_shown: true
     rescue
       false
     end

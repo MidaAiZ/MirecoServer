@@ -17,6 +17,10 @@ class Index::User < ApplicationRecord
            class_name: 'Index::Role::Edit',
            foreign_key: 'user_id'
 
+  has_many :co_edit_roles, -> { co_edit.all_dir },
+           class_name: 'Index::Role::Edit',
+           foreign_key: 'user_id'
+
   has_many :all_edit_roles, -> { all_dir },
            class_name: 'Index::Role::Edit',
            foreign_key: 'user_id'
@@ -32,6 +36,11 @@ class Index::User < ApplicationRecord
   has_many :all_file_seeds,
            through: :all_edit_roles,
            source: :file_seed
+
+  has_many :co_file_seeds,
+           through: :co_edit_roles,
+           source: :file_seed
+
 
   has_many :articles, -> { undeleted },
            through: :file_seeds,
@@ -60,6 +69,18 @@ class Index::User < ApplicationRecord
            through: :all_file_seeds,
            source: :folders
 
+  has_many :co_articles, -> { undeleted },
+            through: :co_file_seeds,
+            source: :articles
+
+  has_many :co_corpuses, -> { undeleted },
+            through: :co_file_seeds,
+            source: :corpuses
+
+  has_many :co_folders, -> { undeleted },
+            through: :co_file_seeds,
+            source: :folders
+
   # has_many :marked_files,
   #           class_name: 'Index::Workspace::MarkRecord',
   #           foreign_key: :user_id
@@ -83,10 +104,30 @@ class Index::User < ApplicationRecord
             foreign_key: :user_id
 
   # -----------------------发表文章----------------------- #
-
   has_many :published_articles,
-            class_name: 'Index::PublishedArticles',
+            class_name: 'Index::PublishedArticle',
             foreign_key: :user_id
+
+  has_many :published_corpuses,
+            class_name: 'Index::PublishedCorpus',
+            foreign_key: :user_id
+
+  has_many :co_published_articles,
+           through: :co_articles,
+           source: :release
+
+  has_many :co_published_corpuses,
+           through: :co_corpuses,
+           source: :release
+
+
+  def published_files
+    (published_articles.where(corpus_id: nil) + published_corpuses).sort { |x, y|  x.created_at <=> y.created_at }
+  end
+
+  def co_published_files
+    (co_published_articles.where(corpus_id: nil) + co_published_corpuses).sort { |x, y|  x.created_at <=> y.created_at }
+  end
 
   #--------------------------回收站--------------------------- #
 
@@ -117,6 +158,7 @@ class Index::User < ApplicationRecord
 
   #----------------------------域------------------------------
   scope :brief, -> { select(:id, :number, :name, :avatar) }
+  scope :new_today, -> { where(created_at: Time.now.midnight..Time.now) }
   default_scope { order('index_users.id DESC') }
 
   #---------------------------搜索-----------------------------
@@ -229,6 +271,15 @@ class Index::User < ApplicationRecord
 
   def update_cache
     Cache.new["user_#{self.id}"] = self
+  end
+
+  def self.fetch_login id, request
+    Cache.new.fetch(cache_key(id), 2 * 60 * 10) {
+      u = self.find_by_id(id)
+      # 记录登录信息
+      Index::LoginRecord.add(u, request.remote_ip) if u
+      u
+    }
   end
 
   private

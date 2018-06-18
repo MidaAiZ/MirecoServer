@@ -2,7 +2,7 @@ class IndexController < ApplicationController
   layout 'index'
 
   def check_login
-    @user = Index::User.fetch session[:user_id]
+    @user = Index::User.fetch_login session[:user_id], request
     @code = :NotLoggedIn unless @user # 用户未登录
     check_access # 检查用户帐号是否正常
   end

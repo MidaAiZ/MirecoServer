@@ -109,7 +109,16 @@ module FileController
     # 文章或文集具有发布功能
     def publish
       @code = if @user.can_edit? :publish, @file
-                @file.publish ? :Success : :Fail
+                @file.publish(params[:cover]) ? :Success : :Fail
+              else
+                :NoPermission
+              end
+      do_update_response
+    end
+
+    def set_config
+      @code = if @user.can_edit? :read, @file
+                @file.set_config(@user.id, params[:item], params[:value]) ? :Success : :Fail
               else
                 :NoPermission
               end

@@ -1,7 +1,9 @@
 class Index::PublishedArticle < ApplicationRecord
-  mount_uploader :cover, FileCoverUploader # 封面上传
+  # mount_uploader :cover, FileCoverUploader # 封面上传
 
   # store_accessor :info, :tbp_counts, :cmt_counts, :rd_times # 点赞数/评论数/阅读次数
+  after_update :update_cache
+  after_destroy :clear_cache, :delete_release
 
   # -----------------------文章内容------------------------ #
   belongs_to :inner_content,
@@ -70,6 +72,10 @@ class Index::PublishedArticle < ApplicationRecord
   scope :recommend, -> { reorder('(|/id + 0.01 * read_times_cache) DESC').order(id: :DESC) }
   # 默认作用域, 不包含content字段, id降序, 未删除的文章
   default_scope { released.order(id: :DESC) }
+
+  def file_type
+    :articles
+  end
 
   #  query state
   def deleted?
@@ -179,6 +185,7 @@ class Index::PublishedArticle < ApplicationRecord
 
   # 禁止删除
   def destroy
+    errors.add(:base, "forbid to destroy the resource")
     return false
   end
 

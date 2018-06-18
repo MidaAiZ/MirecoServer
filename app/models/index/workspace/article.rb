@@ -2,11 +2,12 @@ require_relative 'file_model_module'
 
 class Index::Workspace::Article < ApplicationRecord
   include FileModel
+  # mount_uploader :cover, FileCoverUploader # 封面上传
 
   attr_accessor :content_id # 用来快速访问内容记录
   after_update :update_cache
   after_destroy :clear_cache, :delete_release
-  # store_accessor :info, :tbp_counts, :cmt_counts, :rd_times # 点赞数/评论数/阅读次数
+  store_accessor :info, :config # 文件设置
 
   belongs_to :file_seed,
              class_name: 'Index::Workspace::FileSeed',
@@ -73,7 +74,7 @@ class Index::Workspace::Article < ApplicationRecord
 
   #----------------------------域------------------------------
 
-  scope :shown, -> { where(is_shown: true) }
+  scope :shown, -> { where.not(release_id: nil) }
   scope :root, -> { where(is_inner: false) }
   scope :unroot, -> { where(is_inner: true) }
   scope :deleted, -> { rewhere(is_deleted: true) }
@@ -81,6 +82,10 @@ class Index::Workspace::Article < ApplicationRecord
   scope :with_del, -> { unscope(where: :is_deleted) }
   # 默认作用域, 不包含content字段, id降序, 未删除的文章
   default_scope { undeleted.order('index_articles.id DESC') }
+
+  def is_shown
+    !!release_id
+  end
 
   def update_content text
     if is_shown
@@ -105,18 +110,19 @@ class Index::Workspace::Article < ApplicationRecord
     historys << history
   end
 
-  def publish # 发表文章
+  def publish cover # 发表文章
     art = release || build_release(name: name)
     art.inner_content = inner_content
     art.author = own_editor
+    art.cover = cover
     begin
       ApplicationRecord.transaction do
         # 将发表文章的corpus_id指向正确文集
         if dir && dir.class == Index::Workspace::Corpus && dir.is_shown
           art.corpus = dir.release
         end
-        art.save!
-        update! is_shown: true
+        art.save! # 保存发布版本
+        update! release_id: art.id # 保存发布版本id
       end
     rescue
       false

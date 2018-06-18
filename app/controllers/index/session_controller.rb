@@ -55,6 +55,7 @@ class Index::SessionController < IndexController
         end
 
         check_access # 当查找到用户时检查帐号是否被冻结
+        @user.class.fetch_login(@user.id, request) if @user
       end
     end
 

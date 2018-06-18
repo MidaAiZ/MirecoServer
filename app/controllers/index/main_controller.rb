@@ -15,10 +15,11 @@ class Index::MainController < IndexController
 
   def show_article
     @article = Index::PublishedArticle.fetch params[:id]
-    if @article
+    if @article && @article.released?
       @editor_roles = @article.editor_roles.includes(:editor)
       @article.read(request.remote_ip, @user) if @user
     else
+      @article = nil
       @code ||= :ResourceNotExist
     end
   end
@@ -34,9 +35,10 @@ class Index::MainController < IndexController
 
   def show_corpus
     @corpus = Index::PublishedCorpus.fetch(params[:id])
-    if @corpus
+    if @corpus && @corpus.released?
       @editor_roles = @corpus.editor_roles.includes(:editor)
     else
+      @corpus = nil
       @code = :ResourceNotExist
     end
   end

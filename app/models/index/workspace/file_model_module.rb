@@ -136,6 +136,19 @@ module FileModel
       _self
     end
 
+    #-------------------------读取设置-------------------------- #
+    def get_config uid
+      (self.config || {})[uid.to_s] || {}
+    end
+
+    #---------------------------设置---------------------------- #
+    def set_config uid, item, value
+      self.config ||= {}
+      self.config[uid] ||= {}
+      self.config[uid][item] = value
+      self.save
+    end
+
     #---------------------------搜索---------------------------- #
     def self.filter(cdt = {}, offset = 0, limit = 100)
       allow_hash = { 'name' => 'LIKE', 'tag' => 'LIKE' } # 允许查询的字段集

@@ -1,5 +1,7 @@
 class Index::PublishedCorpus < ApplicationRecord
-  mount_uploader :cover, FileCoverUploader # 封面上传
+  # mount_uploader :cover, FileCoverUploader # 封面上传
+  after_update :update_cache
+  after_destroy :clear_cache, :delete_release
 
   belongs_to :origin, -> { with_del },
              class_name: 'Index::Workspace::Corpus',
@@ -65,6 +67,10 @@ class Index::PublishedCorpus < ApplicationRecord
   scope :recommend, -> { reorder('(|/id + 0.01 * read_times_cache) DESC').order(id: :DESC) }
   # 默认作用域, 不包含content字段, id降序, 未删除的文章
   default_scope { released.order(id: :DESC) }
+
+  def file_type
+    :corpuses
+  end
 
   #  query state
   def deleted?
