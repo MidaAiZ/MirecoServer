@@ -255,8 +255,8 @@ class Index::User < ApplicationRecord
   end
 
   # ------------------------判断赞------------------------- #
-  def has_thumb_up?(resource)
-    Index::ThumbUp.has?(resource, self)
+  def has_like?(resource)
+    Index::Like.has?(resource, self)
   end
 
   # ------------------------标星文件------------------------- #

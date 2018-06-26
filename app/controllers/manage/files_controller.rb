@@ -63,7 +63,7 @@ class Manage::FilesController < ManageController
   end
 
   def file_update_params
-    params.require(:file).permit(:name, :tag, :cover, :read_times_cache, :thumbs_count_cache, :comments_count_cache)
+    params.require(:file).permit(:name, :tag, :cover, :read_times_cache, :likes_count_cache, :comments_count_cache)
   end
 
   def do_response

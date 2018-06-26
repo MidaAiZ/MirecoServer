@@ -1,0 +1,2 @@
+module Index::LikesHelper
+end

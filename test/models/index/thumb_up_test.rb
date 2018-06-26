@@ -1,6 +1,6 @@
 require 'test_helper'
 
-class Index::ThumbUpTest < ActiveSupport::TestCase
+class Index::LikeTest < ActiveSupport::TestCase
   # test "the truth" do
   #   assert true
   # end

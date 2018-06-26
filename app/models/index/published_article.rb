@@ -2,6 +2,8 @@ class Index::PublishedArticle < ApplicationRecord
   # mount_uploader :cover, FileCoverUploader # 封面上传
 
   # store_accessor :info, :tbp_counts, :cmt_counts, :rd_times # 点赞数/评论数/阅读次数
+  attr_accessor :is_like # 用来缓存用户是否点赞
+  
   after_update :update_cache
   after_destroy :clear_cache
 
@@ -34,13 +36,14 @@ class Index::PublishedArticle < ApplicationRecord
            source: :editors
 
   # -----------------------读者评论------------------------ #
-  has_many :comments, as: :resource,
-                      class_name: 'Index::Comment',
-                      dependent: :destroy
+  has_many :comments,
+           class_name: 'Index::ArtComment',
+           foreign_key: :article_id,
+           dependent: :destroy
 
   # -------------------------赞--------------------------- #
-  has_many :thumbs,
-           class_name: 'Index::ArticleThumbUp',
+  has_many :likes,
+           class_name: 'Index::ArticleLike',
            foreign_key: :article_id,
            dependent: :destroy
 
@@ -132,8 +135,8 @@ class Index::PublishedArticle < ApplicationRecord
   end
 
   # 点赞数
-  def thumbs_count
-    thumbs_count_cache + $redis.SCARD(thumb_prefix)
+  def likes_count
+    likes_count_cache + $redis.SCARD(like_prefix)
   end
 
   # -------------------------用户操作------------------------- #
@@ -147,38 +150,40 @@ class Index::PublishedArticle < ApplicationRecord
   end
 
   # 点赞
-  def thumb_up user
-    thumb =  thumbs.find_by_user_id(user.id) || thumbs.build
-    return true if thumb.id
-    if thumb.create(user)
-      add_thumb_count user.id
+  def add_like user
+    like =  likes.find_by_user_id(user.id) || likes.build
+    return true if like.id
+    if like.create(user, self)
+      add_like_count user.id
       return true
     end
+    false
   end
 
   # 取消赞
-  def thumb_cancel user
-    thumb = thumbs.find_by_user_id user.id
-    if thumb && thumb.cancel
-      reduce_thumb_count user.id
+  def delete_like user
+    like = likes.find_by_user_id user.id
+    if like && like.cancel
+      minus_like_count user.id
       return true
     end
+    false
   end
 
   # 评论
   def comment user, content
      cmt = comments.build
-     if cmt.create(self, user, content)
+     if cmt.create(user, self, content)
        add_comments_count cmt.id
      end
-     return cmt
+     cmt
   end
 
   # 删除评论
   def delete_comment cmt
-    return if (cmt.resource_id != self.id)
-    if cmt.remove(self)
-      reduce_thumb_count cmt.id
+    return if (cmt.article_id != self.id)
+    if cmt.destroy
+      minus_comment_count cmt.id
       return true
     end
   end
@@ -196,31 +201,31 @@ class Index::PublishedArticle < ApplicationRecord
   end
 
   def read_prefix
-    "read_times_#{cache_prefix}"
+    "read_times_#{cache_prefix}".hash
   end
 
   def comment_prefix
-    "cmts_count_#{cache_prefix}"
+    "cmts_count_#{cache_prefix}".hash
   end
 
-  def thumb_prefix
-    "thumbs_count_#{cache_prefix}"
+  def like_prefix
+    "likes_count_#{cache_prefix}".hash
   end
 
-  def add_thumb_count key
-    prefix = thumb_prefix
-    puts ArtThumbWorker.perform_at(3.hours.from_now, self.id, prefix) if $redis.EXISTS(prefix) == 0
+  def add_like_count key
+    prefix = like_prefix
+    puts ArtLikeWorker.perform_at(3.hours.from_now, self.id, prefix) if $redis.EXISTS(prefix) == 0
     $redis.SADD(prefix, key)
   end
 
-  def reduce_thumb_count key # 取消赞是低频操作
-    prefix = thumb_prefix
+  def minus_like_count key # 取消赞是低频操作
+    prefix = like_prefix
     if $redis.SISMEMBER prefix, key
       $redis.SREM prefix, key
     else
-      t_count = thumbs_count_cache - 1
+      t_count = likes_count_cache - 1
       t_count = 0 if t_count < 0
-      update thumbs_count_cache: t_count
+      update likes_count_cache: t_count
     end
   end
 
@@ -230,7 +235,7 @@ class Index::PublishedArticle < ApplicationRecord
     $redis.SADD(prefix, key)
   end
 
-  def reduce_comment_count key
+  def minus_comment_count key
     prefix = comment_prefix
     if $redis.SISMEMBER prefix, key
       $redis.SREM prefix, key

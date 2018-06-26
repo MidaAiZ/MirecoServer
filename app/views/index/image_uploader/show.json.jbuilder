@@ -1,4 +1,4 @@
 json.url @image.file.url
-json.thumb @image.file.thumb
+json.like @image.file.like
 json.id @image.id
 json.user_id @image.user_id

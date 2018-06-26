@@ -1,6 +1,6 @@
 class Index::Comment < ApplicationRecord
   after_update :update_cache
-  after_destroy :delete_thumb_up, :clear_cache
+  after_destroy :delete_like, :clear_cache
 
   store_accessor :info, :tbp_counts, :rep_counts, :read_times # 点赞数/回复数/阅读次数
 
@@ -18,13 +18,13 @@ class Index::Comment < ApplicationRecord
            class_name: 'Index::CommentReply'
 
   # -------------------------赞--------------------------- #
-  has_one :thumb_up, as: :resource,
-                     class_name: 'Index::ThumbUp',
+  has_one :like, as: :resource,
+                     class_name: 'Index::Like',
                      dependent: :destroy
 
-  has_one :thumb_ct, -> { t_counts },
+  has_one :like_ct, -> { t_counts },
           as: :resource,
-          class_name: 'Index::ThumbUp'
+          class_name: 'Index::Like'
 
   # -------------------------验证------------------------- #
 
@@ -56,37 +56,37 @@ class Index::Comment < ApplicationRecord
   end
 
   # -------------------------点赞-------------------------- #
-  def thumb_up user
-    Index::ThumbUp.add self, user
+  def like user
+    Index::Like.add self, user
   end
 
   # ------------------------取消赞------------------------- #
-  def thumb_cancel user
-    Index::ThumbUp.cancel self, user
+  def cancel_like user
+    Index::Like.cancel self, user
   end
 
   # --------------------------赞--------------------------- #
-  def thumb_ups
-    Index::ThumbUp.get(self)
+  def likes
+    Index::Like.get(self)
   end
 
   # -------------------------赞数-------------------------- #
-  def thumb_up_counts
-    Index::ThumbUp.counts(self)
+  def like_counts
+    Index::Like.counts(self)
   end
 
   # ------------------------判断赞------------------------- #
-  def has_thumb_up?(user)
-    Index::ThumbUp.has?(self, user)
+  def has_like?(user)
+    Index::Like.has?(self, user)
   end
 
   # -----------------------点赞信息------------------------ #
-  def thumb_up_info(user)
-    Index::ThumbUp.counts_and_has?(self, user)
+  def like_info(user)
+    Index::Like.counts_and_has?(self, user)
   end
 
-  def delete_thumb_up
-    # Index::ThumbUp.destroy self
+  def delete_like
+    # Index::Like.destroy self
   end
 
   def update_cache

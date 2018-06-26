@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20180611060353) do
+ActiveRecord::Schema.define(version: 20180626110406) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -26,11 +26,57 @@ ActiveRecord::Schema.define(version: 20180611060353) do
     t.datetime "updated_at", null: false
   end
 
+  create_table "index_art_cmt_likes", force: :cascade do |t|
+    t.bigint "user_id"
+    t.bigint "cmt_id"
+    t.datetime "created_at"
+    t.index ["cmt_id"], name: "idx_art_likes_on_cmt_id"
+    t.index ["user_id"], name: "idx_art_likes_on_user_id"
+  end
+
+  create_table "index_art_cmt_replies", force: :cascade do |t|
+    t.bigint "user_id"
+    t.bigint "comment_id"
+    t.string "content"
+    t.integer "likes_count_cache"
+    t.integer "replies_count_cache"
+    t.datetime "created_at"
+    t.index ["comment_id"], name: "idx_art_cmt_rpls_on_cmt_id"
+    t.index ["user_id"], name: "idx_art_cmt_rpls_on_user_id"
+  end
+
+  create_table "index_art_cmt_rpl_likes", force: :cascade do |t|
+    t.bigint "user_id"
+    t.bigint "reply_id"
+    t.datetime "created_at"
+    t.index ["reply_id"], name: "idx_art_rpl_likes_on_rpl_id"
+    t.index ["user_id"], name: "idx_art_rpl_likes_on_user_id"
+  end
+
+  create_table "index_art_comments", force: :cascade do |t|
+    t.bigint "user_id"
+    t.string "content"
+    t.integer "likes_count_cache"
+    t.integer "replies_count_cache"
+    t.datetime "created_at"
+    t.bigint "article_id"
+    t.index ["article_id"], name: "idx_art_cmts_on_art_id"
+    t.index ["user_id"], name: "idx_art_cmts_on_user_id"
+  end
+
   create_table "index_article_contents", force: :cascade do |t|
     t.bigint "article_id"
     t.bigint "last_update_user_id"
     t.datetime "last_updated_at"
     t.string "text", default: ""
+  end
+
+  create_table "index_article_likes", force: :cascade do |t|
+    t.bigint "article_id"
+    t.bigint "user_id"
+    t.datetime "thumb_time"
+    t.index ["article_id"], name: "index_art_thumb_ups_on_art_id"
+    t.index ["user_id"], name: "index_art_thumb_ups_on_uid"
   end
 
   create_table "index_article_read_records", force: :cascade do |t|
@@ -40,14 +86,6 @@ ActiveRecord::Schema.define(version: 20180611060353) do
     t.string "ip"
     t.index ["article_id"], name: "index_art_read_records_on_art_id"
     t.index ["user_id"], name: "index_art_read_records_on_uid"
-  end
-
-  create_table "index_article_thumb_ups", force: :cascade do |t|
-    t.bigint "article_id"
-    t.bigint "user_id"
-    t.datetime "thumb_time"
-    t.index ["article_id"], name: "index_art_thumb_ups_on_art_id"
-    t.index ["user_id"], name: "index_art_thumb_ups_on_uid"
   end
 
   create_table "index_articles", id: :serial, force: :cascade do |t|
@@ -188,7 +226,7 @@ ActiveRecord::Schema.define(version: 20180611060353) do
     t.bigint "origin_id"
     t.bigint "content_id"
     t.integer "read_times_cache", default: 0
-    t.integer "thumbs_count_cache", default: 0
+    t.integer "likes_count_cache", default: 0
     t.integer "comments_count_cache", default: 0
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
@@ -221,7 +259,7 @@ ActiveRecord::Schema.define(version: 20180611060353) do
     t.bigint "user_id"
     t.bigint "origin_id"
     t.integer "read_times_cache", default: 0
-    t.integer "thumbs_count_cache", default: 0
+    t.integer "likes_count_cache", default: 0
     t.integer "comments_count_cache", default: 0
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false

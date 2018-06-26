@@ -1,4 +1,6 @@
 class Index::MainController < IndexController
+  include Index::PublishedArticlesHelper
+
   before_action :check_login
   before_action :init, only: [:articles, :corpus]
 
@@ -11,6 +13,7 @@ class Index::MainController < IndexController
       { record: res.records, counts: count_cache(cache_key, res) }
     end
     @articles = @res[:record]; @counts = @res[:counts]
+    attach_like_info @articles, @user
   end
 
   def show_article

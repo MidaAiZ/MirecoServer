@@ -24,9 +24,9 @@ class Index::PublishedCorpus < ApplicationRecord
            source: :editors
 
   # -------------------------赞--------------------------- #
-  has_many :thumbs,
+  has_many :likes,
            through: :articles,
-           source: :thumbs
+           source: :likes
 
   # ------------------------评论-------------------------- #
   has_many :comments,
@@ -138,9 +138,9 @@ class Index::PublishedCorpus < ApplicationRecord
   end
 
   # 点赞数
-  def thumbs_count
-    Rails.cache.fetch(thumb_prefix, expires_in: 15.minutes) do
-      cal_thumbs_count
+  def likes_count
+    Rails.cache.fetch(like_prefix, expires_in: 15.minutes) do
+      cal_likes_count
     end
   end
 
@@ -153,8 +153,8 @@ class Index::PublishedCorpus < ApplicationRecord
     articles.sum(:comments_count_cache)
   end
 
-  def cal_thumbs_count
-    articles.sum(:thumbs_count_cache)
+  def cal_likes_count
+    articles.sum(:likes_count_cache)
   end
 
   # 禁止删除
@@ -177,7 +177,7 @@ class Index::PublishedCorpus < ApplicationRecord
     cache_prefix + "_cmt"
   end
 
-  def thumb_prefix
-    cache_prefix + "_thumb"
+  def like_prefix
+    cache_prefix + "_like"
   end
 end

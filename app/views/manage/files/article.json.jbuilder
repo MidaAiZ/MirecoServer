@@ -2,7 +2,7 @@ json.code @code if @code
 if @file
   # json.cache! @file.cache_key, expires_in: 3.minute do
   json.file do
-      json.extract! @file, :id, :name, :tag, :state, :created_at, :updated_at, :cover, :read_times, :thumbs_count, :comments_count, :origin_id
+      json.extract! @file, :id, :name, :tag, :state, :created_at, :updated_at, :cover, :read_times, :likes_count, :comments_count, :origin_id
       json.content @file.content.text
       json.editors do
         json.array! @editor_roles do |r|

@@ -4,14 +4,15 @@
 # - default # 写在队列参数中的, 表示让 sidekiq 处理这个 queue
 :queues:
   - [default, 1] # 使用数组的形式写, 第一个参数为打开的 queue 的名称, 第二个为优先级
-  - [thumb, 1]
-  - [autothumb, 1]
+  # - [like, 1]
+  # - [autolike, 1]
   - [art_read, 1]
-  - [art_thumb, 1]
-  - [socket_art_content, 1]
+  - [art_like, 1]
   - [art_content, 2]
+  - [art_comment, 1]
   - [mailers, 2]
   - [mailers, 2]
+  - [socket_art_content, 1]
 
 
 development:

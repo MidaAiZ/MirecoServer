@@ -121,21 +121,22 @@ Rails.application.routes.draw do
     get 'hot_corpuses' => 'main#hot_corpuses'
 
     # 点赞
-    post '/:resource_type/:resource_id/thumb_up' => 'thumb_ups#create'
-    delete '/:resource_type/:resource_id/thumb_up' => 'thumb_ups#destroy'
+    post '/:resource_type/:resource_id/like' => 'art_likes#create'
+    delete '/:resource_type/:resource_id/like' => 'art_likes#destroy'
 
     # 评论
-    post '/:resource_type/:resource_id/comments' => 'comments#create'
-    get '/:resource_type/:resource_id/comments' => 'comments#index'
-    get '/:resource_type/:resource_id/comments/:id' => 'comments#show'
-    delete '/:resource_type/:resource_id/comments/:id' => 'comments#destroy'
+    post '/:articles/:art_id/comments' => 'art_comments#create'
+    get '/:articles/:art_id/comments' => 'art_comments#index'
+    get '/:articles/:art_id/comments/:id' => 'art_comments#show'
+    delete '/:articles/:art_id/comments/:id' => 'art_comments#destroy'
 
     # 评论的回复
-    post 'comments/:comment_id/replies' => 'comment_replies#create'
-    get 'comments/:comment_id/replies' => 'comment_replies#index'
-    get 'comments/:comment_id/replies/:id' => 'comment_replies#show'
-    delete 'comments/:comment_id/replies/:id' => 'comment_replies#destroy'
+    post 'art_comments/:cmt_id/replies' => 'art_cmt_replies#create'
+    get 'art_comments/:cmt_id/replies' => 'art_cmt_replies#index'
+    get 'art_comments/:cmt_id/replies/:id' => 'art_cmt_replies#show'
+    delete 'art_comments/:cmt_id/replies/:id' => 'art_cmt_replies#destroy'
 
+    # session
     get 'login' => 'session#index'
     post 'login' => 'session#login'
     delete 'logout' => 'session#logout'
