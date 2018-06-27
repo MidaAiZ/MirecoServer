@@ -53,7 +53,7 @@ Rails.application.routes.draw do
           post '/:id/copy' => 'articles#copy'
           post '/:id/config' => 'articles#set_config'
 
-          get '/:id/release' => 'articles#get_release'
+          get '/:id/release' => 'articles#release'
           get '/:id/profile' => 'articles#profile'
         end
         resources :history_articles, as: :history
@@ -73,7 +73,7 @@ Rails.application.routes.draw do
           post '/:id/copy' => 'corpus#copy'
           post '/:id/config' => 'corpus#set_config'
 
-          get '/:id/release' => 'corpus#get_release'
+          get '/:id/release' => 'corpus#release'
           get '/:id/profile' => 'corpus#profile'
         end
       end
@@ -121,8 +121,8 @@ Rails.application.routes.draw do
     get 'hot_corpuses' => 'main#hot_corpuses'
 
     # 点赞
-    post '/:resource_type/:resource_id/like' => 'art_likes#create'
-    delete '/:resource_type/:resource_id/like' => 'art_likes#destroy'
+    post '/:resource_type/:resource_id/likes' => 'art_likes#create'
+    delete '/:resource_type/:resource_id/likes' => 'art_likes#destroy'
 
     # 评论
     post '/:articles/:art_id/comments' => 'art_comments#create'

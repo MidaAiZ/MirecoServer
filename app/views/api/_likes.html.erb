@@ -22,16 +22,12 @@
                 <span>articles/:article_id/likes</span>
               </li>
               <li>
-                <span>点赞文集:</span><br>
-                <span>corpuses/:corpus_id/likes</span>
-              </li>
-              <li>
-                <span>点赞评论:</span><br>
-                <span>comments/:comment_id/likes</span>
+                <span>点赞文章评论的回复（点赞跟评）:</span><br>
+                <span>art_comments/:comment_id/likes</span>
               </li>
               <li>
                 <span>点赞评论回复:</span><br>
-                <span>replies/:reply_id/likes</span>
+                <span>art_replies/:reply_id/likes</span>
               </li>
             </ul>
           </td>
@@ -69,7 +65,7 @@
               <span>注意：</span>
               <ul>
                 <li>点赞不可以修改更新</li>
-                <li>允许点赞的对象包括: 1.文章, 2.文集, 3.评论</li>
+                <li>目前暂时允许点赞的对象包括: 1.文章, 2.文章评论, 3.文章评论跟评</li>
               </ul>
             </span>
           </td>
@@ -84,16 +80,12 @@
                 <span>articles/:article_id/likes</span>
               </li>
               <li>
-                <span>取消文集点赞:</span>
-                <span>corpuses/:corpus_id/likes</span>
-              </li>
-              <li>
-                <span>取消评论点赞:</span>
-                <span>comments/:comment_id/likes</span>
+                <span>取消文章评论点赞:</span>
+                <span>art_comments/:comment_id/likes</span>
               </li>
               <li>
                 <span>取消评论回复点赞:</span>
-                <span>replies/:reply_id/likes</span>
+                <span>art_replies/:reply_id/likes</span>
               </li>
             </ul>
           </td>

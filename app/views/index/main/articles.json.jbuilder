@@ -1,4 +1,4 @@
-json.counts @counts
+json.count @count
 json.articles do
   json.cache! @articles, expires_in: 3.minutes do
     json.cache_collection! @articles, expires_in: 3.minutes do |a|

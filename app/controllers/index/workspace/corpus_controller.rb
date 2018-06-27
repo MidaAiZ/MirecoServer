@@ -45,7 +45,10 @@ class Index::Workspace::CorpusController < IndexController
 
   def release
     @release = @corpus.release
-    @editor_roles = @release.editor_roles.includes(:editor) if @release
+    if @release
+      @editor_roles = @release.editor_roles.includes(:editor)
+      @articles = @release.articles || []
+    end
     @code ||= :NotReleaseYet unless @release
   end
 

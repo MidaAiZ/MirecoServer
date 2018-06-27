@@ -48,7 +48,7 @@ class Index::ArtComment < ApplicationRecord
 
   # 删除评论
   def delete_reply reply
-    return if (reply.cmt_id != self.id)
+    return if (reply.comment_id != self.id)
     if reply.destroy
       minus_replies_count reply.id
       return true

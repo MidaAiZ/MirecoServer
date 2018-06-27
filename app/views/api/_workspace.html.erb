@@ -102,10 +102,96 @@ count:数量
           </td>
         </tr>
 
-		<!-- 获取已发表文章 -->
+        <!-- 获取我发表的文件（文章+文集） -->
+        <tr>
+          <td>获取我发表的文件（文章+文集）</td>
+          <td>workspace/releases</td>
+          <td>GET</td>
+          <td>
+          <textarea cols="30" rows="10">
+page:页码
+count:数量
+           </textarea>
+          </td>
+          <td>
+          <textarea cols="30" rows="10">
+      {
+      "files": [
+        {
+          "id": 123,
+          "name": "已发表文章",
+          "file_type": "aticles", // 文件类型
+          "tag": null,
+          "is_shown": true,
+          "is_marked": null,
+          "created_at": "2017-06-26T14:27:56.669+08:00",
+          "updated_at": "2017-06-26T14:27:56.690+08:00",
+          "comment_counts": 0, // 评论数
+          "like_counts": 0, // 点赞数
+          "is_like": false // 自己是否有点赞
+        },
+        {
+          ...
+        },
+        ...
+      ]
+      }
+            </textarea>
+          </td>
+          <td>
+          <ul>
+            <li>服务器返回json格式的数组</li>
+            <li>此接口返回用户已发表的文章,需要用户已登录才可以访问</li>
+          </ul>
+          </td>
+        </tr>
+
+        <!-- 获取我协作发表的文件（文章+文集） -->
+        <tr>
+          <td>获取我协作发表的文件（文章+文集）</td>
+          <td>workspace/co_releases</td>
+          <td>GET</td>
+          <td>
+          <textarea cols="30" rows="10">
+page:页码
+count:数量
+           </textarea>
+          </td>
+          <td>
+          <textarea cols="30" rows="10">
+      {
+      "files": [
+        {
+          "id": 124,
+          "name": "已发表文章",
+          "file_type": "aticles", // 文件类型
+          "tag": null,
+          "updated_at": "2017-06-26T14:27:56.690+08:00",
+          "comment_counts": 0, // 评论数
+          "like_counts": 0, // 点赞数
+          "is_like": false // 自己是否有点赞
+        },
+        {
+          ...
+        },
+        ...
+      ]
+      }
+            </textarea>
+          </td>
+          <td>
+          <ul>
+            <li>服务器返回json格式的数组</li>
+            <li>此接口返回用户已发表的文章,需要用户已登录才可以访问</li>
+          </ul>
+          </td>
+        </tr>
+
+
+		<!-- 获取我发表的文章 -->
 		<tr>
-		  <td>获取已发表文章</td>
-		  <td>workspace/published_articles</td>
+		  <td>获取我发表的文章</td>
+		  <td>workspace/released_articles</td>
 		  <td>GET</td>
 		  <td>
 			<textarea cols="30" rows="10">
@@ -122,13 +208,11 @@ count:数量
 			"id": 123,
 			"name": "已发表文章",
 			"tag": null,
-			"is_shown": true,
-			"is_marked": null,
 			"created_at": "2017-06-26T14:27:56.669+08:00",
 			"updated_at": "2017-06-26T14:27:56.690+08:00",
 			"comment_counts": 0, // 评论数
 			"like_counts": 0, // 点赞数
-			"has_like": false // 自己是否有点赞
+			"is_like": false // 自己是否有点赞
 		},
 		{
 			...
@@ -146,15 +230,15 @@ count:数量
 		  </td>
 		</tr>
 
-		<!-- 获取已发表文集 -->
+		<!-- 获取我发表的文集 -->
 		<tr>
-		  <td>获取已发表文集</td>
-		  <td>workspace/published_corpuses</td>
+		  <td>获取我发表的文集</td>
+		  <td>workspace/released_corpuses</td>
 		  <td>GET</td>
 		  <td>
 			<textarea cols="30" rows="10">
-		page:页码
-		count:数量
+page:页码
+count:数量
 			 </textarea>
 		  </td>
 		  <td>
@@ -172,7 +256,7 @@ count:数量
 			"updated_at": "2017-06-26T14:35:52.213+08:00",
 			"comment_counts": 0, // 评论数
 			"like_counts": 0, // 点赞数
-			"has_like": false // 自己是否有点赞
+			"is_like": false // 自己是否有点赞
 		},
 		{
 			...
@@ -190,10 +274,54 @@ count:数量
 		  </td>
 		</tr>
 
+    <!-- 查看已发表文章 -->
+    <tr>
+      <td>查看已发表文章</td>
+      <td>workspace/releases/:file_type/:file_id</td>
+      <td>GET</td>
+      <td>
+      <textarea cols="30" rows="10">
+page:页码
+count:数量
+       </textarea>
+      </td>
+      <td>
+      <textarea cols="30" rows="10">
+{
+  counts: 100, // 文集总数
+  "corpuses": [
+    {
+      "id": 1,
+      "name": "已发表文集",
+      "tag": null,
+      "is_shown": true,
+      "is_marked": null,
+      "created_at": "2017-06-26T14:35:52.207+08:00",
+      "updated_at": "2017-06-26T14:35:52.213+08:00",
+      "comment_counts": 0, // 评论数
+      "like_counts": 0, // 点赞数
+      "is_like": false // 自己是否有点赞
+    },
+    {
+      ...
+    },
+    ...
+  ]
+}
+        </textarea>
+      </td>
+      <td>
+      <ul>
+        <li>服务器返回json格式的数组</li>
+        <li>此接口返回用户已发表的文集,需要用户已登录才可以访问</li>
+      </ul>
+      </td>
+    </tr>
+
 		<!-- 退出协同写作 -->
 		<tr>
 		  <td>退出协同写作</td>
-		  <td>workspace/:file_type/:file_id/withdraw</td>
+		  <td>workspace/:file_type/:file_id/quit</td>
 		  <td>POST</td>
 		  <td>
 			<textarea cols="30" rows="10">
@@ -214,6 +342,30 @@ count:数量
 			</ul>
 		  </td>
 		</tr>
+
+    <!-- 删除已发表文件 -->
+    <tr>
+      <td>删除已发表文件</td>
+      <td>workspace/:type/:id/release</td>
+      <td>DELETE</td>
+      <td>
+      <textarea cols="30" rows="10">
+       </textarea>
+      </td>
+      <td>
+      <textarea cols="30" rows="10">
+{
+  "code": "Success"
+}
+        </textarea>
+      </td>
+      <td>
+      <ul>
+        <li>:file_type指的是文件类型,接受:articles, folders, corpuses</li>
+        <li>:file_id指的是需要删除的文件id</li>
+      </ul>
+      </td>
+    </tr>
       </tbody>
     </table>
   </div>

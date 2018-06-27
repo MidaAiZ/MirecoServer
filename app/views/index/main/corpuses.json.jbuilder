@@ -1,4 +1,4 @@
-json.counts @counts
+json.count @count
 json.corpuses do
   json.cache! @corpuses, expires_in: 3.minutes do
     json.cache_collection! @corpuses, expires_in: 3.minutes do |c|

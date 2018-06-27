@@ -1,5 +1,5 @@
 <section class='api' data-type='comments'>
-  <div class="api-header">读者评论</div>
+  <div class="api-header">读者评论（文章）</div>
   <div class="api-body">
     <table class="table" width="100%" cellspacing="0">
       <thead>
@@ -21,10 +21,6 @@
                 <span>评论文章:</span><br>
                 <span>articles/:article_id/comments</span>
               </li>
-              <li>
-                <span>评论文集:</span><br>
-                <span>corpuses/:corpus_id/comments</span>
-              </li>
             </ul>
           </td>
           <td>POST</td>
@@ -44,10 +40,17 @@
     "code": "Success",
     "comment": {
         "id": 1,
-        "user_id": 1,
+        "user_id": 1, // 评论用户id
+        "article_id": 1, // 被评论的文章id
         "content": "这是评论",
         "created_at": "2017-06-13T05:13:04.135Z",
-        "updated_at": "2017-06-13T05:13:04.135Z"
+        "likes_count": 1, // 点赞数
+        "replies_count": 0, // 回复数
+        "is_like": null, // 我（读者）是否点赞了
+        "user": { // 评论用户具体信息
+          id: 1,
+          ...
+        }
     }
 }
 
@@ -72,7 +75,7 @@
               <span>注意：</span>
               <ul>
                 <li>评论不可以修改更新</li>
-                <li>允许评论的对象包括: 1.文章, 2.文集</li>
+                <li>允许评论的对象包括: 1.文章</li>
               </ul>
             </span>
           </td>
@@ -85,10 +88,6 @@
               <li>
                 <span>获取文章评论:</span>
                 <span>articles/:article_id/comments?page=1&count=15</span>
-              </li>
-              <li>
-                <span>获取文集评论:</span>
-                <span>corpuses/:corpus_id/comments?page=1&count=15</span>
               </li>
             </ul>
           </td>
@@ -104,7 +103,13 @@
             "id": 1,
             "user_id": 1,
             "content": "这是评论",
-            "created_at": "2017-06-13T05:13:04.135Z"
+            "created_at": "2017-06-13T05:13:04.135Z",
+            "likes_count": 1, // 点赞数
+            "replies_count": 0, // 回复数
+            "is_like": null, // 我（读者）是否点赞了,
+            "user": {
+              ...
+            }
         },
         {
             ...
@@ -131,10 +136,6 @@
                 <span>获取文章评论:</span>
                 <span>articles/:article_id/comments/:id</span>
               </li>
-              <li>
-                <span>获取文集评论:</span>
-                <span>corpuses/:corpus_id/comments/:id</span>
-              </li>
             </ul>
           </td>
           <td>GET</td>
@@ -150,7 +151,13 @@
         "id": 1,
         "user_id": 1,
         "content": "这是评论",
-        "created_at": "2017-06-13T05:13:04.135Z"
+        "created_at": "2017-06-13T05:13:04.135Z",
+        "likes_count": 1, // 点赞数
+        "replies_count": 0, // 回复数
+        "is_like": null, // 我（读者）是否点赞了,
+        "user": {
+          ...
+        }
     }
 }
               </textarea>
@@ -173,10 +180,6 @@
               <li>
                 <span>删除文章评论:</span>
                 <span>articles/:article_id/comments/:id</span>
-              </li>
-              <li>
-                <span>删除文集评论:</span>
-                <span>corpuses/:corpus_id/comments/:id</span>
               </li>
             </ul>
           </td>
@@ -201,7 +204,7 @@
               </li>
               <li>
                 <sapn>允许删除评论的角色:</sapn> <br>
-                <span>文件拥有者/文件管理员/评论用户</span>
+                <span>文件拥有者/文件管理员/评论用户自己</span>
               </li>
               <li>
                 <span class="notice">评论被删除后将永久删除,无法恢复</span>
@@ -213,7 +216,7 @@
         <tr>
           <td>回复评论</td>
           <td>
-            comments/:comment_id/replies
+            art_comments/:comment_id/replies
           </td>
           <td>POST</td>
           <td>
@@ -233,8 +236,14 @@
     "reply": {
         "id": 1,
         "user_id": 1,
+        "comment_id": 1,
         "content": "回复评论",
-        "created_at": "2017-06-13T08:04:36.174Z"
+        "created_at": "2017-06-13T08:04:36.174Z",
+        "likes_count": 1, // 点赞数
+        "is_like": null, // 我（读者）是否点赞了
+        "user": {
+          ...
+        }
     }
 }
 //回复失败
@@ -268,7 +277,7 @@
         <tr>
           <td>获取多条回复记录</td>
           <td>
-            <span>comments/:id/?page=1&count=15</span>
+            <span>art_comments/:comment_id/replies?page=1&count=15</span>
           </td>
           <td>GET</td>
           <td>
@@ -280,8 +289,14 @@
         {
             "id": 1,
             "user_id": 1,
+            "comment_id": 1,
             "content": "回复评论",
-            "created_at": "2017-06-13T08:04:36.174Z"
+            "created_at": "2017-06-13T08:04:36.174Z",
+            "likes_count": 1, // 点赞数
+            "is_like": null, // 我（读者）是否点赞了
+            "user": {
+              ...
+            }
         },
         {
             ...
@@ -302,7 +317,7 @@
         <tr>
           <td>获取一条回复记录</td>
           <td>
-            <span>comments/:comment_id/replies/:reply_id</span>
+            <span>art_comments/:comment_id/replies/:reply_id</span>
           </td>
           <td>GET</td>
           <td>
@@ -316,8 +331,11 @@
     reply: {
         "id": 1,
         "user_id": 1,
+        "comment_id": 1,
         "content": "回复评论",
-        "created_at": "2017-06-13T08:04:36.174Z"
+        "created_at": "2017-06-13T08:04:36.174Z",
+        "likes_count": 1, // 点赞数
+        "is_like": null, // 我（读者）是否点赞了
     }
 }
               </textarea>
@@ -336,7 +354,7 @@
         <tr>
           <td>删除回复</td>
           <td>
-            <span>comments/:comment_id/replies/:reply_id</span>
+            <span>art_comments/:comment_id/replies/:reply_id</span>
           </td>
           <td>DELETE</td>
           <td>

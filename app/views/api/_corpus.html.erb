@@ -404,70 +404,121 @@ count:数量
               </li>
             </ul>
           </td>
-        </tr>        <!-- 发表文集 -->
-        <tr>
-          <td>发表文集</td>
-          <td>workspace/corpuses/:id/publish</td>
-          <td>PUT</td>
-          <td>
-            <textarea cols="30" rows="10">
-{
-    "is_shown": true
-}
-              </textarea>
-          </td>
-          <td>
-            <textarea cols="30" rows="10">
-//发表成功
-{
-    "code": "Success",
-    "corpus": {
-        "id": 1,
-        "is_shown": true
-        ...
-    }
-}
-
-//发表失败
-{
-    "code": "Fail",
-    errors: {
-        ...
-    }
-}
-              </textarea>
-          </td>
-          <td>
-            <ul>
-              <li><span>code: 状态码</span><br>
-                <span>Success：修改成功， Fail：修改失败, Nopermisson: 没有权限， ResourceNotExist: 文集不存在</span>
-              </li>
-              <li>
-                <span class="notice">仅拥有者才有权限发表文集</span>
-              </li>
-              <li>
-                <span class="notice">文集发表后会同步发表文集内的所有已存在的文章</span><br>
-                <span class="notice">在文集已发表后新建的文章不会被默认发表,需要用户单独发表新建文章</span>
-              </li>
-              <li>
-                <span class="notice">文集发表后将不支持修改</span>
-              </li>
-              <li>
-                <span>通过publish接口允许修改的属性有：</span>
-                <ol>
-                  <li>is_shown</li>
-                </ol>
-              </li>
-            </ul>
-          </td>
         </tr>
+                <!-- 发表文集 -->
+                <tr>
+                  <td>发表文集</td>
+                  <td>workspace/corpuses/:id/release</td>
+                  <td>POST</td>
+                  <td>
+                    <textarea cols="30" rows="10">
+            //发表时添加封面
+            {
+            "cover": ..., // 从七牛云上传图片后返回的hash
+            }
+
+                      </textarea>
+                  </td>
+                  <td>
+                    <textarea cols="30" rows="10">
+            //发表成功
+            {
+            "code": "Success",
+            }
+
+            //发表失败
+            {
+            "code": "Fail",
+            errors: {
+                ...
+            }
+            }
+                      </textarea>
+                  </td>
+                  <td>
+                    <ul>
+                      <li><span>code: 状态码</span><br>
+                        <span>Success：修改成功， Fail：修改失败, Nopermisson: 没有权限， ResourceNotExist: 集不存在</span>
+                      </li>
+                      <li>
+                        <span class="notice">仅拥有者才有权限发表集</span>
+                      </li>
+                      <li>
+                        <span class="notice">集发表后将不支持修改名字</span>
+                      </li>
+                    </ul>
+                  </td>
+                </tr>
+
+              </tr>
+              <!-- 查看已发表文集 -->
+              <tr>
+                <td>查看已发表文集</td>
+                <td>workspace/corpuses/:id/release</td>
+                <td>GET</td>
+                <td>
+                </td>
+                <td>
+                  <textarea cols="30" rows="20">
+{
+    "release":{
+    "id": 50, // 发表后的文集id
+    "origin_id": 10582, // 被发表的原文集id
+    "name": "test",
+    "created_at": "2018-06-17T15:25:14.315+08:00",
+    "updated_at": "2018-06-27T09:28:21.681+08:00",
+    "cover": ...,
+    "read_times": 0,     // 阅读数
+    "likes_count": 1,    // 点赞书
+    "comments_count": 0, // 评论数
+    "articles": {        // 文集内的文章
+      ...
+    }
+    "editors":[          // 作者列表
+      {
+        "name": "Mida",
+         "avatar": ...
+      },
+      ...
+    ]
+    }
+}
+                    </textarea>
+                </td>
+                <td>
+                </td>
+              </tr>
+
+              <!-- 删除已发表文集 -->
+              <tr>
+                <td>删除已发表文集</td>
+                <td>workspace/corpuses/:id/release</td>
+                <td>DELETE</td>
+                <td>
+                <textarea cols="30" rows="10">
+                 </textarea>
+                </td>
+                <td>
+                <textarea cols="30" rows="10">
+{
+    "code": "Success"
+}
+                  </textarea>
+                </td>
+                <td>
+                <ul>
+                  <li>:id指的是需要删除的文集id，指被发表的原文集的id</li>
+                </ul>
+                </td>
+              </tr>
+
         <!-- 更新文集的文件夹路径 -->
         <tr>
           <td>移动文集</td>
           <td>workspace/corpuses/:id/move_dir</td>
           <td>POST</td>
           <td>
-            <textarea cols="30" rows="10">
+            <textarea cols="30" rows="20">
 // 将文集移入文件夹
 {
     "folder_id": 1
@@ -481,7 +532,7 @@ count:数量
               </textarea>
           </td>
           <td>
-            <textarea cols="30" rows="10">
+            <textarea cols="30" rows="20">
 //移动成功
 {
     "code": "Success",

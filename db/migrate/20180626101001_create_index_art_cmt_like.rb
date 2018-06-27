@@ -1,5 +1,4 @@
 class CreateIndexArtCmtLike < ActiveRecord::Migration[5.1]
-  drop_table :index_art_cmt_likes
   def change
     create_table :index_art_cmt_likes do |t|
       t.references :user, index: false

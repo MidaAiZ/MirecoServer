@@ -69,18 +69,22 @@ class Index::Workspace::Corpus < ApplicationRecord
 
   #--------------------------域--------------------------- #
   scope :shown, -> { where.not(release_id: nil) }
-  scope :root, -> { where(is_inner: false) }
-  scope :unroot, -> { where(is_inner: true) }
+  scope :root, -> { where(dir: nil) }
+  scope :unroot, -> { where.not(dir: nil) }
   scope :deleted, -> { rewhere(is_deleted: true) }
   scope :undeleted, -> { where(is_deleted: false) }
   scope :with_del, -> { unscope(where: :is_deleted) }
   # 简略的文件信息可以提高查询和加载速度
-  scope :brief, -> { unscope(:select).select(:id, :name, :tag, :is_shown, :created_at, :updated_at) }
+  scope :brief, -> { unscope(:select).select(:id, :name, :tag, :created_at, :updated_at) }
   # 默认域
-  default_scope { undeleted.order('index_corpus.id DESC') }
+  default_scope { undeleted.order(id: :DESC) }
 
   def is_shown
     !!release_id
+  end
+
+  def released_articles
+    Index::PublishedArticle.where(origin_id: self.son_articles.shown.map{|a| a.id})
   end
 
   def publish cover # 发表文章
@@ -92,10 +96,10 @@ class Index::Workspace::Corpus < ApplicationRecord
         cor.save!
         update! release_id: cor.id
         # 将该文集下所有已发表文章的corpus_id指向该文集
-        son_articles.where(is_shown: true).update(corpus_id: cor.id)
+        self.released_articles.update_all(corpus_id: cor.id)
       end
-    rescue
-      false
+    # rescue
+    #   false
     end
   end
 

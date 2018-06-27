@@ -1,7 +1,7 @@
 json.code @code if @code
 if @release
-  json.article do
-    json.extract! @release, :id, :name, :created_at, :updated_at, :cover, :read_times, :likes_count, :comments_count  # else
+  json.release do
+    json.extract! @release, :id, :origin_id, :name, :created_at, :updated_at, :cover, :read_times, :likes_count, :comments_count, :corpus_id
     json.editors do
       json.array! @editor_roles do |r|
           e = r.editor

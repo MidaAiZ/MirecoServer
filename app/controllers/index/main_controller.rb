@@ -12,7 +12,7 @@ class Index::MainController < IndexController
       res = @nonpaged_articles.page(@page).per(@count).includes(:author)
       { record: res.records, counts: count_cache(cache_key, res) }
     end
-    @articles = @res[:record]; @counts = @res[:counts]
+    @articles = @res[:record]; @count = @res[:counts]
     attach_like_info @articles, @user
   end
 
@@ -33,13 +33,15 @@ class Index::MainController < IndexController
       res = @nonpaged_corpus.page(@page).per(@count).includes(:author)
       { record: res.records, counts: count_cache(cache_key, res) }
     end
-    @corpuses = @res[:record]; @counts = @res[:counts]
+    @corpuses = @res[:record]; @count = @res[:counts]
   end
 
   def show_corpus
     @corpus = Index::PublishedCorpus.fetch(params[:id])
     if @corpus && @corpus.released?
       @editor_roles = @corpus.editor_roles.includes(:editor)
+      @articles = @corpus.articles || []
+      # attach_like_info @articles, @user
     else
       @corpus = nil
       @code = :ResourceNotExist
@@ -52,7 +54,7 @@ class Index::MainController < IndexController
       res = @nonpaged_articles.page(@page).per(@count).includes(:author)
       { record: res.records, counts: count_cache(cache_key, res) }
     end
-    @articles = @res[:record]; @counts = @res[:counts]
+    @articles = @res[:record]; @count = @res[:counts]
     render :articles
   end
 
@@ -62,7 +64,7 @@ class Index::MainController < IndexController
       res = @nonpaged_articles.page(@page).per(@count).includes(:author)
       { record: res.records, counts: count_cache(cache_key, res) }
     end
-    @articles = @res[:record]; @counts = @res[:counts]
+    @corpuses = @res[:record]; @count = @res[:counts]
     render :corpuses
   end
 

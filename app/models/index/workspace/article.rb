@@ -75,13 +75,13 @@ class Index::Workspace::Article < ApplicationRecord
   #----------------------------域------------------------------
 
   scope :shown, -> { where.not(release_id: nil) }
-  scope :root, -> { where(is_inner: false) }
-  scope :unroot, -> { where(is_inner: true) }
+  scope :root, -> { where(dir: nil) }
+  scope :unroot, -> { where.not(dir: nil) }
   scope :deleted, -> { rewhere(is_deleted: true) }
   scope :undeleted, -> { where(is_deleted: false) }
   scope :with_del, -> { unscope(where: :is_deleted) }
   # 默认作用域, 不包含content字段, id降序, 未删除的文章
-  default_scope { undeleted.order('index_articles.id DESC') }
+  default_scope { undeleted.order(id: :DESC) }
 
   def is_shown
     !!release_id

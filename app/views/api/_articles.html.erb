@@ -22,7 +22,7 @@
           <td>workspace/articles</td>
           <td>POST</td>
           <td>
-            <textarea cols="30" rows="10">
+            <textarea cols="30" rows="30">
 {
     "article": {
         "name": "新建文章", //必须字段
@@ -310,7 +310,7 @@ count:数量
           </td>
         </tr>
         <!-- 更新文章封面 -->
-        <tr>
+        <!-- <tr>
           <td>更新文章头图</td>
           <td>workspace/articles/:id/cover</td>
           <td>PUT</td>
@@ -353,7 +353,7 @@ count:数量
               </li>
             </ul>
           </td>
-      </tr>
+      </tr> -->
 
         <tr>
           <td>文章标星</td>
@@ -438,13 +438,15 @@ errors: {
         <!-- 发表文章 -->
         <tr>
           <td>发表文章</td>
-          <td>workspace/articles/:id/publish</td>
+          <td>workspace/articles/:id/release</td>
           <td>POST</td>
           <td>
             <textarea cols="30" rows="10">
+//发表时添加封面
 {
-    "is_shown": true
+    "cover": ..., // 从七牛云上传图片后返回的hash
 }
+
               </textarea>
           </td>
           <td>
@@ -452,11 +454,6 @@ errors: {
 //发表成功
 {
     "code": "Success",
-    "article": {
-        "id": 1,
-        "is_shown": true
-        ...
-    }
 }
 
 //发表失败
@@ -479,22 +476,79 @@ errors: {
               <li>
                 <span class="notice">文章发表后将不支持修改</span>
               </li>
-              <li>
-                <span>通过publish接口允许修改的属性有：</span>
-                <ol>
-                  <li>is_shown</li>
-                </ol>
-              </li>
             </ul>
           </td>
         </tr>
+
+      </tr>
+              <!-- 查看已发表文章 -->
+              <tr>
+                <td>查看已发表文章</td>
+                <td>workspace/articles/:id/release</td>
+                <td>GET</td>
+                <td>
+                </td>
+                <td>
+                  <textarea cols="30" rows="20">
+{
+  "release":{
+    "id": 50, // 发表后的文章id
+    "origin_id": 10582, // 被发表的原文章id
+    "name": "test",
+    "created_at": "2018-06-17T15:25:14.315+08:00",
+    "updated_at": "2018-06-27T09:28:21.681+08:00",
+    "cover": ...,
+    "read_times": 0,     // 阅读数
+    "likes_count": 1,    // 点赞书
+    "comments_count": 0, // 评论数
+    "corpus_id": null,   // 所属文集id
+    "editors":[          // 作者列表
+      {
+        "name": "Mida",
+         "avatar": ...
+      },
+      ...
+    ],
+    "content": ""       // 文章内容
+  }
+}
+                    </textarea>
+                </td>
+                <td>
+
+                </td>
+              </tr>
+
+              <!-- 删除已发表文章 -->
+              <tr>
+                <td>删除已发表文章</td>
+                <td>workspace/articles/:id/release</td>
+                <td>DELETE</td>
+                <td>
+                <textarea cols="30" rows="10">
+                 </textarea>
+                </td>
+                <td>
+                <textarea cols="30" rows="10">
+            {
+            "code": "Success"
+            }
+                  </textarea>
+                </td>
+                <td>
+                <ul>
+                  <li>:id指的是需要删除的文章id，指被发表的原文章的id</li>
+                </ul>
+                </td>
+              </tr>
+
         <!-- 更新文章的文件夹路径 -->
         <tr>
           <td>移动文章</td>
           <td>workspace/articles/:id/move_dir</td>
           <td>POST</td>
           <td>
-            <textarea cols="30" rows="10">
+            <textarea cols="30" rows="20">
 // 移入文件夹
 {
     "folder_id": 1
