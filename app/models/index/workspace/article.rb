@@ -4,7 +4,7 @@ class Index::Workspace::Article < ApplicationRecord
   include FileModel
   # mount_uploader :cover, FileCoverUploader # 封面上传
 
-  attr_accessor :content_id # 用来快速访问内容记录
+  attr_accessor :text, :content_id # 用来快速访问内容记录
   after_update :update_cache
   after_destroy :clear_cache, :delete_release
   store_accessor :info, :config # 文件设置

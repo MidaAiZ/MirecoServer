@@ -17,8 +17,8 @@ module FileModel
     end
 
     # ----------------------创建并设置目录----------------------- #
-    def create(target_dir, user, attrs = {})
-      Index::Workspace::FileSeed.create(self, target_dir, user, attrs)
+    def create(target_dir, user)
+      Index::Workspace::FileSeed.create(self, target_dir, user)
     end
 
     # -------------------------移动文件------------------------- #
@@ -68,7 +68,6 @@ module FileModel
       after_recover
     end
 
-
     # ------------------------所有子文件------------------------ #
     def files with_deleted = true
       if with_deleted
@@ -101,6 +100,7 @@ module FileModel
       _self.dir = target_dir || self.dir
       _self.created_at = self.created_at + 1
       _self.name = self.name + (target_dir ? "" : "副本")
+      _self.text = self.inner_content.text if self.file_type == :articles
 
       if _self.create(_self.dir, self.own_editor)
         if self.article_nodes.any?

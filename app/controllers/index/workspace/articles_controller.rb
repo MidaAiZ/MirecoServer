@@ -26,7 +26,8 @@ class Index::Workspace::ArticlesController < IndexController
     if (folder_id || corpus_id) && (folder_id != 0 && corpus_id != 0) # 将文章新建在某个文集或者文件夹内
       dir = folder_id.blank? ? Index::Workspace::Corpus.find_by_id(corpus_id) : Index::Workspace::Folder.find_by_id(folder_id)
       @code = if dir && @user.can_edit?(:create, dir) # 验证权限
-                @article.create(dir, @user, {text: params[:article][:content]}) ? :Success : :Fail
+                @article.text = params[:article][:content]
+                @article.create(dir, @user) ? :Success : :Fail
               else
                 :NoPermission # 没有权限
               end

@@ -50,8 +50,8 @@ module FileController
     def update_cover
         return if @file.file_type == Index::Workspace::Folder.file_type # 封面功能暂时只对文集和文章开放
 
-        if @user.can_edit?(:update, @file)
-            @code = @file.update(cover: params[:cover]) ? :Success : :Fail
+        if @file.is_shown && @user.can_edit?(:update, @file)
+            @code = @file.release.update(cover: params[:cover]) ? :Success : :Fail
         else
             @code = :NoPermission
         end
