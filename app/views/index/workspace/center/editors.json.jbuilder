@@ -5,7 +5,7 @@ json.editors do
 		json.editor do
 			editor = role.editor
 			json.extract! editor, :id, :number
-			json.avatar editor.avatar.url
+			json.avatar editor.avatar
 		end
 	end
 end
