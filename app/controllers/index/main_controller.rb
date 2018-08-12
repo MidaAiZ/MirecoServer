@@ -20,7 +20,10 @@ class Index::MainController < IndexController
     @article = Index::PublishedArticle.fetch params[:id]
     if @article && @article.released?
       @editor_roles = @article.editor_roles.includes(:editor)
-      @article.read(request.remote_ip, @user) if @user
+      if @user
+        @article.read(request.remote_ip, @user)
+        attach_like_info [@article], @user
+      end
     else
       @article = nil
       @code ||= :ResourceNotExist
